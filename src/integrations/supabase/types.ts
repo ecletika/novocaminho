@@ -14,6 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
+      birthday_ministries: {
+        Row: {
+          birthday_id: string
+          id: string
+          ministry_id: string
+        }
+        Insert: {
+          birthday_id: string
+          id?: string
+          ministry_id: string
+        }
+        Update: {
+          birthday_id?: string
+          id?: string
+          ministry_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "birthday_ministries_birthday_id_fkey"
+            columns: ["birthday_id"]
+            isOneToOne: false
+            referencedRelation: "birthdays"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "birthday_ministries_ministry_id_fkey"
+            columns: ["ministry_id"]
+            isOneToOne: false
+            referencedRelation: "ministries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      birthdays: {
+        Row: {
+          birthday_date: string
+          birthday_type: string
+          created_at: string
+          id: string
+          man_name: string | null
+          updated_at: string
+          woman_name: string | null
+        }
+        Insert: {
+          birthday_date: string
+          birthday_type: string
+          created_at?: string
+          id?: string
+          man_name?: string | null
+          updated_at?: string
+          woman_name?: string | null
+        }
+        Update: {
+          birthday_date?: string
+          birthday_type?: string
+          created_at?: string
+          id?: string
+          man_name?: string | null
+          updated_at?: string
+          woman_name?: string | null
+        }
+        Relationships: []
+      }
       general_schedules: {
         Row: {
           created_at: string
@@ -151,6 +214,47 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      ministry_posts: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          image_url: string | null
+          ministry_id: string
+          published: boolean | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          ministry_id: string
+          published?: boolean | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          ministry_id?: string
+          published?: boolean | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ministry_posts_ministry_id_fkey"
+            columns: ["ministry_id"]
+            isOneToOne: false
+            referencedRelation: "ministries"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
