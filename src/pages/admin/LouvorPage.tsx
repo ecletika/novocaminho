@@ -106,13 +106,6 @@ export default function LouvorPage() {
   const [editSongLyrics, setEditSongLyrics] = useState("");
   const [editSongContentType, setEditSongContentType] = useState<"cifra" | "letra">("cifra");
 
-  // Form states - Minister (using members with Ministrante function)
-  const ministranteFunctionId = functions.find(f => f.name.toLowerCase().includes("ministrante"))?.id;
-  const ministers = members.filter(m => 
-    m.primary_function_id === ministranteFunctionId ||
-    m.secondary_functions?.some(sf => sf.function_id === ministranteFunctionId)
-  );
-
   // Form states - Schedule
   const [newScheduleDate, setNewScheduleDate] = useState("");
   const [newScheduleMinisterId, setNewScheduleMinisterId] = useState("");
@@ -135,6 +128,13 @@ export default function LouvorPage() {
   const { data: assignments = [] } = useSongMinisterAssignments();
   const { data: schedules = [] } = useWorshipSchedules();
   const { data: functions = [], isLoading: functionsLoading } = useWorshipFunctions();
+
+  // Form states - Minister (using members with Ministrante function)
+  const ministranteFunctionId = functions.find(f => f.name.toLowerCase().includes("ministrante"))?.id;
+  const ministers = members.filter(m => 
+    m.primary_function_id === ministranteFunctionId ||
+    m.secondary_functions?.some(sf => sf.function_id === ministranteFunctionId)
+  );
 
   // Mutations
   const createMember = useCreateWorshipMember();
@@ -222,14 +222,6 @@ export default function LouvorPage() {
     setNewMemberSecondaryFunctionIds([]);
     setSelectedMember(null);
   };
-    
-    setNewMemberName("");
-    setNewMemberPhoto(null);
-    setNewMemberPhotoPreview(null);
-    setNewMemberPrimaryFunctionId("");
-    setNewMemberSecondaryFunctionIds([]);
-    setIsNewMemberDialogOpen(false);
-  };
 
   const handleAddSong = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -290,15 +282,6 @@ export default function LouvorPage() {
   const openViewLyricsDialog = (song: WorshipSong) => {
     setSelectedSong(song);
     setIsViewLyricsDialogOpen(true);
-  };
-
-  const handleAddMinister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newMinisterName.trim()) return;
-    
-    await createMinister.mutateAsync({ name: newMinisterName.trim() });
-    setNewMinisterName("");
-    setIsNewMinisterDialogOpen(false);
   };
 
   const handleAddSchedule = async (e: React.FormEvent) => {
@@ -402,9 +385,6 @@ export default function LouvorPage() {
         break;
       case "song":
         await deleteSong.mutateAsync(deleteItemId);
-        break;
-      case "minister":
-        await deleteMinister.mutateAsync(deleteItemId);
         break;
       case "schedule":
         await deleteSchedule.mutateAsync(deleteItemId);
@@ -923,46 +903,17 @@ export default function LouvorPage() {
                 </SelectContent>
               </Select>
             </div>
-            <Dialog open={isNewMinisterDialogOpen} onOpenChange={setIsNewMinisterDialogOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Novo Ministrante
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle className="font-display text-xl">Adicionar Ministrante</DialogTitle>
-                </DialogHeader>
-                <form onSubmit={handleAddMinister} className="space-y-4 mt-4">
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">Nome *</label>
-                    <Input 
-                      placeholder="Nome do ministrante" 
-                      value={newMinisterName}
-                      onChange={(e) => setNewMinisterName(e.target.value)}
-                      required 
-                    />
-                  </div>
-                  <div className="flex gap-3 pt-4">
-                    <Button type="button" variant="outline" className="flex-1" onClick={() => setIsNewMinisterDialogOpen(false)}>
-                      Cancelar
-                    </Button>
-                    <Button type="submit" className="flex-1" disabled={createMinister.isPending}>
-                      {createMinister.isPending ? "Adicionando..." : "Adicionar"}
-                    </Button>
-                  </div>
-                </form>
-              </DialogContent>
-            </Dialog>
+            <p className="text-sm text-muted-foreground self-center">
+              Ministrantes são membros com a função "Ministrante". Adicione-os na aba Membros.
+            </p>
           </div>
 
           {/* Ministers list */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {ministersLoading ? (
+            {membersLoading ? (
               <div className="col-span-full text-center py-8 text-muted-foreground">Carregando...</div>
             ) : ministers.length === 0 ? (
-              <div className="col-span-full text-center py-8 text-muted-foreground">Nenhum ministrante cadastrado</div>
+              <div className="col-span-full text-center py-8 text-muted-foreground">Nenhum ministrante cadastrado. Adicione membros com a função "Ministrante" na aba Membros.</div>
             ) : (
               ministers.map((minister) => {
                 const ministerAssignments = assignments.filter(a => a.minister_id === minister.id);
