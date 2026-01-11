@@ -5,7 +5,7 @@ interface Birthday {
   woman_name: string | null;
   man_name: string | null;
   birthday_date: string;
-  birthday_type: "personal" | "wedding";
+  birthday_type: string;
 }
 
 interface BirthdayCardProps {

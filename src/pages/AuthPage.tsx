@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, ArrowLeft, Loader2 } from "lucide-react";
 import { z } from "zod";
+import logoImage from "@/assets/logo-igreja.jpeg";
 
 const loginSchema = z.object({
   email: z.string().trim().email({ message: "Email inválido" }),
@@ -150,9 +151,11 @@ export default function AuthPage() {
         <div className="bg-card rounded-2xl shadow-xl p-8">
           {/* Logo */}
           <div className="text-center mb-8">
-            <div className="w-16 h-16 rounded-full gradient-gold flex items-center justify-center mx-auto mb-4">
-              <span className="font-display text-2xl font-bold text-foreground">NC</span>
-            </div>
+            <img 
+              src={logoImage} 
+              alt="Logo Igreja" 
+              className="w-16 h-16 rounded-full object-cover mx-auto mb-4"
+            />
             <h1 className="font-display text-2xl font-bold text-foreground">
               {isLogin ? "Entrar no Painel" : "Criar Conta"}
             </h1>

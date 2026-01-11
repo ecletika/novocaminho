@@ -3,7 +3,7 @@ import { Play, Pause, Volume2, VolumeX, Radio } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 
-const RADIO_STREAM_URL = "https://s08.maxcast.com.br:8608/live";
+const RADIO_STREAM_URL = "https://s08.maxcast.com.br:8608/live?id=189593287090";
 
 export default function RadioPlayer() {
   const audioRef = useRef<HTMLAudioElement>(null);

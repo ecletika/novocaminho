@@ -1,10 +1,13 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Play, Calendar, ArrowRight, Users, Music, Tv, BookOpen, Heart, Radio } from "lucide-react";
+import { Play, Calendar, ArrowRight, Users, Music, Tv, BookOpen, Heart, Radio, Cake } from "lucide-react";
 import heroImage from "@/assets/hero-church.jpg";
 import worshipImage from "@/assets/ministry-worship.jpg";
 import techImage from "@/assets/ministry-tech.jpg";
 import casadosImage from "@/assets/casados-para-sempre.jpg";
+import RadioPlayer from "@/components/RadioPlayer";
+import BirthdayCard from "@/components/BirthdayCard";
+import { useMonthlyBirthdays } from "@/hooks/useBirthdays";
 
 const ministries = [
   {
@@ -52,6 +55,8 @@ const upcomingEvents = [
 ];
 
 export default function HomePage() {
+  const { data: monthlyBirthdays = [] } = useMonthlyBirthdays();
+  
   return (
     <>
       {/* Hero Section */}
@@ -103,9 +108,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Quick Info Bar */}
+      {/* Quick Info Bar + Radio Player */}
       <section className="relative -mt-8 z-20">
-        <div className="container-church">
+        <div className="container-church space-y-6">
           <div className="bg-card rounded-2xl shadow-card p-6 md:p-8 grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -135,6 +140,9 @@ export default function HomePage() {
               </div>
             </div>
           </div>
+          
+          {/* Radio Player */}
+          <RadioPlayer />
         </div>
       </section>
 
@@ -235,6 +243,25 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Birthdays Section */}
+      {monthlyBirthdays.length > 0 && (
+        <section className="section-padding">
+          <div className="container-church">
+            <div className="text-center mb-12">
+              <span className="text-secondary font-medium text-sm uppercase tracking-wider">Celebrações</span>
+              <h2 className="font-display text-4xl md:text-5xl font-bold text-foreground mt-3 mb-4">
+                Aniversários do Mês
+              </h2>
+              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+                Celebramos com alegria os aniversários da nossa família
+              </p>
+            </div>
+
+            <BirthdayCard birthdays={monthlyBirthdays} title="Aniversários do Mês" />
+          </div>
+        </section>
+      )}
 
       {/* CTA Section */}
       <section className="section-padding gradient-hero relative overflow-hidden">

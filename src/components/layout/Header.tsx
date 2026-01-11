@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Radio, ChevronDown } from "lucide-react";
 import { useMinistries } from "@/hooks/useMinistries";
+import logoImage from "@/assets/logo-igreja.jpeg";
 
 const baseNavigation = [
   { name: "Início", href: "/" },
@@ -41,9 +42,11 @@ export default function Header() {
         <nav className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full gradient-gold flex items-center justify-center">
-              <span className="font-display text-lg font-bold text-foreground">NC</span>
-            </div>
+            <img 
+              src={logoImage} 
+              alt="Logo Igreja" 
+              className="w-10 h-10 rounded-full object-cover"
+            />
             <div className="hidden sm:block">
               <span className={`font-display text-xl font-semibold transition-colors ${
                 isScrolled ? "text-foreground" : "text-primary-foreground"
