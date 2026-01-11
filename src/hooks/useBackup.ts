@@ -5,19 +5,32 @@ interface BackupData {
   version: string;
   created_at: string;
   data: {
-    ministries: unknown[];
-    ministry_posts: unknown[];
-    birthdays: unknown[];
-    birthday_ministries: unknown[];
-    inventory_items: unknown[];
-    worship_members: unknown[];
-    worship_functions: unknown[];
-    worship_songs: unknown[];
-    worship_schedules: unknown[];
-    worship_ministers: unknown[];
-    general_schedules: unknown[];
+    ministries: Record<string, unknown>[];
+    ministry_posts: Record<string, unknown>[];
+    birthdays: Record<string, unknown>[];
+    birthday_ministries: Record<string, unknown>[];
+    inventory_items: Record<string, unknown>[];
+    worship_members: Record<string, unknown>[];
+    worship_functions: Record<string, unknown>[];
+    worship_songs: Record<string, unknown>[];
+    worship_schedules: Record<string, unknown>[];
+    worship_ministers: Record<string, unknown>[];
+    general_schedules: Record<string, unknown>[];
   };
 }
+
+type TableName = 
+  | "ministries"
+  | "ministry_posts"
+  | "birthdays"
+  | "birthday_ministries"
+  | "inventory_items"
+  | "worship_members"
+  | "worship_functions"
+  | "worship_songs"
+  | "worship_schedules"
+  | "worship_ministers"
+  | "general_schedules";
 
 export async function exportBackup(): Promise<void> {
   try {
@@ -52,17 +65,17 @@ export async function exportBackup(): Promise<void> {
       version: "1.0",
       created_at: new Date().toISOString(),
       data: {
-        ministries: ministries || [],
-        ministry_posts: ministry_posts || [],
-        birthdays: birthdays || [],
-        birthday_ministries: birthday_ministries || [],
-        inventory_items: inventory_items || [],
-        worship_members: worship_members || [],
-        worship_functions: worship_functions || [],
-        worship_songs: worship_songs || [],
-        worship_schedules: worship_schedules || [],
-        worship_ministers: worship_ministers || [],
-        general_schedules: general_schedules || [],
+        ministries: (ministries || []) as Record<string, unknown>[],
+        ministry_posts: (ministry_posts || []) as Record<string, unknown>[],
+        birthdays: (birthdays || []) as Record<string, unknown>[],
+        birthday_ministries: (birthday_ministries || []) as Record<string, unknown>[],
+        inventory_items: (inventory_items || []) as Record<string, unknown>[],
+        worship_members: (worship_members || []) as Record<string, unknown>[],
+        worship_functions: (worship_functions || []) as Record<string, unknown>[],
+        worship_songs: (worship_songs || []) as Record<string, unknown>[],
+        worship_schedules: (worship_schedules || []) as Record<string, unknown>[],
+        worship_ministers: (worship_ministers || []) as Record<string, unknown>[],
+        general_schedules: (general_schedules || []) as Record<string, unknown>[],
       },
     };
 
@@ -96,7 +109,7 @@ export async function importBackup(file: File): Promise<void> {
     }
 
     // Clear existing data and import new data
-    const tables = [
+    const tables: TableName[] = [
       "birthday_ministries",
       "ministry_posts",
       "birthdays",
@@ -119,7 +132,7 @@ export async function importBackup(file: File): Promise<void> {
     }
 
     // Insert data in correct order
-    const insertOrder = [
+    const insertOrder: { table: TableName; data: Record<string, unknown>[] }[] = [
       { table: "ministries", data: backup.data.ministries },
       { table: "worship_functions", data: backup.data.worship_functions },
       { table: "worship_ministers", data: backup.data.worship_ministers },
@@ -135,7 +148,8 @@ export async function importBackup(file: File): Promise<void> {
 
     for (const { table, data } of insertOrder) {
       if (data && Array.isArray(data) && data.length > 0) {
-        const { error } = await supabase.from(table).insert(data);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { error } = await supabase.from(table).insert(data as any);
         if (error) {
           console.error(`Error inserting ${table}:`, error);
         }
