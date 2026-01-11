@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { MapPin, Phone, Mail, Facebook, Instagram, Youtube, Heart } from "lucide-react";
+import logoImage from "@/assets/logo-igreja.jpeg";
 
 export default function Footer() {
   return (
@@ -9,9 +10,11 @@ export default function Footer() {
           {/* About */}
           <div>
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-full gradient-gold flex items-center justify-center">
-                <span className="font-display text-xl font-bold text-foreground">NC</span>
-              </div>
+              <img 
+                src={logoImage} 
+                alt="Logo Igreja" 
+                className="w-12 h-12 rounded-full object-cover"
+              />
               <div>
                 <span className="font-display text-xl font-semibold">Novo Caminho</span>
                 <span className="block text-sm text-primary-foreground/70">Portugal</span>

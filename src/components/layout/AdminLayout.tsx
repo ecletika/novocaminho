@@ -16,9 +16,13 @@ import {
   Bell,
   Search,
   Radio,
+  Cake,
+  Layers,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/contexts/AuthContext";
+import logoImage from "@/assets/logo-igreja.jpeg";
 
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -26,6 +30,8 @@ const navigation = [
   { name: "Louvor", href: "/admin/louvor", icon: Music },
   { name: "Mesa & Mídia", href: "/admin/tech", icon: Tv },
   { name: "Ministérios", href: "/admin/ministerios", icon: Users },
+  { name: "Conteúdos", href: "/admin/conteudos", icon: Layers },
+  { name: "Aniversários", href: "/admin/aniversarios", icon: Cake },
   { name: "Escalas", href: "/admin/escalas", icon: Calendar },
   { name: "Documentação", href: "/admin/docs", icon: FileText },
   { name: "Configurações", href: "/admin/config", icon: Settings },
@@ -34,6 +40,7 @@ const navigation = [
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const { signOut, user } = useAuth();
 
   const isActive = (href: string) => {
     if (href === "/admin") {
@@ -62,9 +69,11 @@ export default function AdminLayout() {
           {/* Logo */}
           <div className="h-16 flex items-center justify-between px-6 border-b border-border">
             <Link to="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full gradient-gold flex items-center justify-center">
-                <span className="font-display text-lg font-bold text-foreground">NC</span>
-              </div>
+              <img 
+                src={logoImage} 
+                alt="Logo Igreja" 
+                className="w-10 h-10 rounded-full object-cover"
+              />
               <div>
                 <span className="font-display text-lg font-semibold text-foreground">Novo Caminho</span>
                 <span className="block text-xs text-muted-foreground">Painel Admin</span>
@@ -119,13 +128,22 @@ export default function AdminLayout() {
           <div className="p-4 border-t border-border">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
-                <span className="text-primary-foreground font-medium">AD</span>
+                <span className="text-primary-foreground font-medium">
+                  {user?.email?.charAt(0).toUpperCase() || "A"}
+                </span>
               </div>
-              <div className="flex-1">
-                <span className="font-medium text-foreground text-sm">Admin</span>
+              <div className="flex-1 min-w-0">
+                <span className="font-medium text-foreground text-sm truncate block">
+                  {user?.email?.split("@")[0] || "Admin"}
+                </span>
                 <span className="block text-xs text-muted-foreground">Administrador</span>
               </div>
-              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-muted-foreground hover:text-foreground"
+                onClick={() => signOut()}
+              >
                 <LogOut className="w-4 h-4" />
               </Button>
             </div>

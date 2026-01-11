@@ -25,6 +25,9 @@ import TechPage from "./pages/admin/TechPage";
 import DocsPage from "./pages/admin/DocsPage";
 import AdminMinisteriosPage from "./pages/admin/AdminMinisteriosPage";
 import EscalasPage from "./pages/admin/EscalasPage";
+import AniversariosPage from "./pages/admin/AniversariosPage";
+import ConteudosPage from "./pages/admin/ConteudosPage";
+import ConfigPage from "./pages/admin/ConfigPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -55,6 +58,9 @@ const App = () => (
               <Route path="docs" element={<DocsPage />} />
               <Route path="ministerios" element={<AdminMinisteriosPage />} />
               <Route path="escalas" element={<EscalasPage />} />
+              <Route path="aniversarios" element={<AniversariosPage />} />
+              <Route path="conteudos" element={<ConteudosPage />} />
+              <Route path="config" element={<ConfigPage />} />
             </Route>
 
             {/* Catch all */}
