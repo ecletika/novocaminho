@@ -31,6 +31,11 @@ export function useGeneralSchedules() {
         .order("date", { ascending: false });
       if (error) throw error;
       
+      // If no schedules, return empty array
+      if (!data || data.length === 0) {
+        return [] as GeneralSchedule[];
+      }
+      
       // Fetch team members
       const scheduleIds = data.map(s => s.id);
       const { data: teamMembers } = await supabase

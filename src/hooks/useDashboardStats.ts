@@ -64,7 +64,7 @@ export function useNextSchedule() {
     queryFn: async () => {
       const today = new Date().toISOString().split('T')[0];
       
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("general_schedules")
         .select(`
           *,
@@ -76,8 +76,10 @@ export function useNextSchedule() {
         .gte("date", today)
         .order("date")
         .limit(1)
-        .single();
+        .maybeSingle();
       
+      // If no schedule found, return null (not an error)
+      if (error && error.code !== 'PGRST116') throw error;
       return data;
     },
   });
