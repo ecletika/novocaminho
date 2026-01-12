@@ -158,6 +158,11 @@ export function useWorshipMembers() {
         .order("name");
       if (error) throw error;
       
+      // If no members, return empty array
+      if (!data || data.length === 0) {
+        return [] as WorshipMember[];
+      }
+      
       // Fetch secondary functions
       const memberIds = data.map(m => m.id);
       const { data: secondaryFunctions } = await supabase
@@ -537,6 +542,11 @@ export function useWorshipSchedules() {
         `)
         .order("date", { ascending: false });
       if (error) throw error;
+      
+      // If no schedules, return empty array
+      if (!data || data.length === 0) {
+        return [] as WorshipSchedule[];
+      }
       
       // Fetch vocalists and musicians
       const scheduleIds = data.map(s => s.id);
