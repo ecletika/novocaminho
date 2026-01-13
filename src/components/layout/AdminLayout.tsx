@@ -30,6 +30,7 @@ const navigation = [
   { name: "Louvor", href: "/admin/louvor", icon: Music },
   { name: "Mesa & Mídia", href: "/admin/tech", icon: Tv },
   { name: "Ministérios", href: "/admin/ministerios", icon: Users },
+  { name: "Eventos", href: "/admin/eventos", icon: Calendar },
   { name: "Conteúdos", href: "/admin/conteudos", icon: Layers },
   { name: "Aniversários", href: "/admin/aniversarios", icon: Cake },
   { name: "Escalas", href: "/admin/escalas", icon: Calendar },

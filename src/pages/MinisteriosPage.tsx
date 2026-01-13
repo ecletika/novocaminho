@@ -1,62 +1,44 @@
 import { Link } from "react-router-dom";
-import { Music, Tv, Heart, BookOpen, Users, Mic2, ArrowRight } from "lucide-react";
+import { Music, Tv, Heart, BookOpen, Users, Mic2, ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useMinistries } from "@/hooks/useMinistries";
 import worshipImage from "@/assets/ministry-worship.jpg";
 import techImage from "@/assets/ministry-tech.jpg";
 import casadosImage from "@/assets/casados-para-sempre.jpg";
 
-const ministries = [
-  {
-    id: "louvor",
-    title: "Ministério de Louvor",
-    description: "Nosso ministério de louvor é formado por músicos e cantores dedicados a conduzir a congregação em adoração. Através da música, proclamamos a grandeza de Deus e criamos um ambiente de comunhão espiritual.",
-    image: worshipImage,
-    icon: Music,
-    features: ["Ensaios semanais", "Escalas mensais", "Formação musical", "Retiros de louvor"],
-  },
-  {
-    id: "tech",
-    title: "Mesa de Som & Mídia",
-    description: "O ministério de mídia é responsável por toda a parte técnica dos cultos, incluindo som, transmissão ao vivo, projeção e gravações. Uma equipe dedicada a levar a palavra de Deus além das paredes da igreja.",
-    image: techImage,
-    icon: Tv,
-    features: ["Transmissões ao vivo", "Controle de som", "Projeção", "Edição de vídeos"],
-  },
-  {
-    id: "casados",
-    title: "Casados Para Sempre",
-    description: "Um ministério dedicado a fortalecer os casamentos através de encontros, estudos bíblicos e aconselhamento. Acreditamos que famílias saudáveis são a base de uma igreja forte.",
-    image: casadosImage,
-    icon: Heart,
-    features: ["Encontros mensais", "Aconselhamento", "Retiros de casais", "Grupos de estudo"],
-  },
-  {
-    id: "ensino",
-    title: "Ministério de Ensino",
-    description: "Responsável pela formação bíblica da igreja através de estudos, cursos e discipulado. Equipamos os membros para crescerem na fé e no conhecimento da Palavra de Deus.",
-    image: worshipImage,
-    icon: BookOpen,
-    features: ["Escola Bíblica", "Cursos temáticos", "Discipulado", "Material didático"],
-  },
-  {
-    id: "acolhimento",
-    title: "Ministério de Acolhimento",
-    description: "Nossa equipe de acolhimento é o primeiro contato dos visitantes com a igreja. Com alegria e amor, recebemos todos que chegam, fazendo-os sentir-se em casa.",
-    image: techImage,
-    icon: Users,
-    features: ["Recepção", "Integração", "Visitação", "Café pós-culto"],
-  },
-  {
-    id: "oracao",
-    title: "Ministério de Oração",
-    description: "A base espiritual da nossa igreja. Mantemos uma cobertura de oração constante, intercedendo pela liderança, membros e necessidades da comunidade.",
-    image: casadosImage,
-    icon: Mic2,
-    features: ["Vigílias", "Corrente de oração", "Intercessão", "Oração pelos enfermos"],
-  },
-];
+const iconMap: Record<string, React.ElementType> = {
+  Music,
+  Tv,
+  Heart,
+  BookOpen,
+  Users,
+  Mic2,
+};
+
+// Default images for ministries without image_url
+const defaultImages: Record<string, string> = {
+  louvor: worshipImage,
+  tech: techImage,
+  casados: casadosImage,
+  ensino: worshipImage,
+  acolhimento: techImage,
+  oracao: casadosImage,
+  edificados: worshipImage,
+};
 
 export default function MinisteriosPage() {
+  const { data: ministries, isLoading } = useMinistries();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  const activeMinistries = ministries?.filter(m => m.is_active) || [];
+
   return (
     <>
       {/* Hero */}
@@ -77,49 +59,65 @@ export default function MinisteriosPage() {
       {/* Ministries Grid */}
       <section className="section-padding">
         <div className="container-church">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {ministries.map((ministry, index) => (
-              <div
-                key={ministry.id}
-                className={`group bg-card rounded-2xl shadow-card overflow-hidden hover:shadow-xl transition-all duration-500 animate-fade-up delay-${(index % 4 + 1) * 100}`}
-              >
-                <div className="grid grid-cols-1 md:grid-cols-2">
-                  <div className="aspect-square md:aspect-auto overflow-hidden">
-                    <img
-                      src={ministry.image}
-                      alt={ministry.title}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
-                  </div>
-                  <div className="p-6 md:p-8 flex flex-col">
-                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
-                      <ministry.icon className="w-6 h-6 text-primary" />
+          {activeMinistries.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">Nenhum ministério encontrado.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {activeMinistries.map((ministry, index) => {
+                const IconComponent = iconMap[ministry.icon] || Users;
+                const imageUrl = ministry.image_url || defaultImages[ministry.slug] || worshipImage;
+                
+                return (
+                  <div
+                    key={ministry.id}
+                    className={`group bg-card rounded-2xl shadow-card overflow-hidden hover:shadow-xl transition-all duration-500 animate-fade-up`}
+                    style={{ animationDelay: `${(index % 4 + 1) * 100}ms` }}
+                  >
+                    <div className="grid grid-cols-1 md:grid-cols-2">
+                      <div className="aspect-square md:aspect-auto overflow-hidden">
+                        <img
+                          src={imageUrl}
+                          alt={ministry.title}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        />
+                      </div>
+                      <div className="p-6 md:p-8 flex flex-col">
+                        <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                          <IconComponent className="w-6 h-6 text-primary" />
+                        </div>
+                        <h3 className="font-display text-2xl font-semibold text-foreground mb-3">
+                          {ministry.title}
+                        </h3>
+                        <p className="text-muted-foreground text-sm flex-1 mb-4">
+                          {ministry.description}
+                        </p>
+                        {ministry.features && ministry.features.length > 0 && (
+                          <div className="flex flex-wrap gap-2 mb-6">
+                            {ministry.features.map((feature) => (
+                              <span
+                                key={feature}
+                                className="px-3 py-1 rounded-full bg-muted text-muted-foreground text-xs font-medium"
+                              >
+                                {feature}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        <Button variant="outline" size="sm" className="self-start" asChild>
+                          <Link to={`/ministerios/${ministry.slug}`}>
+                            Saber Mais
+                            <ArrowRight className="w-4 h-4 ml-2" />
+                          </Link>
+                        </Button>
+                      </div>
                     </div>
-                    <h3 className="font-display text-2xl font-semibold text-foreground mb-3">
-                      {ministry.title}
-                    </h3>
-                    <p className="text-muted-foreground text-sm flex-1 mb-4">
-                      {ministry.description}
-                    </p>
-                    <div className="flex flex-wrap gap-2 mb-6">
-                      {ministry.features.map((feature) => (
-                        <span
-                          key={feature}
-                          className="px-3 py-1 rounded-full bg-muted text-muted-foreground text-xs font-medium"
-                        >
-                          {feature}
-                        </span>
-                      ))}
-                    </div>
-                    <Button variant="outline" size="sm" className="self-start">
-                      Saber Mais
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </Button>
                   </div>
-                </div>
-              </div>
-            ))}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 
