@@ -1,113 +1,44 @@
 import { useState } from "react";
-import { Calendar, MapPin, Clock, Users, ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-
-const months = [
-  "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-  "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
-];
-
-const events = [
-  {
-    id: 1,
-    title: "Culto de Domingo",
-    date: "2024-12-22",
-    time: "10:00",
-    location: "Templo Principal",
-    category: "Culto",
-    description: "Culto dominical com louvor e pregação da Palavra.",
-  },
-  {
-    id: 2,
-    title: "Culto de Domingo (Noite)",
-    date: "2024-12-22",
-    time: "18:00",
-    location: "Templo Principal",
-    category: "Culto",
-    description: "Culto noturno com foco em oração e comunhão.",
-  },
-  {
-    id: 3,
-    title: "Reunião de Casais",
-    date: "2024-12-24",
-    time: "19:30",
-    location: "Salão de Eventos",
-    category: "Casados Para Sempre",
-    description: "Encontro especial de Natal para casais.",
-  },
-  {
-    id: 4,
-    title: "Celebração de Natal",
-    date: "2024-12-25",
-    time: "18:00",
-    location: "Templo Principal",
-    category: "Especial",
-    description: "Grande celebração em família comemorando o nascimento de Jesus Cristo.",
-  },
-  {
-    id: 5,
-    title: "Ensaio do Louvor",
-    date: "2024-12-28",
-    time: "15:00",
-    location: "Sala de Ensaio",
-    category: "Louvor",
-    description: "Preparação das músicas para o culto de Ano Novo.",
-  },
-  {
-    id: 6,
-    title: "Vigília de Ano Novo",
-    date: "2024-12-31",
-    time: "22:00",
-    location: "Templo Principal",
-    category: "Especial",
-    description: "Vigília de gratidão e oração para receber o novo ano.",
-  },
-];
+import { Calendar, MapPin, Clock, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { useUpcomingEvents } from "@/hooks/useEvents";
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 const categoryColors: Record<string, string> = {
   "Culto": "bg-primary/10 text-primary",
   "Louvor": "bg-secondary/20 text-secondary-foreground",
   "Casados Para Sempre": "bg-accent/20 text-accent-foreground",
-  "Especial": "bg-gold/20 text-gold-dark",
+  "Especial": "bg-amber-100 text-amber-800",
+  "Retiro": "bg-green-100 text-green-800",
+  "Conferência": "bg-blue-100 text-blue-800",
+  "Estudo": "bg-purple-100 text-purple-800",
+  "Jovens": "bg-pink-100 text-pink-800",
+  "Crianças": "bg-orange-100 text-orange-800",
 };
 
 export default function EventosPage() {
-  const [currentMonth, setCurrentMonth] = useState(11); // December (0-indexed)
-  const [currentYear, setCurrentYear] = useState(2024);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const { data: events = [], isLoading } = useUpcomingEvents();
 
-  const getDaysInMonth = (month: number, year: number) => {
-    return new Date(year, month + 1, 0).getDate();
+  const monthStart = startOfMonth(currentMonth);
+  const monthEnd = endOfMonth(currentMonth);
+  const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
+  const firstDayOfWeek = monthStart.getDay();
+
+  const getEventsForDay = (day: Date) => {
+    return events.filter(event => isSameDay(new Date(event.date), day));
   };
 
-  const getFirstDayOfMonth = (month: number, year: number) => {
-    return new Date(year, month, 1).getDay();
-  };
+  const prevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
+  const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
 
-  const daysInMonth = getDaysInMonth(currentMonth, currentYear);
-  const firstDay = getFirstDayOfMonth(currentMonth, currentYear);
-
-  const getEventsForDay = (day: number) => {
-    const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    return events.filter(event => event.date === dateStr);
-  };
-
-  const prevMonth = () => {
-    if (currentMonth === 0) {
-      setCurrentMonth(11);
-      setCurrentYear(currentYear - 1);
-    } else {
-      setCurrentMonth(currentMonth - 1);
-    }
-  };
-
-  const nextMonth = () => {
-    if (currentMonth === 11) {
-      setCurrentMonth(0);
-      setCurrentYear(currentYear + 1);
-    } else {
-      setCurrentMonth(currentMonth + 1);
-    }
-  };
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -140,8 +71,8 @@ export default function EventosPage() {
                   >
                     <ChevronLeft className="w-5 h-5" />
                   </button>
-                  <h2 className="font-display text-2xl font-semibold text-foreground">
-                    {months[currentMonth]} {currentYear}
+                  <h2 className="font-display text-2xl font-semibold text-foreground capitalize">
+                    {format(currentMonth, "MMMM yyyy", { locale: ptBR })}
                   </h2>
                   <button
                     onClick={nextMonth}
@@ -166,19 +97,18 @@ export default function EventosPage() {
                 {/* Calendar Grid */}
                 <div className="grid grid-cols-7 gap-2">
                   {/* Empty cells for days before the first day */}
-                  {Array.from({ length: firstDay }).map((_, i) => (
+                  {Array.from({ length: firstDayOfWeek }).map((_, i) => (
                     <div key={`empty-${i}`} className="aspect-square" />
                   ))}
 
                   {/* Days of the month */}
-                  {Array.from({ length: daysInMonth }).map((_, i) => {
-                    const day = i + 1;
+                  {daysInMonth.map((day) => {
                     const dayEvents = getEventsForDay(day);
-                    const isToday = day === 21 && currentMonth === 11 && currentYear === 2024;
+                    const isToday = isSameDay(day, new Date());
 
                     return (
                       <div
-                        key={day}
+                        key={day.toISOString()}
                         className={`aspect-square rounded-xl p-1 transition-colors ${
                           isToday
                             ? "bg-primary text-primary-foreground"
@@ -189,7 +119,7 @@ export default function EventosPage() {
                       >
                         <div className="h-full flex flex-col">
                           <span className={`text-sm font-medium ${isToday ? "" : "text-foreground"}`}>
-                            {day}
+                            {format(day, "d")}
                           </span>
                           {dayEvents.length > 0 && (
                             <div className="flex-1 flex items-end">
@@ -218,34 +148,44 @@ export default function EventosPage() {
               <h3 className="font-display text-xl font-semibold text-foreground mb-6">
                 Próximos Eventos
               </h3>
-              <div className="space-y-4">
-                {events.map((event) => (
-                  <div
-                    key={event.id}
-                    className="bg-card rounded-xl p-5 shadow-soft hover:shadow-card transition-all duration-300"
-                  >
-                    <span className={`inline-block px-2 py-1 rounded-md text-xs font-medium mb-3 ${categoryColors[event.category] || "bg-muted text-muted-foreground"}`}>
-                      {event.category}
-                    </span>
-                    <h4 className="font-semibold text-foreground mb-2">{event.title}</h4>
-                    <p className="text-muted-foreground text-sm mb-4">{event.description}</p>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Calendar className="w-4 h-4" />
-                        <span>{new Date(event.date).toLocaleDateString('pt-PT', { day: 'numeric', month: 'long' })}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Clock className="w-4 h-4" />
-                        <span>{event.time}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <MapPin className="w-4 h-4" />
-                        <span>{event.location}</span>
+              {events.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  Nenhum evento programado
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {events.slice(0, 10).map((event) => (
+                    <div
+                      key={event.id}
+                      className="bg-card rounded-xl p-5 shadow-soft hover:shadow-card transition-all duration-300"
+                    >
+                      <span className={`inline-block px-2 py-1 rounded-md text-xs font-medium mb-3 ${categoryColors[event.category] || "bg-muted text-muted-foreground"}`}>
+                        {event.category}
+                      </span>
+                      <h4 className="font-semibold text-foreground mb-2">{event.title}</h4>
+                      {event.description && (
+                        <p className="text-muted-foreground text-sm mb-4">{event.description}</p>
+                      )}
+                      <div className="space-y-2 text-sm">
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <Calendar className="w-4 h-4" />
+                          <span>{format(new Date(event.date), "dd 'de' MMMM", { locale: ptBR })}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <Clock className="w-4 h-4" />
+                          <span>{event.time}</span>
+                        </div>
+                        {event.location && (
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <MapPin className="w-4 h-4" />
+                            <span>{event.location}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>

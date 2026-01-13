@@ -77,6 +77,45 @@ export type Database = {
         }
         Relationships: []
       }
+      events: {
+        Row: {
+          category: string
+          created_at: string
+          date: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          location: string | null
+          time: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          date: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          location?: string | null
+          time: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          date?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          location?: string | null
+          time?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       general_schedules: {
         Row: {
           created_at: string

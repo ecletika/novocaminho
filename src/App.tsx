@@ -24,6 +24,7 @@ import LouvorPage from "./pages/admin/LouvorPage";
 import TechPage from "./pages/admin/TechPage";
 import DocsPage from "./pages/admin/DocsPage";
 import AdminMinisteriosPage from "./pages/admin/AdminMinisteriosPage";
+import AdminEventosPage from "./pages/admin/AdminEventosPage";
 import EscalasPage from "./pages/admin/EscalasPage";
 import AniversariosPage from "./pages/admin/AniversariosPage";
 import ConteudosPage from "./pages/admin/ConteudosPage";
@@ -57,6 +58,7 @@ const App = () => (
               <Route path="tech" element={<TechPage />} />
               <Route path="docs" element={<DocsPage />} />
               <Route path="ministerios" element={<AdminMinisteriosPage />} />
+              <Route path="eventos" element={<AdminEventosPage />} />
               <Route path="escalas" element={<EscalasPage />} />
               <Route path="aniversarios" element={<AniversariosPage />} />
               <Route path="conteudos" element={<ConteudosPage />} />
