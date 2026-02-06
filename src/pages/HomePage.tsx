@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Play, Calendar, ArrowRight, Users, Music, Tv, BookOpen, Heart, Radio, Cake } from "lucide-react";
@@ -7,6 +8,7 @@ import techImage from "@/assets/ministry-tech.jpg";
 import casadosImage from "@/assets/casados-para-sempre.jpg";
 import RadioPlayer from "@/components/RadioPlayer";
 import BirthdayCard from "@/components/BirthdayCard";
+import FacebookLiveModal from "@/components/FacebookLiveModal";
 import { useMonthlyBirthdays } from "@/hooks/useBirthdays";
 
 const ministries = [
@@ -56,6 +58,7 @@ const upcomingEvents = [
 
 export default function HomePage() {
   const { data: monthlyBirthdays = [] } = useMonthlyBirthdays();
+  const [showLive, setShowLive] = useState(false);
   
   return (
     <>
@@ -93,7 +96,7 @@ export default function HomePage() {
                 Visite-nos
               </Link>
             </Button>
-            <Button variant="hero-outline" size="xl">
+            <Button variant="hero-outline" size="xl" onClick={() => setShowLive(true)}>
               <Play className="w-5 h-5 mr-2" />
               Assistir ao Vivo
             </Button>
@@ -290,6 +293,7 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      <FacebookLiveModal open={showLive} onOpenChange={setShowLive} />
     </>
   );
 }

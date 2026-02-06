@@ -1,5 +1,5 @@
-import { useState, useRef } from "react";
-import { Download, Upload, Loader2, Shield, Database, AlertTriangle } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Download, Upload, Loader2, Shield, Database, AlertTriangle, Video, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -12,6 +12,10 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { exportBackup, importBackup } from "@/hooks/useBackup";
+import { useSiteConfig, useUpdateSiteConfig } from "@/hooks/useSiteConfig";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 
 export default function ConfigPage() {
   const [isExporting, setIsExporting] = useState(false);
@@ -19,6 +23,22 @@ export default function ConfigPage() {
   const [showImportConfirm, setShowImportConfirm] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { data: facebookPageId } = useSiteConfig("facebook_page_id");
+  const updateConfig = useUpdateSiteConfig();
+  const [fbPageId, setFbPageId] = useState("");
+
+  useEffect(() => {
+    if (facebookPageId) setFbPageId(facebookPageId);
+  }, [facebookPageId]);
+
+  const handleSaveFacebook = async () => {
+    try {
+      await updateConfig.mutateAsync({ key: "facebook_page_id", value: fbPageId });
+      toast.success("Link do Facebook salvo!");
+    } catch {
+      toast.error("Erro ao salvar");
+    }
+  };
 
   const handleExport = async () => {
     setIsExporting(true);
@@ -130,6 +150,37 @@ export default function ConfigPage() {
               )}
             </Button>
           </div>
+        </div>
+      </div>
+
+      {/* Facebook Live Section */}
+      <div className="bg-card rounded-xl shadow-soft p-6">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
+            <Video className="w-6 h-6 text-blue-600" />
+          </div>
+          <div>
+            <h2 className="font-display text-xl font-semibold text-foreground">Transmissão ao Vivo</h2>
+            <p className="text-sm text-muted-foreground">Configure o ID da página do Facebook para o player ao vivo</p>
+          </div>
+        </div>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="fb-page-id">ID ou nome da página do Facebook</Label>
+            <Input
+              id="fb-page-id"
+              value={fbPageId}
+              onChange={(e) => setFbPageId(e.target.value)}
+              placeholder="Ex: IgrejaNovoCAminhoPortugal"
+            />
+            <p className="text-xs text-muted-foreground">
+              O ID aparece na URL da sua página: facebook.com/<strong>SeuID</strong>
+            </p>
+          </div>
+          <Button onClick={handleSaveFacebook} disabled={updateConfig.isPending}>
+            {updateConfig.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+            Salvar
+          </Button>
         </div>
       </div>
 

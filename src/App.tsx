@@ -29,6 +29,8 @@ import EscalasPage from "./pages/admin/EscalasPage";
 import AniversariosPage from "./pages/admin/AniversariosPage";
 import ConteudosPage from "./pages/admin/ConteudosPage";
 import ConfigPage from "./pages/admin/ConfigPage";
+import AdminCasadosPage from "./pages/admin/AdminCasadosPage";
+import UsersPage from "./pages/admin/UsersPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -62,6 +64,8 @@ const App = () => (
               <Route path="escalas" element={<EscalasPage />} />
               <Route path="aniversarios" element={<AniversariosPage />} />
               <Route path="conteudos" element={<ConteudosPage />} />
+              <Route path="casados" element={<AdminCasadosPage />} />
+              <Route path="users" element={<UsersPage />} />
               <Route path="config" element={<ConfigPage />} />
             </Route>
 

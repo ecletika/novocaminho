@@ -77,6 +77,60 @@ export type Database = {
         }
         Relationships: []
       }
+      casados_gallery: {
+        Row: {
+          caption: string | null
+          created_at: string
+          id: string
+          image_url: string
+          sort_order: number | null
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          image_url: string
+          sort_order?: number | null
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
+      casados_posts: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          image_url: string | null
+          published: boolean | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          published?: boolean | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          published?: boolean | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       events: {
         Row: {
           category: string
@@ -502,6 +556,27 @@ export type Database = {
           },
         ]
       }
+      site_config: {
+        Row: {
+          id: string
+          key: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          id?: string
+          key: string
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          id?: string
+          key?: string
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
       song_minister_assignments: {
         Row: {
           created_at: string
@@ -540,6 +615,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_permissions: {
+        Row: {
+          created_at: string
+          id: string
+          permission: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          permission: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          permission?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {

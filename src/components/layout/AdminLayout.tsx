@@ -18,30 +18,45 @@ import {
   Radio,
   Cake,
   Layers,
+  Heart,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
+import { useMyPermissions } from "@/hooks/useUserPermissions";
 import logoImage from "@/assets/logo-igreja.jpeg";
 
 const navigation = [
-  { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
-  { name: "Inventário", href: "/admin/inventario", icon: Package },
-  { name: "Louvor", href: "/admin/louvor", icon: Music },
-  { name: "Mesa & Mídia", href: "/admin/tech", icon: Tv },
-  { name: "Ministérios", href: "/admin/ministerios", icon: Users },
-  { name: "Eventos", href: "/admin/eventos", icon: Calendar },
-  { name: "Conteúdos", href: "/admin/conteudos", icon: Layers },
-  { name: "Aniversários", href: "/admin/aniversarios", icon: Cake },
-  { name: "Escalas", href: "/admin/escalas", icon: Calendar },
-  { name: "Documentação", href: "/admin/docs", icon: FileText },
-  { name: "Configurações", href: "/admin/config", icon: Settings },
+  { name: "Dashboard", href: "/admin", icon: LayoutDashboard, perm: null },
+  { name: "Inventário", href: "/admin/inventario", icon: Package, perm: "inventario" },
+  { name: "Louvor", href: "/admin/louvor", icon: Music, perm: "louvor" },
+  { name: "Mesa & Mídia", href: "/admin/tech", icon: Tv, perm: "tech" },
+  { name: "Ministérios", href: "/admin/ministerios", icon: Users, perm: "ministerios" },
+  { name: "Eventos", href: "/admin/eventos", icon: Calendar, perm: "eventos" },
+  { name: "Conteúdos", href: "/admin/conteudos", icon: Layers, perm: "conteudos" },
+  { name: "Casados Para Sempre", href: "/admin/casados", icon: Heart, perm: "casados" },
+  { name: "Aniversários", href: "/admin/aniversarios", icon: Cake, perm: "aniversarios" },
+  { name: "Escalas", href: "/admin/escalas", icon: Calendar, perm: "escalas" },
+  { name: "Documentação", href: "/admin/docs", icon: FileText, perm: "docs" },
+  { name: "Utilizadores", href: "/admin/users", icon: Users, perm: null },
+  { name: "Configurações", href: "/admin/config", icon: Settings, perm: "config" },
 ];
 
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
-  const { signOut, user } = useAuth();
+  const { signOut, user, isAdmin } = useAuth();
+  const { data: myPermissions = [] } = useMyPermissions();
+
+  const visibleNavigation = navigation.filter((item) => {
+    if (isAdmin) return true;
+    if (item.perm === null) {
+      // Dashboard visible to all, Users only to admin
+      if (item.href === "/admin/users") return false;
+      return true;
+    }
+    return myPermissions.includes(item.perm);
+  });
 
   const isActive = (href: string) => {
     if (href === "/admin") {
@@ -90,7 +105,7 @@ export default function AdminLayout() {
 
           {/* Navigation */}
           <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-            {navigation.map((item) => (
+            {visibleNavigation.map((item) => (
               <Link
                 key={item.name}
                 to={item.href}
