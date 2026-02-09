@@ -7,6 +7,9 @@ export interface Birthday {
   man_name: string | null;
   birthday_date: string;
   birthday_type: "personal" | "wedding";
+  phone: string | null;
+  email: string | null;
+  address: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -20,6 +23,9 @@ export interface BirthdayInsert {
   man_name?: string | null;
   birthday_date: string;
   birthday_type: "personal" | "wedding";
+  phone?: string | null;
+  email?: string | null;
+  address?: string | null;
   ministry_ids?: string[];
 }
 

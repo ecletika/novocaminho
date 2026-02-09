@@ -14,6 +14,7 @@ import EventosPage from "./pages/EventosPage";
 import ContatoPage from "./pages/ContatoPage";
 import CasadosPage from "./pages/CasadosPage";
 import AuthPage from "./pages/AuthPage";
+import PublicBirthdayRegister from "./pages/PublicBirthdayRegister";
 import NotFound from "./pages/NotFound";
 
 // Admin Layout & Pages
@@ -51,6 +52,7 @@ const App = () => (
             <Route element={<PublicLayout><ContatoPage /></PublicLayout>} path="/contato" />
             <Route element={<PublicLayout><CasadosPage /></PublicLayout>} path="/casados" />
             <Route path="/auth" element={<AuthPage />} />
+            <Route path="/cadastro-aniversario" element={<PublicBirthdayRegister />} />
 
             {/* Admin Routes - Protected */}
             <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
