@@ -49,29 +49,38 @@ export type Database = {
       }
       birthdays: {
         Row: {
+          address: string | null
           birthday_date: string
           birthday_type: string
           created_at: string
+          email: string | null
           id: string
           man_name: string | null
+          phone: string | null
           updated_at: string
           woman_name: string | null
         }
         Insert: {
+          address?: string | null
           birthday_date: string
           birthday_type: string
           created_at?: string
+          email?: string | null
           id?: string
           man_name?: string | null
+          phone?: string | null
           updated_at?: string
           woman_name?: string | null
         }
         Update: {
+          address?: string | null
           birthday_date?: string
           birthday_type?: string
           created_at?: string
+          email?: string | null
           id?: string
           man_name?: string | null
+          phone?: string | null
           updated_at?: string
           woman_name?: string | null
         }

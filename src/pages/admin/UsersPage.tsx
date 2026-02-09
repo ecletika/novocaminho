@@ -1,9 +1,15 @@
 import { useState, useEffect } from "react";
-import { Users, Shield, Loader2, Save, Search } from "lucide-react";
+import { Users, Shield, Loader2, Save, Search, Plus, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import {
   useAllUserPermissions,
@@ -24,6 +30,12 @@ export default function UsersPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [editingUser, setEditingUser] = useState<string | null>(null);
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [newEmail, setNewEmail] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [newName, setNewName] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
 
   const { data: allPermissions = [], isLoading: permsLoading } = useAllUserPermissions();
   const setPerms = useSetUserPermissions();
@@ -84,6 +96,28 @@ export default function UsersPage() {
     }
   };
 
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsCreating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-user", {
+        body: { email: newEmail, password: newPassword, full_name: newName },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success("Utilizador criado com sucesso!");
+      setIsCreateOpen(false);
+      setNewEmail("");
+      setNewPassword("");
+      setNewName("");
+      loadUsers();
+    } catch (err: any) {
+      toast.error(err.message || "Erro ao criar utilizador");
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
   const togglePermission = (perm: string) => {
     setSelectedPermissions((prev) =>
       prev.includes(perm) ? prev.filter((p) => p !== perm) : [...prev, perm]
@@ -104,12 +138,18 @@ export default function UsersPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="font-display text-3xl font-bold text-foreground flex items-center gap-3">
-          <Users className="w-8 h-8 text-primary" />
-          Utilizadores e Permissões
-        </h1>
-        <p className="text-muted-foreground mt-1">Gerencie as permissões de cada utilizador</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="font-display text-3xl font-bold text-foreground flex items-center gap-3">
+            <Users className="w-8 h-8 text-primary" />
+            Utilizadores e Permissões
+          </h1>
+          <p className="text-muted-foreground mt-1">Gerencie as permissões de cada utilizador</p>
+        </div>
+        <Button onClick={() => setIsCreateOpen(true)}>
+          <Plus className="w-4 h-4 mr-2" />
+          Novo Utilizador
+        </Button>
       </div>
 
       <div className="bg-card rounded-xl shadow-soft p-4">
@@ -193,6 +233,66 @@ export default function UsersPage() {
           </div>
         )}
       </div>
+
+      {/* Create User Dialog */}
+      <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display text-xl">Novo Utilizador</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleCreateUser} className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <Label>Nome</Label>
+              <Input
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                placeholder="Nome completo"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Email *</Label>
+              <Input
+                type="email"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                placeholder="email@exemplo.com"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Senha *</Label>
+              <div className="relative">
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Senha de acesso"
+                  required
+                  minLength={6}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </Button>
+              </div>
+            </div>
+            <div className="flex gap-3 pt-4">
+              <Button type="button" variant="outline" className="flex-1" onClick={() => setIsCreateOpen(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit" className="flex-1" disabled={isCreating}>
+                {isCreating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                Criar
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
