@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { email, password, full_name } = await req.json();
+    const { email, password, full_name, ministry_ids } = await req.json();
 
     if (!email || !password) {
       return new Response(JSON.stringify({ error: "Email e senha são obrigatórios" }), {
@@ -73,6 +73,15 @@ Deno.serve(async (req) => {
       user_id: data.user.id,
       role: "member",
     });
+
+    // Add ministry associations
+    if (ministry_ids && Array.isArray(ministry_ids) && ministry_ids.length > 0) {
+      const rows = ministry_ids.map((mid: string) => ({
+        user_id: data.user.id,
+        ministry_id: mid,
+      }));
+      await supabase.from("user_ministries").insert(rows);
+    }
 
     return new Response(JSON.stringify({ success: true, user_id: data.user.id }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
