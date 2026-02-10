@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { Users, Shield, Loader2, Save, Search, Plus, Eye, EyeOff } from "lucide-react";
+import { Users, Shield, Loader2, Save, Search, Plus, Eye, EyeOff, Church } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -16,6 +17,7 @@ import {
   useSetUserPermissions,
   ALL_PERMISSIONS,
 } from "@/hooks/useUserPermissions";
+import { useMinistries } from "@/hooks/useMinistries";
 import { toast } from "sonner";
 
 interface UserWithRole {
@@ -24,36 +26,44 @@ interface UserWithRole {
   role: string | null;
 }
 
+interface UserMinistry {
+  user_id: string;
+  ministry_id: string;
+}
+
 export default function UsersPage() {
   const [users, setUsers] = useState<UserWithRole[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [editingUser, setEditingUser] = useState<string | null>(null);
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
+  const [selectedMinistries, setSelectedMinistries] = useState<string[]>([]);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [newEmail, setNewEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [newName, setNewName] = useState("");
+  const [newMinistries, setNewMinistries] = useState<string[]>([]);
   const [showPassword, setShowPassword] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const [userMinistries, setUserMinistries] = useState<UserMinistry[]>([]);
 
   const { data: allPermissions = [], isLoading: permsLoading } = useAllUserPermissions();
   const setPerms = useSetUserPermissions();
+  const { data: ministries = [], isLoading: ministriesLoading } = useMinistries();
 
   useEffect(() => {
     loadUsers();
+    loadUserMinistries();
   }, []);
 
   const loadUsers = async () => {
     setIsLoading(true);
     try {
-      // Get profiles with user info
       const { data: profiles, error } = await supabase
         .from("profiles")
         .select("user_id, full_name");
       if (error) throw error;
 
-      // Get roles
       const { data: roles, error: rolesError } = await supabase
         .from("user_roles")
         .select("user_id, role");
@@ -76,23 +86,47 @@ export default function UsersPage() {
     }
   };
 
+  const loadUserMinistries = async () => {
+    const { data, error } = await supabase
+      .from("user_ministries")
+      .select("user_id, ministry_id");
+    if (!error && data) {
+      setUserMinistries(data);
+    }
+  };
+
   const getUserPermissions = (userId: string) => {
     return allPermissions.filter((p) => p.user_id === userId).map((p) => p.permission);
+  };
+
+  const getUserMinistryIds = (userId: string) => {
+    return userMinistries.filter((m) => m.user_id === userId).map((m) => m.ministry_id);
   };
 
   const startEditing = (userId: string) => {
     setEditingUser(userId);
     setSelectedPermissions(getUserPermissions(userId));
+    setSelectedMinistries(getUserMinistryIds(userId));
   };
 
   const handleSave = async () => {
     if (!editingUser) return;
     try {
       await setPerms.mutateAsync({ userId: editingUser, permissions: selectedPermissions });
-      toast.success("Permissões atualizadas com sucesso!");
+
+      // Save ministries
+      await supabase.from("user_ministries").delete().eq("user_id", editingUser);
+      if (selectedMinistries.length > 0) {
+        await supabase.from("user_ministries").insert(
+          selectedMinistries.map((mid) => ({ user_id: editingUser, ministry_id: mid }))
+        );
+      }
+
+      loadUserMinistries();
+      toast.success("Permissões e ministérios atualizados!");
       setEditingUser(null);
     } catch (err) {
-      toast.error("Erro ao atualizar permissões");
+      toast.error("Erro ao atualizar");
     }
   };
 
@@ -101,7 +135,7 @@ export default function UsersPage() {
     setIsCreating(true);
     try {
       const { data, error } = await supabase.functions.invoke("create-user", {
-        body: { email: newEmail, password: newPassword, full_name: newName },
+        body: { email: newEmail, password: newPassword, full_name: newName, ministry_ids: newMinistries },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
@@ -110,7 +144,9 @@ export default function UsersPage() {
       setNewEmail("");
       setNewPassword("");
       setNewName("");
+      setNewMinistries([]);
       loadUsers();
+      loadUserMinistries();
     } catch (err: any) {
       toast.error(err.message || "Erro ao criar utilizador");
     } finally {
@@ -124,11 +160,15 @@ export default function UsersPage() {
     );
   };
 
+  const toggleMinistry = (id: string, list: string[], setter: (v: string[]) => void) => {
+    setter(list.includes(id) ? list.filter((m) => m !== id) : [...list, id]);
+  };
+
   const filteredUsers = users.filter(
     (u) => u.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (isLoading || permsLoading) {
+  if (isLoading || permsLoading || ministriesLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -144,7 +184,7 @@ export default function UsersPage() {
             <Users className="w-8 h-8 text-primary" />
             Utilizadores e Permissões
           </h1>
-          <p className="text-muted-foreground mt-1">Gerencie as permissões de cada utilizador</p>
+          <p className="text-muted-foreground mt-1">Gerencie permissões e ministérios de cada utilizador</p>
         </div>
         <Button onClick={() => setIsCreateOpen(true)}>
           <Plus className="w-4 h-4 mr-2" />
@@ -168,6 +208,7 @@ export default function UsersPage() {
         {filteredUsers.map((user) => {
           const isEditing = editingUser === user.id;
           const userPerms = isEditing ? selectedPermissions : getUserPermissions(user.id);
+          const userMins = isEditing ? selectedMinistries : getUserMinistryIds(user.id);
           const isAdmin = user.role === "admin";
 
           return (
@@ -196,7 +237,7 @@ export default function UsersPage() {
                       </Button>
                     ) : (
                       <Button size="sm" variant="outline" onClick={() => startEditing(user.id)}>
-                        Editar Permissões
+                        Editar
                       </Button>
                     )}
                   </div>
@@ -206,20 +247,60 @@ export default function UsersPage() {
               {isAdmin ? (
                 <p className="text-sm text-muted-foreground">Administrador — acesso total a todas as áreas.</p>
               ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                  {ALL_PERMISSIONS.map((perm) => (
-                    <div key={perm.key} className="flex items-center gap-2">
-                      <Checkbox
-                        id={`${user.id}-${perm.key}`}
-                        checked={userPerms.includes(perm.key)}
-                        onCheckedChange={() => isEditing && togglePermission(perm.key)}
-                        disabled={!isEditing}
-                      />
-                      <Label htmlFor={`${user.id}-${perm.key}`} className="text-sm cursor-pointer">
-                        {perm.label}
-                      </Label>
+                <div className="space-y-4">
+                  {/* Ministries */}
+                  <div>
+                    <h4 className="text-sm font-medium text-foreground mb-2 flex items-center gap-2">
+                      <Church className="w-4 h-4" /> Ministérios
+                    </h4>
+                    {isEditing ? (
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                        {ministries.filter(m => m.is_active).map((m) => (
+                          <div key={m.id} className="flex items-center gap-2">
+                            <Checkbox
+                              id={`min-${user.id}-${m.id}`}
+                              checked={userMins.includes(m.id)}
+                              onCheckedChange={() => toggleMinistry(m.id, selectedMinistries, setSelectedMinistries)}
+                            />
+                            <Label htmlFor={`min-${user.id}-${m.id}`} className="text-sm cursor-pointer">
+                              {m.title}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="flex flex-wrap gap-1">
+                        {userMins.length === 0 ? (
+                          <span className="text-xs text-muted-foreground">Nenhum ministério atribuído</span>
+                        ) : (
+                          userMins.map((mid) => {
+                            const m = ministries.find((x) => x.id === mid);
+                            return m ? <Badge key={mid} variant="secondary" className="text-xs">{m.title}</Badge> : null;
+                          })
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Permissions */}
+                  <div>
+                    <h4 className="text-sm font-medium text-foreground mb-2">Permissões</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                      {ALL_PERMISSIONS.map((perm) => (
+                        <div key={perm.key} className="flex items-center gap-2">
+                          <Checkbox
+                            id={`${user.id}-${perm.key}`}
+                            checked={userPerms.includes(perm.key)}
+                            onCheckedChange={() => isEditing && togglePermission(perm.key)}
+                            disabled={!isEditing}
+                          />
+                          <Label htmlFor={`${user.id}-${perm.key}`} className="text-sm cursor-pointer">
+                            {perm.label}
+                          </Label>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  </div>
                 </div>
               )}
             </div>
@@ -236,7 +317,7 @@ export default function UsersPage() {
 
       {/* Create User Dialog */}
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-display text-xl">Novo Utilizador</DialogTitle>
           </DialogHeader>
@@ -281,6 +362,26 @@ export default function UsersPage() {
                 </Button>
               </div>
             </div>
+
+            {/* Ministry selection */}
+            <div className="space-y-2">
+              <Label>Ministérios</Label>
+              <div className="grid grid-cols-2 gap-2 border rounded-lg p-3">
+                {ministries.filter(m => m.is_active).map((m) => (
+                  <div key={m.id} className="flex items-center gap-2">
+                    <Checkbox
+                      id={`new-min-${m.id}`}
+                      checked={newMinistries.includes(m.id)}
+                      onCheckedChange={() => toggleMinistry(m.id, newMinistries, setNewMinistries)}
+                    />
+                    <Label htmlFor={`new-min-${m.id}`} className="text-sm cursor-pointer">
+                      {m.title}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             <div className="flex gap-3 pt-4">
               <Button type="button" variant="outline" className="flex-1" onClick={() => setIsCreateOpen(false)}>
                 Cancelar

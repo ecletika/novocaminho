@@ -625,6 +625,35 @@ export type Database = {
           },
         ]
       }
+      user_ministries: {
+        Row: {
+          created_at: string
+          id: string
+          ministry_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ministry_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ministry_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_ministries_ministry_id_fkey"
+            columns: ["ministry_id"]
+            isOneToOne: false
+            referencedRelation: "ministries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_permissions: {
         Row: {
           created_at: string
