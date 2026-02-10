@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Search, Music, Users, Calendar, Mic, Trash2, Edit, Eye, Upload, Settings, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Search, Music, Users, Calendar, Mic, Trash2, Edit, Eye, Upload, Settings, ChevronLeft, ChevronRight, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -538,6 +538,14 @@ export default function LouvorPage() {
                     />
                   </div>
                   <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">Telefone</label>
+                    <Input 
+                      placeholder="Ex: +5511999999999" 
+                      value={newMemberPhone}
+                      onChange={(e) => setNewMemberPhone(e.target.value)}
+                    />
+                  </div>
+                  <div>
                     <label className="block text-sm font-medium text-foreground mb-2">Função Principal *</label>
                     <Select value={newMemberPrimaryFunctionId} onValueChange={setNewMemberPrimaryFunctionId}>
                       <SelectTrigger>
@@ -588,7 +596,15 @@ export default function LouvorPage() {
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
               {filteredMembers.map((member) => (
                 <div key={member.id} className="bg-card rounded-xl shadow-soft p-4 hover:shadow-card transition-all text-center group relative">
-                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => openEditMemberDialog(member)}
+                    >
+                      <Edit className="w-4 h-4 text-muted-foreground" />
+                    </Button>
                     <Button 
                       variant="ghost" 
                       size="icon"
@@ -611,6 +627,12 @@ export default function LouvorPage() {
                   <p className="text-xs text-muted-foreground mt-1">
                     {member.primary_function?.name || "Sem função"}
                   </p>
+                  {member.phone && (
+                    <a href={`https://wa.me/${member.phone.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-primary mt-1 hover:underline">
+                      <Phone className="w-3 h-3" />
+                      {member.phone}
+                    </a>
+                  )}
                   <span className={`inline-block w-2 h-2 rounded-full mt-2 ${member.active ? 'bg-green-500' : 'bg-muted'}`} />
                 </div>
               ))}
@@ -1523,6 +1545,94 @@ export default function LouvorPage() {
               </Button>
               <Button type="submit" className="flex-1" disabled={updateSchedule.isPending}>
                 {updateSchedule.isPending ? "Salvando..." : "Salvar"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Member Dialog */}
+      <Dialog open={isEditMemberDialogOpen} onOpenChange={(open) => { setIsEditMemberDialogOpen(open); if (!open) resetMemberForm(); }}>
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-display text-xl">Editar Integrante</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleEditMember} className="space-y-4 mt-4">
+            <div className="flex flex-col items-center gap-4">
+              <div 
+                className="w-24 h-24 rounded-full bg-muted flex items-center justify-center cursor-pointer hover:bg-muted/80 transition-colors overflow-hidden"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                {newMemberPhotoPreview ? (
+                  <img src={newMemberPhotoPreview} alt="Preview" className="w-full h-full object-cover" />
+                ) : (
+                  <Upload className="w-8 h-8 text-muted-foreground" />
+                )}
+              </div>
+              <input 
+                ref={fileInputRef}
+                type="file" 
+                accept="image/*" 
+                className="hidden" 
+                onChange={handlePhotoChange}
+              />
+              <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+                Alterar Foto
+              </Button>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Nome *</label>
+              <Input 
+                placeholder="Nome completo" 
+                value={newMemberName}
+                onChange={(e) => setNewMemberName(e.target.value)}
+                required 
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Telefone</label>
+              <Input 
+                placeholder="Ex: +5511999999999" 
+                value={newMemberPhone}
+                onChange={(e) => setNewMemberPhone(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Função Principal *</label>
+              <Select value={newMemberPrimaryFunctionId} onValueChange={setNewMemberPrimaryFunctionId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a função principal" />
+                </SelectTrigger>
+                <SelectContent>
+                  {functions.map((func) => (
+                    <SelectItem key={func.id} value={func.id}>{func.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Funções Secundárias</label>
+              <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto">
+                {functions
+                  .filter(f => f.id !== newMemberPrimaryFunctionId)
+                  .map((func) => (
+                    <div key={func.id} className="flex items-center gap-2">
+                      <Checkbox
+                        id={`edit-func-${func.id}`}
+                        checked={newMemberSecondaryFunctionIds.includes(func.id)}
+                        onCheckedChange={() => toggleSecondaryFunction(func.id)}
+                      />
+                      <label htmlFor={`edit-func-${func.id}`} className="text-sm">{func.name}</label>
+                    </div>
+                  ))}
+              </div>
+            </div>
+            <div className="flex gap-3 pt-4">
+              <Button type="button" variant="outline" className="flex-1" onClick={() => { setIsEditMemberDialogOpen(false); resetMemberForm(); }}>
+                Cancelar
+              </Button>
+              <Button type="submit" className="flex-1" disabled={updateMember.isPending}>
+                {updateMember.isPending ? "Salvando..." : "Salvar"}
               </Button>
             </div>
           </form>
