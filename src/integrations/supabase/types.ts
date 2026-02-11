@@ -827,6 +827,7 @@ export type Database = {
           name: string
           original_key: string
           updated_at: string
+          youtube_url: string | null
         }
         Insert: {
           content_type?: string
@@ -837,6 +838,7 @@ export type Database = {
           name: string
           original_key: string
           updated_at?: string
+          youtube_url?: string | null
         }
         Update: {
           content_type?: string
@@ -847,6 +849,7 @@ export type Database = {
           name?: string
           original_key?: string
           updated_at?: string
+          youtube_url?: string | null
         }
         Relationships: []
       }

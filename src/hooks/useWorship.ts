@@ -37,6 +37,7 @@ export interface WorshipSong {
   lyrics: string | null;
   has_chords: boolean;
   content_type: "cifra" | "letra";
+  youtube_url: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -322,6 +323,7 @@ export function useCreateWorshipSong() {
       lyrics?: string; 
       has_chords?: boolean;
       content_type: "cifra" | "letra";
+      youtube_url?: string;
     }) => {
       const { data, error } = await supabase
         .from("worship_songs")
