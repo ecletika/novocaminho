@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Search, Music, Users, Calendar, Mic, Trash2, Edit, Eye, Upload, Settings, ChevronLeft, ChevronRight, Phone } from "lucide-react";
+import { Plus, Search, Music, Users, Calendar, Mic, Trash2, Edit, Eye, Upload, Settings, ChevronLeft, ChevronRight, Phone, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -446,6 +446,22 @@ export default function LouvorPage() {
 
   const getScheduleForDay = (day: Date) => {
     return schedules.find(s => isSameDay(new Date(s.date), day));
+  };
+
+  const shareScheduleWhatsApp = (schedule: WorshipSchedule) => {
+    const dateStr = format(new Date(schedule.date), "EEEE, d 'de' MMMM", { locale: ptBR });
+    let msg = `🎵 *Escala de Louvor*\n📅 ${dateStr}\n`;
+    if (schedule.minister?.name) msg += `🎤 *Ministrante:* ${schedule.minister.name}\n`;
+    if (schedule.vocalists && schedule.vocalists.length > 0) {
+      msg += `\n🎶 *Vocais:*\n`;
+      schedule.vocalists.forEach(v => { msg += `  • ${v.member?.name || ""}\n`; });
+    }
+    if (schedule.musicians && schedule.musicians.length > 0) {
+      msg += `\n🎸 *Músicos:*\n`;
+      schedule.musicians.forEach(m => { msg += `  • ${m.member?.name || ""} (${m.instrument})\n`; });
+    }
+    msg += `\n_Deus abençoe o nosso louvor!_ 🙏`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
   };
 
   return (
@@ -1249,6 +1265,14 @@ export default function LouvorPage() {
                           </div>
                         </div>
                         <div className="flex items-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => shareScheduleWhatsApp(schedule)}
+                            title="Compartilhar por WhatsApp"
+                          >
+                            <Share2 className="w-4 h-4 text-green-600" />
+                          </Button>
                           <Button
                             variant="ghost"
                             size="icon"
