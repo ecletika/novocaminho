@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Search, Music, Users, Calendar, Mic, Trash2, Edit, Eye, Upload, Settings, ChevronLeft, ChevronRight, Phone, Share2 } from "lucide-react";
+import { Plus, Search, Music, Users, Calendar, Mic, Trash2, Edit, Eye, Upload, Settings, ChevronLeft, ChevronRight, Phone, Share2, Youtube, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -97,6 +97,7 @@ export default function LouvorPage() {
   const [newSongKey, setNewSongKey] = useState("");
   const [newSongLyrics, setNewSongLyrics] = useState("");
   const [newSongContentType, setNewSongContentType] = useState<"cifra" | "letra">("cifra");
+  const [newSongYoutubeUrl, setNewSongYoutubeUrl] = useState("");
   const [newSongMinisterId, setNewSongMinisterId] = useState("");
   const [newSongMinisterKey, setNewSongMinisterKey] = useState("");
 
@@ -105,6 +106,7 @@ export default function LouvorPage() {
   const [editSongKey, setEditSongKey] = useState("");
   const [editSongLyrics, setEditSongLyrics] = useState("");
   const [editSongContentType, setEditSongContentType] = useState<"cifra" | "letra">("cifra");
+  const [editSongYoutubeUrl, setEditSongYoutubeUrl] = useState("");
 
   // Form states - Schedule
   const [newScheduleDate, setNewScheduleDate] = useState("");
@@ -232,7 +234,8 @@ export default function LouvorPage() {
       original_key: newSongKey,
       lyrics: newSongLyrics || undefined,
       has_chords: newSongContentType === "cifra" && !!newSongLyrics,
-      content_type: newSongContentType
+      content_type: newSongContentType,
+      youtube_url: newSongYoutubeUrl.trim() || undefined
     });
 
     // If a minister was selected, create the assignment
@@ -248,6 +251,7 @@ export default function LouvorPage() {
     setNewSongKey("");
     setNewSongLyrics("");
     setNewSongContentType("cifra");
+    setNewSongYoutubeUrl("");
     setNewSongMinisterId("");
     setNewSongMinisterKey("");
     setIsNewSongDialogOpen(false);
@@ -263,7 +267,8 @@ export default function LouvorPage() {
       original_key: editSongKey,
       lyrics: editSongLyrics || null,
       has_chords: editSongContentType === "cifra" && !!editSongLyrics,
-      content_type: editSongContentType
+      content_type: editSongContentType,
+      youtube_url: editSongYoutubeUrl.trim() || null
     });
     
     setIsEditSongDialogOpen(false);
@@ -276,12 +281,18 @@ export default function LouvorPage() {
     setEditSongKey(song.original_key);
     setEditSongLyrics(song.lyrics || "");
     setEditSongContentType(song.content_type as "cifra" | "letra");
+    setEditSongYoutubeUrl((song as any).youtube_url || "");
     setIsEditSongDialogOpen(true);
   };
 
-  const openViewLyricsDialog = (song: WorshipSong) => {
-    setSelectedSong(song);
-    setIsViewLyricsDialogOpen(true);
+  const openViewLyricsInNewTab = (song: WorshipSong) => {
+    const content = song.lyrics || "Conteúdo não disponível";
+    const title = `${song.name} - ${song.content_type === "cifra" ? "Cifra" : "Letra"} (Tom: ${song.original_key})`;
+    const youtubeLink = (song as any).youtube_url ? `<p style="margin-bottom:16px"><a href="${(song as any).youtube_url}" target="_blank" style="color:#2563eb;text-decoration:underline">🎬 Assistir no YouTube</a></p>` : '';
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${title}</title><style>body{font-family:monospace;padding:32px;max-width:900px;margin:0 auto;background:#f9fafb}h1{font-size:1.5rem;margin-bottom:8px}pre{white-space:pre-wrap;background:#fff;padding:24px;border-radius:8px;border:1px solid #e5e7eb;font-size:14px;line-height:1.6}</style></head><body><h1>${song.name}</h1><p style="margin-bottom:16px"><span style="background:#e0e7ff;padding:4px 12px;border-radius:999px;font-size:14px">Tom: ${song.original_key}</span></p>${youtubeLink}<pre>${content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre></body></html>`;
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
   };
 
   const handleAddSchedule = async (e: React.FormEvent) => {
@@ -810,6 +821,14 @@ export default function LouvorPage() {
                       </div>
                     )}
                     <div>
+                      <label className="block text-sm font-medium text-foreground mb-2">Link do YouTube (opcional)</label>
+                      <Input 
+                        placeholder="https://youtube.com/watch?v=..." 
+                        value={newSongYoutubeUrl}
+                        onChange={(e) => setNewSongYoutubeUrl(e.target.value)}
+                      />
+                    </div>
+                    <div>
                       <label className="block text-sm font-medium text-foreground mb-2">Cifra / Letra</label>
                       <Textarea 
                         placeholder="Cole aqui a cifra ou letra..." 
@@ -856,7 +875,7 @@ export default function LouvorPage() {
                         <tr 
                           key={song.id} 
                           className="hover:bg-muted/30 transition-colors cursor-pointer"
-                          onClick={() => song.lyrics && openViewLyricsDialog(song)}
+                          onClick={() => song.lyrics && openViewLyricsInNewTab(song)}
                         >
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
@@ -891,13 +910,24 @@ export default function LouvorPage() {
                           </td>
                           <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
                             <div className="flex items-center justify-end gap-1">
+                              {(song as any).youtube_url && (
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon"
+                                  onClick={() => window.open((song as any).youtube_url, '_blank')}
+                                  title="Assistir no YouTube"
+                                >
+                                  <Youtube className="w-4 h-4 text-red-600" />
+                                </Button>
+                              )}
                               {song.lyrics && (
                                 <Button 
                                   variant="ghost" 
                                   size="icon"
-                                  onClick={() => openViewLyricsDialog(song)}
+                                  onClick={() => openViewLyricsInNewTab(song)}
+                                  title="Abrir cifra em tela inteira"
                                 >
-                                  <Eye className="w-4 h-4 text-muted-foreground" />
+                                  <ExternalLink className="w-4 h-4 text-muted-foreground" />
                                 </Button>
                               )}
                               <Button 
@@ -1015,7 +1045,7 @@ export default function LouvorPage() {
                           <tr 
                             key={assignment.id} 
                             className="hover:bg-muted/30 transition-colors cursor-pointer"
-                            onClick={() => assignment.song?.lyrics && openViewLyricsDialog(assignment.song)}
+                            onClick={() => assignment.song?.lyrics && openViewLyricsInNewTab(assignment.song)}
                           >
                             <td className="px-6 py-4">
                               <div className="flex items-center gap-3">
@@ -1041,7 +1071,7 @@ export default function LouvorPage() {
                                   <Button 
                                     variant="ghost" 
                                     size="icon"
-                                    onClick={() => assignment.song && openViewLyricsDialog(assignment.song)}
+                                    onClick={() => assignment.song && openViewLyricsInNewTab(assignment.song)}
                                   >
                                     <Eye className="w-4 h-4 text-muted-foreground" />
                                   </Button>
@@ -1453,6 +1483,14 @@ export default function LouvorPage() {
                   <SelectItem value="letra">Letra</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Link do YouTube (opcional)</label>
+              <Input 
+                placeholder="https://youtube.com/watch?v=..." 
+                value={editSongYoutubeUrl}
+                onChange={(e) => setEditSongYoutubeUrl(e.target.value)}
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Cifra / Letra</label>

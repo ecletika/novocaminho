@@ -1,0 +1,1 @@
+ALTER TABLE worship_songs ADD COLUMN youtube_url TEXT NULL DEFAULT NULL;
