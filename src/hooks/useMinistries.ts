@@ -9,7 +9,7 @@ export interface Ministry {
   description: string | null;
   icon: string;
   image_url: string | null;
-  features: string[];
+  features: string[] | null;
   is_active: boolean;
   sort_order: number;
   created_at: string;
