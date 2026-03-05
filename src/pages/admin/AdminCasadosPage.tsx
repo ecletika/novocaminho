@@ -116,6 +116,15 @@ export default function AdminCasadosPage() {
     }
   };
 
+  const { data: posts = [], isLoading: postsLoading } = useCasadosPosts();
+  const createPost = useCreateCasadosPost();
+  const updatePost = useUpdateCasadosPost();
+  const deletePost = useDeleteCasadosPost();
+
+  const { data: gallery = [], isLoading: galleryLoading } = useCasadosGallery();
+  const addGalleryImg = useAddGalleryImage();
+  const deleteGalleryImg = useDeleteGalleryImage();
+
   const resetForm = () => {
     setFormData({ title: "", content: "", image_url: null, published: true });
     setSelectedPost(null);
