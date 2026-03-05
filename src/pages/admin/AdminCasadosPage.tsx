@@ -1,5 +1,5 @@
-import { useState, useRef } from "react";
-import { Plus, Search, Trash2, Edit, Loader2, Eye, Image, Heart, Camera } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Plus, Search, Trash2, Edit, Loader2, Eye, Image, Heart, Camera, Save, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,6 +37,8 @@ import {
 } from "@/hooks/useCasadosGallery";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export default function AdminCasadosPage() {
   // Posts state
