@@ -35,30 +35,27 @@ export default function Header() {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled
             ? "bg-card/95 backdrop-blur-md shadow-soft"
             : "bg-transparent"
-        }`}
+          }`}
       >
         <div className="container-church">
           <nav className="flex items-center justify-between h-20">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-3">
-              <img 
-                src={logoImage} 
-                alt="Logo Igreja" 
-                className="w-10 h-10 rounded-full object-cover"
+            <Link to="/" className="flex items-center gap-4">
+              <img
+                src={logoImage}
+                alt="Logo Igreja"
+                className="w-12 h-12 object-cover rounded-sm border border-white/10"
               />
-              <div className="hidden sm:block">
-                <span className={`font-display text-xl font-semibold transition-colors ${
-                  isScrolled ? "text-foreground" : "text-primary-foreground"
-                }`}>
+              <div className="hidden sm:flex flex-col">
+                <span className={`font-serif text-2xl uppercase tracking-[0.15em] transition-colors ${isScrolled ? "text-primary" : "text-white"
+                  }`}>
                   Novo Caminho
                 </span>
-                <span className={`block text-xs transition-colors ${
-                  isScrolled ? "text-muted-foreground" : "text-primary-foreground/70"
-                }`}>
+                <span className={`block text-[10px] uppercase tracking-[0.3em] font-light transition-colors ${isScrolled ? "text-muted-foreground" : "text-white/50"
+                  }`}>
                   Portugal
                 </span>
               </div>
@@ -68,15 +65,14 @@ export default function Header() {
             <div className="hidden lg:flex items-center gap-1">
               <Link
                 to="/"
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                  isActive("/")
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${isActive("/")
                     ? isScrolled
                       ? "bg-primary text-primary-foreground"
                       : "bg-primary-foreground/20 text-primary-foreground"
                     : isScrolled
-                    ? "text-foreground hover:bg-muted"
-                    : "text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10"
-                }`}
+                      ? "text-foreground hover:bg-muted"
+                      : "text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10"
+                  }`}
               >
                 Início
               </Link>
@@ -86,15 +82,14 @@ export default function Header() {
                 <button
                   onClick={() => setIsMinisteriosOpen(!isMinisteriosOpen)}
                   onBlur={() => setTimeout(() => setIsMinisteriosOpen(false), 150)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-1 ${
-                    isMinisteriosActive
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-1 ${isMinisteriosActive
                       ? isScrolled
                         ? "bg-primary text-primary-foreground"
                         : "bg-primary-foreground/20 text-primary-foreground"
                       : isScrolled
-                      ? "text-foreground hover:bg-muted"
-                      : "text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10"
-                  }`}
+                        ? "text-foreground hover:bg-muted"
+                        : "text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10"
+                    }`}
                 >
                   Ministérios
                   <ChevronDown className={`w-4 h-4 transition-transform ${isMinisteriosOpen ? "rotate-180" : ""}`} />
@@ -126,15 +121,14 @@ export default function Header() {
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    isActive(item.href)
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${isActive(item.href)
                       ? isScrolled
                         ? "bg-primary text-primary-foreground"
                         : "bg-primary-foreground/20 text-primary-foreground"
                       : isScrolled
-                      ? "text-foreground hover:bg-muted"
-                      : "text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10"
-                  }`}
+                        ? "text-foreground hover:bg-muted"
+                        : "text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10"
+                    }`}
                 >
                   {item.name}
                 </Link>
@@ -161,11 +155,10 @@ export default function Header() {
 
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className={`lg:hidden p-2 rounded-lg transition-colors ${
-                  isScrolled
+                className={`lg:hidden p-2 rounded-lg transition-colors ${isScrolled
                     ? "text-foreground hover:bg-muted"
                     : "text-primary-foreground hover:bg-primary-foreground/10"
-                }`}
+                  }`}
               >
                 {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
@@ -179,22 +172,20 @@ export default function Header() {
                 <Link
                   to="/"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className={`block px-4 py-3 rounded-lg text-base font-medium transition-colors ${
-                    isActive("/")
+                  className={`block px-4 py-3 rounded-lg text-base font-medium transition-colors ${isActive("/")
                       ? "bg-primary text-primary-foreground"
                       : "text-foreground hover:bg-muted"
-                  }`}
+                    }`}
                 >
                   Início
                 </Link>
                 <Link
                   to="/ministerios"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className={`block px-4 py-3 rounded-lg text-base font-medium transition-colors ${
-                    isMinisteriosActive
+                  className={`block px-4 py-3 rounded-lg text-base font-medium transition-colors ${isMinisteriosActive
                       ? "bg-primary text-primary-foreground"
                       : "text-foreground hover:bg-muted"
-                  }`}
+                    }`}
                 >
                   Ministérios
                 </Link>
@@ -213,11 +204,10 @@ export default function Header() {
                     key={item.name}
                     to={item.href}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className={`block px-4 py-3 rounded-lg text-base font-medium transition-colors ${
-                      isActive(item.href)
+                    className={`block px-4 py-3 rounded-lg text-base font-medium transition-colors ${isActive(item.href)
                         ? "bg-primary text-primary-foreground"
                         : "text-foreground hover:bg-muted"
-                    }`}
+                      }`}
                   >
                     {item.name}
                   </Link>

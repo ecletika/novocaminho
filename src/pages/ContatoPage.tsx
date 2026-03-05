@@ -65,10 +65,10 @@ export default function ContatoPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-foreground mb-1">Endereço</h3>
-                    <p className="text-muted-foreground">
-                      Rua da Igreja, 123<br />
-                      1000-001 Lisboa, Portugal
-                    </p>
+                    <a href="https://maps.app.goo.gl/sXLL4ZogkSUZ6uyt7" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
+                      Rua da Parada N° 6<br />
+                      Agualva-Cacém, Portugal
+                    </a>
                   </div>
                 </div>
 
@@ -88,7 +88,9 @@ export default function ContatoPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-foreground mb-1">E-mail</h3>
-                    <p className="text-muted-foreground">contato@novocaminho.pt</p>
+                    <a href="mailto:contacto@igrejanovocaminho.pt" className="text-muted-foreground hover:text-primary transition-colors">
+                      contacto@igrejanovocaminho.pt
+                    </a>
                   </div>
                 </div>
 
@@ -109,14 +111,14 @@ export default function ContatoPage() {
               {/* Map */}
               <div className="mt-8 rounded-2xl overflow-hidden shadow-card h-64 bg-muted">
                 <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3112.927234289827!2d-9.142685!3d38.736946!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzjCsDQ0JzEzLjAiTiA5wrAwOCczMy43Ilc!5e0!3m2!1spt-PT!2spt!4v1234567890"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1139.7397725902404!2d-9.3000676!3d38.7758785!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd1ecf4cb98b6ed5%3A0xeab5b021d7b34b6b!2sR.%20da%20Parada%206%2C%202735-300%20Agualva-Cac%C3%A9m%2C%20Portugal!5e0!3m2!1spt-PT!2spt!4v1703120000000!5m2!1spt-PT!2spt"
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}
                   allowFullScreen
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
-                  title="Localização da Igreja"
+                  title="Localização da Igreja Novo Caminho"
                 />
               </div>
             </div>

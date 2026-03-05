@@ -9,6 +9,7 @@ import casadosImage from "@/assets/casados-para-sempre.jpg";
 import RadioPlayer from "@/components/RadioPlayer";
 import BirthdayCard from "@/components/BirthdayCard";
 import FacebookLiveModal from "@/components/FacebookLiveModal";
+import PhotoGallery from "@/components/PhotoGallery";
 import { useMonthlyBirthdays } from "@/hooks/useBirthdays";
 
 const ministries = [
@@ -59,7 +60,7 @@ const upcomingEvents = [
 export default function HomePage() {
   const { data: monthlyBirthdays = [] } = useMonthlyBirthdays();
   const [showLive, setShowLive] = useState(false);
-  
+
   return (
     <>
       {/* Hero Section */}
@@ -69,44 +70,40 @@ export default function HomePage() {
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: `url(${heroImage})` }}
         >
-          <div className="absolute inset-0 gradient-hero opacity-80" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-background opacity-90" />
         </div>
 
         {/* Content */}
-        <div className="relative z-10 container-church text-center text-primary-foreground pt-20">
+        <div className="relative z-10 container-church text-center text-primary-foreground pt-32">
           <div className="animate-fade-up">
-            <span className="inline-block px-4 py-2 rounded-full bg-secondary/20 text-secondary text-sm font-medium mb-6 backdrop-blur-sm">
+            <span className="inline-block px-5 py-2 rounded-full border border-primary/30 bg-primary/10 text-primary text-xs font-semibold uppercase tracking-[0.2em] mb-8 backdrop-blur-md">
               Bem-vindo à nossa família
             </span>
           </div>
-          
-          <h1 className="font-display text-5xl md:text-7xl lg:text-8xl font-bold mb-6 animate-fade-up delay-100">
-            Igreja{" "}
-            <span className="text-gradient-gold">Novo Caminho</span>
+
+          <h1 className="font-display text-5xl md:text-7xl lg:text-8xl font-bold mb-6 animate-fade-up delay-100 flex flex-col gap-2">
+            <span className="text-white/90">Igreja</span>
+            <span className="text-primary italic font-serif">Novo Caminho</span>
           </h1>
-          
-          <p className="text-xl md:text-2xl text-primary-foreground/80 max-w-2xl mx-auto mb-10 animate-fade-up delay-200">
+
+          <p className="text-xl md:text-2xl text-white/70 font-light max-w-2xl mx-auto mb-12 animate-fade-up delay-200">
             Um lugar de acolhimento, transformação e esperança em Portugal
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-up delay-300">
-            <Button variant="hero" size="xl" asChild>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 animate-fade-up delay-300">
+            <Button className="bg-primary text-primary-foreground hover:bg-white hover:text-black transition-all duration-500 rounded-none px-8 py-6 uppercase tracking-widest text-xs font-bold" asChild>
               <Link to="/contato">
-                <Calendar className="w-5 h-5 mr-2" />
                 Visite-nos
               </Link>
             </Button>
-            <Button variant="hero-outline" size="xl" onClick={() => setShowLive(true)}>
-              <Play className="w-5 h-5 mr-2" />
+            <Button className="bg-transparent border border-white/30 text-white hover:bg-white/10 transition-all duration-500 rounded-none px-8 py-6 uppercase tracking-widest text-xs font-bold" onClick={() => setShowLive(true)}>
               Assistir ao Vivo
             </Button>
           </div>
 
           {/* Scroll Indicator */}
-          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-float">
-            <div className="w-8 h-12 rounded-full border-2 border-primary-foreground/30 flex items-start justify-center p-2">
-              <div className="w-1.5 h-3 rounded-full bg-secondary animate-pulse" />
-            </div>
+          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-float opacity-50">
+            <div className="w-px h-16 bg-gradient-to-b from-primary to-transparent" />
           </div>
         </div>
       </section>
@@ -143,7 +140,7 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-          
+
           {/* Radio Player */}
           <RadioPlayer />
         </div>
@@ -265,6 +262,23 @@ export default function HomePage() {
           </div>
         </section>
       )}
+
+      {/* Gallery Section */}
+      <section className="section-padding bg-muted/30">
+        <div className="container-church">
+          <div className="text-center mb-12">
+            <span className="text-secondary font-medium text-sm uppercase tracking-wider">Nossos Momentos</span>
+            <h2 className="font-display text-4xl md:text-5xl font-bold text-foreground mt-3 mb-4">
+              Galeria de Fotos
+            </h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+              Acompanhe o que tem acontecido nos eventos e cultos da nossa igreja
+            </p>
+          </div>
+
+          <PhotoGallery />
+        </div>
+      </section>
 
       {/* CTA Section */}
       <section className="section-padding gradient-hero relative overflow-hidden">
