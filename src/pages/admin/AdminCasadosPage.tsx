@@ -41,6 +41,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 export default function AdminCasadosPage() {
+  const { toast } = useToast();
+
+  // About page state
+  const [aboutContent, setAboutContent] = useState("");
+  const [aboutTitle, setAboutTitle] = useState("");
+  const [isSavingAbout, setIsSavingAbout] = useState(false);
+  const [aboutLoaded, setAboutLoaded] = useState(false);
+
   // Posts state
   const [searchTerm, setSearchTerm] = useState("");
   const [isPostDialogOpen, setIsPostDialogOpen] = useState(false);
@@ -62,14 +70,51 @@ export default function AdminCasadosPage() {
   const [deleteGalleryId, setDeleteGalleryId] = useState<string | null>(null);
   const galleryFileRef = useRef<HTMLInputElement>(null);
 
-  const { data: posts = [], isLoading: postsLoading } = useCasadosPosts();
-  const createPost = useCreateCasadosPost();
-  const updatePost = useUpdateCasadosPost();
-  const deletePost = useDeleteCasadosPost();
+  // Load about content from site_config
+  useEffect(() => {
+    const loadAbout = async () => {
+      const { data: titleData } = await supabase
+        .from("site_config")
+        .select("value")
+        .eq("key", "casados_about_title")
+        .maybeSingle();
+      const { data: contentData } = await supabase
+        .from("site_config")
+        .select("value")
+        .eq("key", "casados_about_content")
+        .maybeSingle();
+      if (titleData) setAboutTitle(titleData.value);
+      if (contentData) setAboutContent(contentData.value);
+      setAboutLoaded(true);
+    };
+    loadAbout();
+  }, []);
 
-  const { data: gallery = [], isLoading: galleryLoading } = useCasadosGallery();
-  const addGalleryImg = useAddGalleryImage();
-  const deleteGalleryImg = useDeleteGalleryImage();
+  const saveAboutContent = async () => {
+    setIsSavingAbout(true);
+    try {
+      for (const { key, value } of [
+        { key: "casados_about_title", value: aboutTitle },
+        { key: "casados_about_content", value: aboutContent },
+      ]) {
+        const { data: existing } = await supabase
+          .from("site_config")
+          .select("id")
+          .eq("key", key)
+          .maybeSingle();
+        if (existing) {
+          await supabase.from("site_config").update({ value }).eq("key", key);
+        } else {
+          await supabase.from("site_config").insert({ key, value });
+        }
+      }
+      toast({ title: "Página salva", description: "O conteúdo da página Sobre foi atualizado." });
+    } catch (err: any) {
+      toast({ title: "Erro", description: err.message, variant: "destructive" });
+    } finally {
+      setIsSavingAbout(false);
+    }
+  };
 
   const resetForm = () => {
     setFormData({ title: "", content: "", image_url: null, published: true });
