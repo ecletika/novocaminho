@@ -206,11 +206,43 @@ export default function AdminCasadosPage() {
         <p className="text-muted-foreground mt-1">Gerencie palavras e galeria do ministério de casais</p>
       </div>
 
-      <Tabs defaultValue="palavras">
+      <Tabs defaultValue="sobre">
         <TabsList>
+          <TabsTrigger value="sobre">
+            <Info className="w-4 h-4 mr-1" />
+            Sobre
+          </TabsTrigger>
           <TabsTrigger value="palavras">Palavras</TabsTrigger>
           <TabsTrigger value="galeria">Galeria</TabsTrigger>
         </TabsList>
+
+        {/* SOBRE TAB */}
+        <TabsContent value="sobre" className="space-y-6 mt-6">
+          <div className="bg-card rounded-xl p-6 shadow-soft space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="about-title">Título da Página</Label>
+              <Input
+                id="about-title"
+                value={aboutTitle}
+                onChange={(e) => setAboutTitle(e.target.value)}
+                placeholder="Ex: Casados Para Sempre"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Conteúdo da Página</Label>
+              {aboutLoaded && (
+                <RichTextEditor
+                  content={aboutContent}
+                  onChange={setAboutContent}
+                />
+              )}
+            </div>
+            <Button onClick={saveAboutContent} disabled={isSavingAbout}>
+              {isSavingAbout ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+              Salvar Página
+            </Button>
+          </div>
+        </TabsContent>
 
         {/* PALAVRAS TAB */}
         <TabsContent value="palavras" className="space-y-6 mt-6">
