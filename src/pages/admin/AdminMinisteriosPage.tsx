@@ -80,7 +80,7 @@ export default function AdminMinisteriosPage() {
       title: ministry.title,
       description: ministry.description || "",
       icon: ministry.icon,
-      features: ministry.features.join(", "),
+      features: (ministry.features || []).join(", "),
       is_active: ministry.is_active,
       sort_order: ministry.sort_order,
     });
@@ -281,9 +281,9 @@ export default function AdminMinisteriosPage() {
                 <p className="text-muted-foreground text-sm mt-1 line-clamp-2">
                   {ministry.description}
                 </p>
-                {ministry.features.length > 0 && (
+                {(ministry.features || []).length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-2">
-                    {ministry.features.slice(0, 4).map((feature) => (
+                    {(ministry.features || []).slice(0, 4).map((feature) => (
                       <span
                         key={feature}
                         className="px-2 py-0.5 rounded-full bg-muted text-muted-foreground text-xs"

@@ -95,7 +95,7 @@ export default function MinisteriosPage() {
                         </p>
                         {ministry.features && ministry.features.length > 0 && (
                           <div className="flex flex-wrap gap-2 mb-6">
-                            {ministry.features.map((feature) => (
+                            {ministry.features.map((feature: string) => (
                               <span
                                 key={feature}
                                 className="px-3 py-1 rounded-full bg-muted text-muted-foreground text-xs font-medium"

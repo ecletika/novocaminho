@@ -1,5 +1,5 @@
-import { useState, useRef } from "react";
-import { Plus, Search, Trash2, Edit, Loader2, Eye, Image, Heart, Camera } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Plus, Search, Trash2, Edit, Loader2, Eye, Image, Heart, Camera, Save, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,8 +37,18 @@ import {
 } from "@/hooks/useCasadosGallery";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export default function AdminCasadosPage() {
+  const { toast } = useToast();
+
+  // About page state
+  const [aboutContent, setAboutContent] = useState("");
+  const [aboutTitle, setAboutTitle] = useState("");
+  const [isSavingAbout, setIsSavingAbout] = useState(false);
+  const [aboutLoaded, setAboutLoaded] = useState(false);
+
   // Posts state
   const [searchTerm, setSearchTerm] = useState("");
   const [isPostDialogOpen, setIsPostDialogOpen] = useState(false);
@@ -59,6 +69,52 @@ export default function AdminCasadosPage() {
   const [isUploadingGallery, setIsUploadingGallery] = useState(false);
   const [deleteGalleryId, setDeleteGalleryId] = useState<string | null>(null);
   const galleryFileRef = useRef<HTMLInputElement>(null);
+
+  // Load about content from site_config
+  useEffect(() => {
+    const loadAbout = async () => {
+      const { data: titleData } = await supabase
+        .from("site_config")
+        .select("value")
+        .eq("key", "casados_about_title")
+        .maybeSingle();
+      const { data: contentData } = await supabase
+        .from("site_config")
+        .select("value")
+        .eq("key", "casados_about_content")
+        .maybeSingle();
+      if (titleData) setAboutTitle(titleData.value);
+      if (contentData) setAboutContent(contentData.value);
+      setAboutLoaded(true);
+    };
+    loadAbout();
+  }, []);
+
+  const saveAboutContent = async () => {
+    setIsSavingAbout(true);
+    try {
+      for (const { key, value } of [
+        { key: "casados_about_title", value: aboutTitle },
+        { key: "casados_about_content", value: aboutContent },
+      ]) {
+        const { data: existing } = await supabase
+          .from("site_config")
+          .select("id")
+          .eq("key", key)
+          .maybeSingle();
+        if (existing) {
+          await supabase.from("site_config").update({ value }).eq("key", key);
+        } else {
+          await supabase.from("site_config").insert({ key, value });
+        }
+      }
+      toast({ title: "Página salva", description: "O conteúdo da página Sobre foi atualizado." });
+    } catch (err: any) {
+      toast({ title: "Erro", description: err.message, variant: "destructive" });
+    } finally {
+      setIsSavingAbout(false);
+    }
+  };
 
   const { data: posts = [], isLoading: postsLoading } = useCasadosPosts();
   const createPost = useCreateCasadosPost();
@@ -150,11 +206,43 @@ export default function AdminCasadosPage() {
         <p className="text-muted-foreground mt-1">Gerencie palavras e galeria do ministério de casais</p>
       </div>
 
-      <Tabs defaultValue="palavras">
+      <Tabs defaultValue="sobre">
         <TabsList>
+          <TabsTrigger value="sobre">
+            <Info className="w-4 h-4 mr-1" />
+            Sobre
+          </TabsTrigger>
           <TabsTrigger value="palavras">Palavras</TabsTrigger>
           <TabsTrigger value="galeria">Galeria</TabsTrigger>
         </TabsList>
+
+        {/* SOBRE TAB */}
+        <TabsContent value="sobre" className="space-y-6 mt-6">
+          <div className="bg-card rounded-xl p-6 shadow-soft space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="about-title">Título da Página</Label>
+              <Input
+                id="about-title"
+                value={aboutTitle}
+                onChange={(e) => setAboutTitle(e.target.value)}
+                placeholder="Ex: Casados Para Sempre"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Conteúdo da Página</Label>
+              {aboutLoaded && (
+                <RichTextEditor
+                  content={aboutContent}
+                  onChange={setAboutContent}
+                />
+              )}
+            </div>
+            <Button onClick={saveAboutContent} disabled={isSavingAbout}>
+              {isSavingAbout ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+              Salvar Página
+            </Button>
+          </div>
+        </TabsContent>
 
         {/* PALAVRAS TAB */}
         <TabsContent value="palavras" className="space-y-6 mt-6">
