@@ -133,7 +133,7 @@ export default function LouvorPage() {
 
   // Form states - Minister (using members with Ministrante function)
   const ministranteFunctionId = functions.find(f => f.name.toLowerCase().includes("ministrante"))?.id;
-  const ministers = members.filter(m => 
+  const ministers = members.filter(m =>
     m.primary_function_id === ministranteFunctionId ||
     m.secondary_functions?.some(sf => sf.function_id === ministranteFunctionId)
   );
@@ -165,20 +165,20 @@ export default function LouvorPage() {
   const handleAddMember = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMemberName.trim() || !newMemberPrimaryFunctionId) return;
-    
+
     let photoUrl: string | undefined;
     if (newMemberPhoto) {
       photoUrl = await uploadMemberPhoto(newMemberPhoto);
     }
-    
-    await createMember.mutateAsync({ 
+
+    await createMember.mutateAsync({
       name: newMemberName.trim(),
       phone: newMemberPhone.trim() || undefined,
       photo_url: photoUrl,
       primary_function_id: newMemberPrimaryFunctionId,
       secondary_function_ids: newMemberSecondaryFunctionIds
     });
-    
+
     resetMemberForm();
     setIsNewMemberDialogOpen(false);
   };
@@ -186,12 +186,12 @@ export default function LouvorPage() {
   const handleEditMember = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedMember || !newMemberName.trim() || !newMemberPrimaryFunctionId) return;
-    
+
     let photoUrl: string | undefined;
     if (newMemberPhoto) {
       photoUrl = await uploadMemberPhoto(newMemberPhoto);
     }
-    
+
     await updateMember.mutateAsync({
       id: selectedMember.id,
       name: newMemberName.trim(),
@@ -200,7 +200,7 @@ export default function LouvorPage() {
       primary_function_id: newMemberPrimaryFunctionId,
       secondary_function_ids: newMemberSecondaryFunctionIds
     });
-    
+
     resetMemberForm();
     setIsEditMemberDialogOpen(false);
   };
@@ -228,9 +228,9 @@ export default function LouvorPage() {
   const handleAddSong = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newSongName.trim() || !newSongKey) return;
-    
-    const song = await createSong.mutateAsync({ 
-      name: newSongName.trim(), 
+
+    const song = await createSong.mutateAsync({
+      name: newSongName.trim(),
       original_key: newSongKey,
       lyrics: newSongLyrics || undefined,
       has_chords: newSongContentType === "cifra" && !!newSongLyrics,
@@ -260,7 +260,7 @@ export default function LouvorPage() {
   const handleEditSong = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedSong || !editSongName.trim() || !editSongKey) return;
-    
+
     await updateSong.mutateAsync({
       id: selectedSong.id,
       name: editSongName.trim(),
@@ -270,7 +270,7 @@ export default function LouvorPage() {
       content_type: editSongContentType,
       youtube_url: editSongYoutubeUrl.trim() || null
     });
-    
+
     setIsEditSongDialogOpen(false);
     setSelectedSong(null);
   };
@@ -298,19 +298,19 @@ export default function LouvorPage() {
   const handleAddSchedule = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newScheduleDate || !newScheduleMinisterId) return;
-    
+
     const musicianAssignments: { member_id: string; instrument: "teclado" | "violao" | "bateria" }[] = [];
     if (newScheduleTecladoId) musicianAssignments.push({ member_id: newScheduleTecladoId, instrument: "teclado" });
     if (newScheduleViolaoId) musicianAssignments.push({ member_id: newScheduleViolaoId, instrument: "violao" });
     if (newScheduleBateriaId) musicianAssignments.push({ member_id: newScheduleBateriaId, instrument: "bateria" });
-    
-    await createSchedule.mutateAsync({ 
-      date: newScheduleDate, 
+
+    await createSchedule.mutateAsync({
+      date: newScheduleDate,
       minister_id: newScheduleMinisterId,
       vocalist_ids: newScheduleVocalistIds,
       musician_assignments: musicianAssignments
     });
-    
+
     resetScheduleForm();
     setIsNewScheduleDialogOpen(false);
   };
@@ -318,12 +318,12 @@ export default function LouvorPage() {
   const handleEditSchedule = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedSchedule || !newScheduleDate || !newScheduleMinisterId) return;
-    
+
     const musicianAssignments: { member_id: string; instrument: "teclado" | "violao" | "bateria" }[] = [];
     if (newScheduleTecladoId) musicianAssignments.push({ member_id: newScheduleTecladoId, instrument: "teclado" });
     if (newScheduleViolaoId) musicianAssignments.push({ member_id: newScheduleViolaoId, instrument: "violao" });
     if (newScheduleBateriaId) musicianAssignments.push({ member_id: newScheduleBateriaId, instrument: "bateria" });
-    
+
     await updateSchedule.mutateAsync({
       id: selectedSchedule.id,
       date: newScheduleDate,
@@ -331,7 +331,7 @@ export default function LouvorPage() {
       vocalist_ids: newScheduleVocalistIds,
       musician_assignments: musicianAssignments
     });
-    
+
     resetScheduleForm();
     setIsEditScheduleDialogOpen(false);
     setSelectedSchedule(null);
@@ -351,26 +351,26 @@ export default function LouvorPage() {
     setNewScheduleDate(schedule.date);
     setNewScheduleMinisterId(schedule.minister_id || "");
     setNewScheduleVocalistIds(schedule.vocalists?.map(v => v.member_id) || []);
-    
+
     const teclado = schedule.musicians?.find(m => m.instrument === "teclado");
     const violao = schedule.musicians?.find(m => m.instrument === "violao");
     const bateria = schedule.musicians?.find(m => m.instrument === "bateria");
-    
+
     setNewScheduleTecladoId(teclado?.member_id || "");
     setNewScheduleViolaoId(violao?.member_id || "");
     setNewScheduleBateriaId(bateria?.member_id || "");
-    
+
     setIsEditScheduleDialogOpen(true);
   };
 
   const handleAssignSong = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!assignSongId || !assignMinisterId || !assignKey) return;
-    
-    await createAssignment.mutateAsync({ 
-      song_id: assignSongId, 
-      minister_id: assignMinisterId, 
-      key: assignKey 
+
+    await createAssignment.mutateAsync({
+      song_id: assignSongId,
+      minister_id: assignMinisterId,
+      key: assignKey
     });
     setAssignSongId("");
     setAssignMinisterId("");
@@ -381,7 +381,7 @@ export default function LouvorPage() {
   const handleAddFunction = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newFunctionName.trim()) return;
-    
+
     await createFunction.mutateAsync({ name: newFunctionName.trim() });
     setNewFunctionName("");
     setIsNewFunctionDialogOpen(false);
@@ -389,7 +389,7 @@ export default function LouvorPage() {
 
   const handleConfirmDelete = async () => {
     if (!deleteItemId || !deleteType) return;
-    
+
     switch (deleteType) {
       case "member":
         await deleteMember.mutateAsync(deleteItemId);
@@ -407,7 +407,7 @@ export default function LouvorPage() {
         await deleteFunction.mutateAsync(deleteItemId);
         break;
     }
-    
+
     setDeleteItemId(null);
     setDeleteType(null);
   };
@@ -418,8 +418,8 @@ export default function LouvorPage() {
   };
 
   const toggleSecondaryFunction = (functionId: string) => {
-    setNewMemberSecondaryFunctionIds(prev => 
-      prev.includes(functionId) 
+    setNewMemberSecondaryFunctionIds(prev =>
+      prev.includes(functionId)
         ? prev.filter(id => id !== functionId)
         : [...prev, functionId]
     );
@@ -434,15 +434,15 @@ export default function LouvorPage() {
   };
 
   // Filter songs by selected minister
-  const ministerSongs = selectedMinisterId 
+  const ministerSongs = selectedMinisterId
     ? assignments.filter(a => a.minister_id === selectedMinisterId)
     : [];
 
-  const filteredMembers = members.filter(m => 
+  const filteredMembers = members.filter(m =>
     m.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const filteredSongs = songs.filter(s => 
+  const filteredSongs = songs.filter(s =>
     s.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -499,10 +499,6 @@ export default function LouvorPage() {
             <Mic className="w-4 h-4" />
             <span className="hidden sm:inline">Ministrantes</span>
           </TabsTrigger>
-          <TabsTrigger value="schedule" className="gap-2">
-            <Calendar className="w-4 h-4" />
-            <span className="hidden sm:inline">Escalas</span>
-          </TabsTrigger>
           <TabsTrigger value="functions" className="gap-2">
             <Settings className="w-4 h-4" />
             <span className="hidden sm:inline">Funções</span>
@@ -534,7 +530,7 @@ export default function LouvorPage() {
                 </DialogHeader>
                 <form onSubmit={handleAddMember} className="space-y-4 mt-4">
                   <div className="flex flex-col items-center gap-4">
-                    <div 
+                    <div
                       className="w-24 h-24 rounded-full bg-muted flex items-center justify-center cursor-pointer hover:bg-muted/80 transition-colors overflow-hidden"
                       onClick={() => fileInputRef.current?.click()}
                     >
@@ -544,11 +540,11 @@ export default function LouvorPage() {
                         <Upload className="w-8 h-8 text-muted-foreground" />
                       )}
                     </div>
-                    <input 
+                    <input
                       ref={fileInputRef}
-                      type="file" 
-                      accept="image/*" 
-                      className="hidden" 
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
                       onChange={handlePhotoChange}
                     />
                     <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
@@ -557,17 +553,17 @@ export default function LouvorPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-2">Nome *</label>
-                    <Input 
-                      placeholder="Nome completo" 
+                    <Input
+                      placeholder="Nome completo"
                       value={newMemberName}
                       onChange={(e) => setNewMemberName(e.target.value)}
-                      required 
+                      required
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-2">Telefone</label>
-                    <Input 
-                      placeholder="Ex: +5511999999999" 
+                    <Input
+                      placeholder="Ex: +5511999999999"
                       value={newMemberPhone}
                       onChange={(e) => setNewMemberPhone(e.target.value)}
                     />
@@ -624,16 +620,16 @@ export default function LouvorPage() {
               {filteredMembers.map((member) => (
                 <div key={member.id} className="bg-card rounded-xl shadow-soft p-4 hover:shadow-card transition-all text-center group relative">
                   <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                    <Button 
-                      variant="ghost" 
+                    <Button
+                      variant="ghost"
                       size="icon"
                       className="h-8 w-8"
                       onClick={() => openEditMemberDialog(member)}
                     >
                       <Edit className="w-4 h-4 text-muted-foreground" />
                     </Button>
-                    <Button 
-                      variant="ghost" 
+                    <Button
+                      variant="ghost"
                       size="icon"
                       className="h-8 w-8"
                       onClick={() => openDeleteDialog(member.id, "member")}
@@ -672,11 +668,11 @@ export default function LouvorPage() {
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input 
-                placeholder="Pesquisar músicas..." 
+              <Input
+                placeholder="Pesquisar músicas..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9" 
+                className="pl-9"
               />
             </div>
             <div className="flex gap-2">
@@ -757,11 +753,11 @@ export default function LouvorPage() {
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-foreground mb-2">Nome da Música *</label>
-                        <Input 
-                          placeholder="Nome do hino" 
+                        <Input
+                          placeholder="Nome do hino"
                           value={newSongName}
                           onChange={(e) => setNewSongName(e.target.value)}
-                          required 
+                          required
                         />
                       </div>
                       <div>
@@ -822,16 +818,16 @@ export default function LouvorPage() {
                     )}
                     <div>
                       <label className="block text-sm font-medium text-foreground mb-2">Link do YouTube (opcional)</label>
-                      <Input 
-                        placeholder="https://youtube.com/watch?v=..." 
+                      <Input
+                        placeholder="https://youtube.com/watch?v=..."
                         value={newSongYoutubeUrl}
                         onChange={(e) => setNewSongYoutubeUrl(e.target.value)}
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-foreground mb-2">Cifra / Letra</label>
-                      <Textarea 
-                        placeholder="Cole aqui a cifra ou letra..." 
+                      <Textarea
+                        placeholder="Cole aqui a cifra ou letra..."
                         rows={8}
                         value={newSongLyrics}
                         onChange={(e) => setNewSongLyrics(e.target.value)}
@@ -872,8 +868,8 @@ export default function LouvorPage() {
                     {filteredSongs.map((song) => {
                       const songAssignments = assignments.filter(a => a.song_id === song.id);
                       return (
-                        <tr 
-                          key={song.id} 
+                        <tr
+                          key={song.id}
                           className="hover:bg-muted/30 transition-colors cursor-pointer"
                           onClick={() => song.lyrics && openViewLyricsInNewTab(song)}
                         >
@@ -911,8 +907,8 @@ export default function LouvorPage() {
                           <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
                             <div className="flex items-center justify-end gap-1">
                               {(song as any).youtube_url && (
-                                <Button 
-                                  variant="ghost" 
+                                <Button
+                                  variant="ghost"
                                   size="icon"
                                   onClick={() => window.open((song as any).youtube_url, '_blank')}
                                   title="Assistir no YouTube"
@@ -921,8 +917,8 @@ export default function LouvorPage() {
                                 </Button>
                               )}
                               {song.lyrics && (
-                                <Button 
-                                  variant="ghost" 
+                                <Button
+                                  variant="ghost"
                                   size="icon"
                                   onClick={() => openViewLyricsInNewTab(song)}
                                   title="Abrir cifra em tela inteira"
@@ -930,15 +926,15 @@ export default function LouvorPage() {
                                   <ExternalLink className="w-4 h-4 text-muted-foreground" />
                                 </Button>
                               )}
-                              <Button 
-                                variant="ghost" 
+                              <Button
+                                variant="ghost"
                                 size="icon"
                                 onClick={() => openEditSongDialog(song)}
                               >
                                 <Edit className="w-4 h-4 text-muted-foreground" />
                               </Button>
-                              <Button 
-                                variant="ghost" 
+                              <Button
+                                variant="ghost"
                                 size="icon"
                                 onClick={() => openDeleteDialog(song.id, "song")}
                               >
@@ -986,11 +982,10 @@ export default function LouvorPage() {
               ministers.map((minister) => {
                 const ministerAssignments = assignments.filter(a => a.minister_id === minister.id);
                 return (
-                  <div 
-                    key={minister.id} 
-                    className={`bg-card rounded-xl shadow-soft p-5 hover:shadow-card transition-all cursor-pointer ${
-                      selectedMinisterId === minister.id ? 'ring-2 ring-primary' : ''
-                    }`}
+                  <div
+                    key={minister.id}
+                    className={`bg-card rounded-xl shadow-soft p-5 hover:shadow-card transition-all cursor-pointer ${selectedMinisterId === minister.id ? 'ring-2 ring-primary' : ''
+                      }`}
                     onClick={() => setSelectedMinisterId(minister.id)}
                   >
                     <div className="flex items-start gap-4">
@@ -1001,8 +996,8 @@ export default function LouvorPage() {
                         <h3 className="font-semibold text-foreground">{minister.name}</h3>
                         <p className="text-sm text-muted-foreground">{ministerAssignments.length} músicas</p>
                       </div>
-                      <Button 
-                        variant="ghost" 
+                      <Button
+                        variant="ghost"
                         size="icon"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -1042,8 +1037,8 @@ export default function LouvorPage() {
                       </thead>
                       <tbody className="divide-y divide-border">
                         {ministerSongs.map((assignment) => (
-                          <tr 
-                            key={assignment.id} 
+                          <tr
+                            key={assignment.id}
                             className="hover:bg-muted/30 transition-colors cursor-pointer"
                             onClick={() => assignment.song?.lyrics && openViewLyricsInNewTab(assignment.song)}
                           >
@@ -1068,8 +1063,8 @@ export default function LouvorPage() {
                             <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
                               <div className="flex items-center justify-end gap-1">
                                 {assignment.song?.lyrics && (
-                                  <Button 
-                                    variant="ghost" 
+                                  <Button
+                                    variant="ghost"
                                     size="icon"
                                     onClick={() => assignment.song && openViewLyricsInNewTab(assignment.song)}
                                   >
@@ -1077,16 +1072,16 @@ export default function LouvorPage() {
                                   </Button>
                                 )}
                                 {assignment.song && (
-                                  <Button 
-                                    variant="ghost" 
+                                  <Button
+                                    variant="ghost"
                                     size="icon"
                                     onClick={() => assignment.song && openEditSongDialog(assignment.song)}
                                   >
                                     <Edit className="w-4 h-4 text-muted-foreground" />
                                   </Button>
                                 )}
-                                <Button 
-                                  variant="ghost" 
+                                <Button
+                                  variant="ghost"
                                   size="icon"
                                   onClick={() => openDeleteDialog(assignment.id, "assignment")}
                                 >
@@ -1103,253 +1098,6 @@ export default function LouvorPage() {
               )}
             </div>
           )}
-        </TabsContent>
-
-        {/* Schedule Tab */}
-        <TabsContent value="schedule" className="space-y-6">
-          <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
-            <div className="flex items-center gap-4">
-              <Button variant="outline" size="icon" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>
-                <ChevronLeft className="w-4 h-4" />
-              </Button>
-              <h2 className="font-display text-xl font-semibold text-foreground min-w-[200px] text-center">
-                {format(currentMonth, "MMMM yyyy", { locale: ptBR })}
-              </h2>
-              <Button variant="outline" size="icon" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-            </div>
-            <Dialog open={isNewScheduleDialogOpen} onOpenChange={setIsNewScheduleDialogOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Nova Escala
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-lg">
-                <DialogHeader>
-                  <DialogTitle className="font-display text-xl">Criar Nova Escala</DialogTitle>
-                </DialogHeader>
-                <form onSubmit={handleAddSchedule} className="space-y-4 mt-4">
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">Data *</label>
-                    <Input 
-                      type="date" 
-                      value={newScheduleDate}
-                      onChange={(e) => setNewScheduleDate(e.target.value)}
-                      required 
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">Ministrante *</label>
-                    <Select value={newScheduleMinisterId} onValueChange={setNewScheduleMinisterId}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione o ministrante" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {ministers.map((minister) => (
-                          <SelectItem key={minister.id} value={minister.id}>{minister.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">Vocais</label>
-                    <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto border rounded-md p-2">
-                      {members.map((member) => (
-                        <div key={member.id} className="flex items-center gap-2">
-                          <Checkbox
-                            id={`vocalist-${member.id}`}
-                            checked={newScheduleVocalistIds.includes(member.id)}
-                            onCheckedChange={() => toggleVocalist(member.id)}
-                          />
-                          <label htmlFor={`vocalist-${member.id}`} className="text-sm">{member.name}</label>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-2">Teclado</label>
-                      <Select value={newScheduleTecladoId} onValueChange={setNewScheduleTecladoId}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="">Nenhum</SelectItem>
-                          {members.map((member) => (
-                            <SelectItem key={member.id} value={member.id}>{member.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-2">Violão</label>
-                      <Select value={newScheduleViolaoId} onValueChange={setNewScheduleViolaoId}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="">Nenhum</SelectItem>
-                          {members.map((member) => (
-                            <SelectItem key={member.id} value={member.id}>{member.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-2">Bateria</label>
-                      <Select value={newScheduleBateriaId} onValueChange={setNewScheduleBateriaId}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="">Nenhum</SelectItem>
-                          {members.map((member) => (
-                            <SelectItem key={member.id} value={member.id}>{member.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div className="flex gap-3 pt-4">
-                    <Button type="button" variant="outline" className="flex-1" onClick={() => { setIsNewScheduleDialogOpen(false); resetScheduleForm(); }}>
-                      Cancelar
-                    </Button>
-                    <Button type="submit" className="flex-1" disabled={createSchedule.isPending}>
-                      {createSchedule.isPending ? "Criando..." : "Criar"}
-                    </Button>
-                  </div>
-                </form>
-              </DialogContent>
-            </Dialog>
-          </div>
-
-          {/* Calendar View */}
-          <div className="bg-card rounded-xl shadow-soft p-4">
-            <div className="grid grid-cols-7 gap-1 mb-2">
-              {["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map((day) => (
-                <div key={day} className="text-center text-sm font-semibold text-muted-foreground py-2">
-                  {day}
-                </div>
-              ))}
-            </div>
-            <div className="grid grid-cols-7 gap-1">
-              {/* Empty cells for days before month start */}
-              {Array.from({ length: monthStart.getDay() }).map((_, i) => (
-                <div key={`empty-start-${i}`} className="aspect-square" />
-              ))}
-              {/* Days of the month */}
-              {daysInMonth.map((day) => {
-                const schedule = getScheduleForDay(day);
-                const isToday = isSameDay(day, new Date());
-                return (
-                  <div
-                    key={day.toISOString()}
-                    className={`aspect-square rounded-lg p-1 flex flex-col items-center justify-start transition-colors ${
-                      schedule 
-                        ? 'bg-primary/20 hover:bg-primary/30 cursor-pointer' 
-                        : 'hover:bg-muted/50'
-                    } ${isToday ? 'ring-2 ring-primary' : ''}`}
-                    onClick={() => schedule && openEditScheduleDialog(schedule)}
-                  >
-                    <span className={`text-sm font-medium ${isToday ? 'text-primary' : 'text-foreground'}`}>
-                      {format(day, "d")}
-                    </span>
-                    {schedule && (
-                      <div className="mt-1 w-full">
-                        <div className="text-[10px] text-primary font-medium truncate text-center">
-                          {schedule.minister?.name?.split(' ')[0]}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Schedule List */}
-          <div className="space-y-4">
-            <h3 className="font-display text-lg font-semibold text-foreground">
-              Escalas de {format(currentMonth, "MMMM", { locale: ptBR })}
-            </h3>
-            {schedulesInMonth.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground bg-card rounded-xl">
-                Nenhuma escala neste mês
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {schedulesInMonth
-                  .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-                  .map((schedule) => (
-                    <div key={schedule.id} className="bg-card rounded-xl shadow-soft p-5 hover:shadow-card transition-all">
-                      <div className="flex items-start justify-between mb-4">
-                        <div>
-                          <h3 className="font-semibold text-foreground text-lg">
-                            {format(new Date(schedule.date), "EEEE, d 'de' MMMM", { locale: ptBR })}
-                          </h3>
-                          <div className="flex items-center gap-2 mt-1">
-                            <Mic className="w-4 h-4 text-primary" />
-                            <span className="text-primary font-medium">{schedule.minister?.name}</span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => shareScheduleWhatsApp(schedule)}
-                            title="Compartilhar por WhatsApp"
-                          >
-                            <Share2 className="w-4 h-4 text-green-600" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => openEditScheduleDialog(schedule)}
-                          >
-                            <Edit className="w-4 h-4 text-muted-foreground" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => openDeleteDialog(schedule.id, "schedule")}
-                          >
-                            <Trash2 className="w-4 h-4 text-destructive" />
-                          </Button>
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        {schedule.vocalists && schedule.vocalists.length > 0 && (
-                          <div>
-                            <span className="text-xs text-muted-foreground">Vocais:</span>
-                            <div className="flex flex-wrap gap-1 mt-1">
-                              {schedule.vocalists.map((v) => (
-                                <span key={v.id} className="px-2 py-1 rounded bg-secondary/10 text-secondary-foreground text-xs">
-                                  {v.member?.name}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                        {schedule.musicians && schedule.musicians.length > 0 && (
-                          <div>
-                            <span className="text-xs text-muted-foreground">Músicos:</span>
-                            <div className="flex flex-wrap gap-1 mt-1">
-                              {schedule.musicians.map((m) => (
-                                <span key={m.id} className="px-2 py-1 rounded bg-accent/10 text-accent-foreground text-xs">
-                                  {m.member?.name} ({m.instrument})
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            )}
-          </div>
         </TabsContent>
 
         {/* Functions Tab */}
@@ -1370,11 +1118,11 @@ export default function LouvorPage() {
                 <form onSubmit={handleAddFunction} className="space-y-4 mt-4">
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-2">Nome da Função *</label>
-                    <Input 
-                      placeholder="Ex: Vocal, Guitarra, Teclado" 
+                    <Input
+                      placeholder="Ex: Vocal, Guitarra, Teclado"
                       value={newFunctionName}
                       onChange={(e) => setNewFunctionName(e.target.value)}
-                      required 
+                      required
                     />
                   </div>
                   <div className="flex gap-3 pt-4">
@@ -1399,8 +1147,8 @@ export default function LouvorPage() {
               {functions.map((func) => (
                 <div key={func.id} className="bg-card rounded-xl shadow-soft p-4 hover:shadow-card transition-all text-center group relative">
                   <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button 
-                      variant="ghost" 
+                    <Button
+                      variant="ghost"
                       size="icon"
                       className="h-8 w-8"
                       onClick={() => openDeleteDialog(func.id, "function")}
@@ -1451,11 +1199,11 @@ export default function LouvorPage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-foreground mb-2">Nome da Música *</label>
-                <Input 
-                  placeholder="Nome do hino" 
+                <Input
+                  placeholder="Nome do hino"
                   value={editSongName}
                   onChange={(e) => setEditSongName(e.target.value)}
-                  required 
+                  required
                 />
               </div>
               <div>
@@ -1486,16 +1234,16 @@ export default function LouvorPage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Link do YouTube (opcional)</label>
-              <Input 
-                placeholder="https://youtube.com/watch?v=..." 
+              <Input
+                placeholder="https://youtube.com/watch?v=..."
                 value={editSongYoutubeUrl}
                 onChange={(e) => setEditSongYoutubeUrl(e.target.value)}
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Cifra / Letra</label>
-              <Textarea 
-                placeholder="Cole aqui a cifra ou letra..." 
+              <Textarea
+                placeholder="Cole aqui a cifra ou letra..."
                 rows={8}
                 value={editSongLyrics}
                 onChange={(e) => setEditSongLyrics(e.target.value)}
@@ -1522,11 +1270,11 @@ export default function LouvorPage() {
           <form onSubmit={handleEditSchedule} className="space-y-4 mt-4">
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Data *</label>
-              <Input 
-                type="date" 
+              <Input
+                type="date"
                 value={newScheduleDate}
                 onChange={(e) => setNewScheduleDate(e.target.value)}
-                required 
+                required
               />
             </div>
             <div>
@@ -1621,7 +1369,7 @@ export default function LouvorPage() {
           </DialogHeader>
           <form onSubmit={handleEditMember} className="space-y-4 mt-4">
             <div className="flex flex-col items-center gap-4">
-              <div 
+              <div
                 className="w-24 h-24 rounded-full bg-muted flex items-center justify-center cursor-pointer hover:bg-muted/80 transition-colors overflow-hidden"
                 onClick={() => fileInputRef.current?.click()}
               >
@@ -1631,11 +1379,11 @@ export default function LouvorPage() {
                   <Upload className="w-8 h-8 text-muted-foreground" />
                 )}
               </div>
-              <input 
+              <input
                 ref={fileInputRef}
-                type="file" 
-                accept="image/*" 
-                className="hidden" 
+                type="file"
+                accept="image/*"
+                className="hidden"
                 onChange={handlePhotoChange}
               />
               <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
@@ -1644,17 +1392,17 @@ export default function LouvorPage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Nome *</label>
-              <Input 
-                placeholder="Nome completo" 
+              <Input
+                placeholder="Nome completo"
                 value={newMemberName}
                 onChange={(e) => setNewMemberName(e.target.value)}
-                required 
+                required
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Telefone</label>
-              <Input 
-                placeholder="Ex: +5511999999999" 
+              <Input
+                placeholder="Ex: +5511999999999"
                 value={newMemberPhone}
                 onChange={(e) => setNewMemberPhone(e.target.value)}
               />
