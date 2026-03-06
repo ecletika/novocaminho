@@ -53,10 +53,15 @@ export default function AniversariosPage() {
     man_name: "",
     birthday_date: "",
     birthday_type: "personal" as "personal" | "wedding",
+    nickname: "",
+    photo_url: "",
     phone: "",
     email: "",
     address: "",
-    ministry_ids: [] as string[],
+    woman_birthday: "",
+    man_birthday: "",
+    leader_name: "",
+    ministry_selections: [] as { ministry_id: string; is_leader: boolean }[],
   });
 
   const { data: birthdays = [], isLoading } = useBirthdays();
@@ -71,10 +76,15 @@ export default function AniversariosPage() {
       man_name: "",
       birthday_date: "",
       birthday_type: "personal",
+      nickname: "",
+      photo_url: "",
       phone: "",
       email: "",
       address: "",
-      ministry_ids: [],
+      woman_birthday: "",
+      man_birthday: "",
+      leader_name: "",
+      ministry_selections: [],
     });
     setSelectedBirthday(null);
   };
@@ -86,10 +96,18 @@ export default function AniversariosPage() {
       man_name: birthday.man_name || "",
       birthday_date: birthday.birthday_date,
       birthday_type: birthday.birthday_type as "personal" | "wedding",
+      nickname: (birthday as any).nickname || "",
+      photo_url: (birthday as any).photo_url || "",
       phone: (birthday as any).phone || "",
       email: (birthday as any).email || "",
       address: (birthday as any).address || "",
-      ministry_ids: birthday.ministries?.map((m) => m.ministry_id) || [],
+      leader_name: (birthday as any).leader_name || "",
+      woman_birthday: (birthday as any).woman_birthday || "",
+      man_birthday: (birthday as any).man_birthday || "",
+      ministry_selections: birthday.ministries?.map((m) => ({
+        ministry_id: m.ministry_id,
+        is_leader: m.is_leader,
+      })) || [],
     });
     setIsDialogOpen(true);
   };
@@ -105,7 +123,12 @@ export default function AniversariosPage() {
       phone: formData.phone || null,
       email: formData.email || null,
       address: formData.address || null,
-      ministry_ids: formData.ministry_ids,
+      nickname: formData.nickname || null,
+      photo_url: formData.photo_url || null,
+      woman_birthday: formData.woman_birthday || null,
+      man_birthday: formData.man_birthday || null,
+      leader_name: formData.leader_name || null,
+      ministry_selections: formData.ministry_selections,
     };
 
     if (selectedBirthday) {
@@ -126,11 +149,28 @@ export default function AniversariosPage() {
   };
 
   const toggleMinistry = (ministryId: string) => {
+    setFormData((prev) => {
+      const exists = prev.ministry_selections.find((s) => s.ministry_id === ministryId);
+      if (exists) {
+        return {
+          ...prev,
+          ministry_selections: prev.ministry_selections.filter((s) => s.ministry_id !== ministryId),
+        };
+      } else {
+        return {
+          ...prev,
+          ministry_selections: [...prev.ministry_selections, { ministry_id: ministryId, is_leader: false }],
+        };
+      }
+    });
+  };
+
+  const toggleLeader = (ministryId: string) => {
     setFormData((prev) => ({
       ...prev,
-      ministry_ids: prev.ministry_ids.includes(ministryId)
-        ? prev.ministry_ids.filter((id) => id !== ministryId)
-        : [...prev.ministry_ids, ministryId],
+      ministry_selections: prev.ministry_selections.map((s) =>
+        s.ministry_id === ministryId ? { ...s, is_leader: !s.is_leader } : s
+      ),
     }));
   };
 
@@ -238,11 +278,10 @@ export default function AniversariosPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <h3 className="font-semibold text-foreground truncate">{getName(birthday)}</h3>
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                      birthday.birthday_type === "wedding"
-                        ? "bg-pink-100 text-pink-700"
-                        : "bg-blue-100 text-blue-700"
-                    }`}>
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${birthday.birthday_type === "wedding"
+                      ? "bg-pink-100 text-pink-700"
+                      : "bg-blue-100 text-blue-700"
+                      }`}>
                       {birthday.birthday_type === "wedding" ? "Casamento" : "Pessoal"}
                     </span>
                   </div>
@@ -268,7 +307,7 @@ export default function AniversariosPage() {
                         const ministry = ministries.find((min) => min.id === m.ministry_id);
                         return ministry ? (
                           <span key={m.ministry_id} className="px-2 py-0.5 rounded-full bg-muted text-muted-foreground text-xs">
-                            {ministry.title}
+                            {ministry.title} {m.is_leader && "👑"}
                           </span>
                         ) : null;
                       })}
@@ -341,9 +380,8 @@ export default function AniversariosPage() {
                       <td className="p-3 font-medium text-foreground">{getName(b)}</td>
                       <td className="p-3 text-muted-foreground">{formatDate(b.birthday_date)}</td>
                       <td className="p-3">
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                          b.birthday_type === "wedding" ? "bg-pink-100 text-pink-700" : "bg-blue-100 text-blue-700"
-                        }`}>
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${b.birthday_type === "wedding" ? "bg-pink-100 text-pink-700" : "bg-blue-100 text-blue-700"
+                          }`}>
                           {b.birthday_type === "wedding" ? "Casamento" : "Pessoal"}
                         </span>
                       </td>
@@ -357,7 +395,7 @@ export default function AniversariosPage() {
                               const ministry = ministries.find((min) => min.id === m.ministry_id);
                               return ministry ? (
                                 <span key={m.ministry_id} className="px-2 py-0.5 rounded-full bg-muted text-muted-foreground text-xs">
-                                  {ministry.title}
+                                  {ministry.title} {m.is_leader && "(Líder)"}
                                 </span>
                               ) : null;
                             })}
@@ -408,16 +446,28 @@ export default function AniversariosPage() {
             </div>
 
             {formData.birthday_type === "wedding" ? (
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Nome do Marido</Label>
-                  <Input value={formData.man_name} onChange={(e) => setFormData({ ...formData, man_name: e.target.value })} placeholder="Nome do marido" />
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Nome do Marido</Label>
+                    <Input value={formData.man_name} onChange={(e) => setFormData({ ...formData, man_name: e.target.value })} placeholder="Nome do marido" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Nome da Mulher</Label>
+                    <Input value={formData.woman_name} onChange={(e) => setFormData({ ...formData, woman_name: e.target.value })} placeholder="Nome da mulher" />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label>Nome da Mulher</Label>
-                  <Input value={formData.woman_name} onChange={(e) => setFormData({ ...formData, woman_name: e.target.value })} placeholder="Nome da mulher" />
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Aniversário do Marido</Label>
+                    <Input type="date" value={formData.man_birthday} onChange={(e) => setFormData({ ...formData, man_birthday: e.target.value })} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Aniversário da Mulher</Label>
+                    <Input type="date" value={formData.woman_birthday} onChange={(e) => setFormData({ ...formData, woman_birthday: e.target.value })} />
+                  </div>
                 </div>
-              </div>
+              </>
             ) : (
               <div className="space-y-2">
                 <Label>Nome *</Label>
@@ -426,38 +476,56 @@ export default function AniversariosPage() {
             )}
 
             <div className="space-y-2">
-              <Label>Data *</Label>
+              <Label>
+                {formData.birthday_type === "wedding" ? "Data do Casamento *" : "Data de Aniversário *"}
+              </Label>
               <Input type="date" value={formData.birthday_date} onChange={(e) => setFormData({ ...formData, birthday_date: e.target.value })} required />
             </div>
 
             <div className="space-y-2">
-              <Label>Telefone</Label>
-              <Input value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} placeholder="(00) 00000-0000" />
+              <Label>Líder / Supervisor</Label>
+              <Input value={formData.leader_name} onChange={(e) => setFormData({ ...formData, leader_name: e.target.value })} placeholder="Nome do líder/supervisor" />
             </div>
 
-            <div className="space-y-2">
-              <Label>Email</Label>
-              <Input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} placeholder="email@exemplo.com" />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Endereço</Label>
-              <Input value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} placeholder="Endereço completo" />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Apelido</Label>
+                <Input value={formData.nickname} onChange={(e) => setFormData({ ...formData, nickname: e.target.value })} placeholder="Como prefere ser chamado" />
+              </div>
+              <div className="space-y-2">
+                <Label>Foto (URL)</Label>
+                <Input value={formData.photo_url} onChange={(e) => setFormData({ ...formData, photo_url: e.target.value })} placeholder="URL da foto" />
+              </div>
             </div>
 
             <div className="space-y-2">
               <Label>Ministérios</Label>
-              <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-2 border rounded-lg">
-                {ministries.filter((m) => m.is_active).map((ministry) => (
-                  <div key={ministry.id} className="flex items-center gap-2">
-                    <Checkbox
-                      id={`ministry-${ministry.id}`}
-                      checked={formData.ministry_ids.includes(ministry.id)}
-                      onCheckedChange={() => toggleMinistry(ministry.id)}
-                    />
-                    <label htmlFor={`ministry-${ministry.id}`} className="text-sm cursor-pointer">{ministry.title}</label>
-                  </div>
-                ))}
+              <div className="space-y-2 max-h-48 overflow-y-auto p-2 border rounded-lg">
+                {ministries.filter((m) => m.is_active).map((ministry) => {
+                  const selection = formData.ministry_selections.find(s => s.ministry_id === ministry.id);
+                  return (
+                    <div key={ministry.id} className="flex items-center justify-between p-2 rounded hover:bg-muted/50">
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          id={`ministry-${ministry.id}`}
+                          checked={!!selection}
+                          onCheckedChange={() => toggleMinistry(ministry.id)}
+                        />
+                        <label htmlFor={`ministry-${ministry.id}`} className="text-sm cursor-pointer">{ministry.title}</label>
+                      </div>
+                      {selection && (
+                        <div className="flex items-center gap-2">
+                          <Checkbox
+                            id={`leader-${ministry.id}`}
+                            checked={selection.is_leader}
+                            onCheckedChange={() => toggleLeader(ministry.id)}
+                          />
+                          <label htmlFor={`leader-${ministry.id}`} className="text-xs cursor-pointer text-muted-foreground">Líder?</label>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
 

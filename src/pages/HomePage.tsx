@@ -65,45 +65,66 @@ export default function HomePage() {
     <>
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Background Image */}
+        {/* Background Image / Overlay */}
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: `url(${heroImage})` }}
         >
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-background opacity-90" />
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-primary/60 to-background opacity-95" />
+        </div>
+
+        {/* Geometric Background Overlay */}
+        <div className="absolute inset-0 z-0 opacity-20 pointer-events-none overflow-hidden">
+          <svg className="absolute -top-24 -right-24 w-[600px] h-[600px] text-white" viewBox="0 0 100 100">
+            <circle cx="100" cy="0" r="40" fill="none" stroke="currentColor" strokeWidth="0.2" />
+            <circle cx="100" cy="0" r="60" fill="none" stroke="currentColor" strokeWidth="0.2" />
+            <circle cx="100" cy="0" r="80" fill="none" stroke="currentColor" strokeWidth="0.2" />
+            <circle cx="100" cy="0" r="100" fill="none" stroke="currentColor" strokeWidth="0.2" />
+          </svg>
+          <svg className="absolute -bottom-24 -left-24 w-[600px] h-[600px] text-white" viewBox="0 0 100 100">
+            <circle cx="0" cy="100" r="40" fill="none" stroke="currentColor" strokeWidth="0.2" />
+            <circle cx="0" cy="100" r="60" fill="none" stroke="currentColor" strokeWidth="0.2" />
+            <circle cx="0" cy="100" r="80" fill="none" stroke="currentColor" strokeWidth="0.2" />
+            <circle cx="0" cy="100" r="100" fill="none" stroke="currentColor" strokeWidth="0.2" />
+          </svg>
         </div>
 
         {/* Content */}
         <div className="relative z-10 container-church text-center text-primary-foreground pt-32">
           <div className="animate-fade-up">
-            <span className="inline-block px-5 py-2 rounded-full border border-primary/30 bg-primary/10 text-primary text-xs font-semibold uppercase tracking-[0.2em] mb-8 backdrop-blur-md">
-              Bem-vindo à nossa família
+            <span className="inline-block px-5 py-2 rounded-full border border-white/20 bg-white/10 text-white text-xs font-bold uppercase tracking-[0.3em] mb-8 backdrop-blur-sm">
+              Uma Igreja Relevante para a Cidade
             </span>
           </div>
 
-          <h1 className="font-display text-5xl md:text-7xl lg:text-8xl font-bold mb-6 animate-fade-up delay-100 flex flex-col gap-2">
-            <span className="text-white/90">Igreja</span>
-            <span className="text-primary italic font-serif">Novo Caminho</span>
+          <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-extrabold mb-8 animate-fade-up delay-100 flex flex-col gap-1 tracking-tighter uppercase">
+            <span className="text-white">Resista a esse medo,</span>
+            <span className="text-white">Resista a esse sofrimento,</span>
+            <span className="text-white/80 italic font-serif lowercase">busque o</span>
+            <span className="text-white">Novo Caminho,</span>
+            <span className="text-white">Busque a Deus.</span>
           </h1>
 
-          <p className="text-xl md:text-2xl text-white/70 font-light max-w-2xl mx-auto mb-12 animate-fade-up delay-200">
-            Um lugar de acolhimento, transformação e esperança em Portugal
+          <p className="text-sm md:text-base text-white/60 font-medium max-w-2xl mx-auto mb-12 animate-fade-up delay-200 uppercase tracking-[0.2em] flex items-center justify-center gap-2">
+            <span className="w-8 h-px bg-white/20"></span>
+            Rua da Parada 06, Agualva-Cacém
+            <span className="w-8 h-px bg-white/20"></span>
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 animate-fade-up delay-300">
-            <Button className="bg-primary text-primary-foreground hover:bg-white hover:text-black transition-all duration-500 rounded-none px-8 py-6 uppercase tracking-widest text-xs font-bold" asChild>
+            <Button className="bg-white text-primary hover:bg-primary-foreground transition-all duration-500 rounded-full px-10 py-7 uppercase tracking-widest text-xs font-bold shadow-lg shadow-black/20" asChild>
               <Link to="/contato">
                 Visite-nos
               </Link>
             </Button>
-            <Button className="bg-transparent border border-white/30 text-white hover:bg-white/10 transition-all duration-500 rounded-none px-8 py-6 uppercase tracking-widest text-xs font-bold" onClick={() => setShowLive(true)}>
+            <Button className="bg-transparent border-2 border-white/40 text-white hover:bg-white/10 transition-all duration-500 rounded-full px-10 py-7 uppercase tracking-widest text-xs font-bold backdrop-blur-sm" onClick={() => setShowLive(true)}>
               Assistir ao Vivo
             </Button>
           </div>
 
           {/* Scroll Indicator */}
           <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-float opacity-50">
-            <div className="w-px h-16 bg-gradient-to-b from-primary to-transparent" />
+            <div className="w-px h-16 bg-gradient-to-b from-white to-transparent" />
           </div>
         </div>
       </section>

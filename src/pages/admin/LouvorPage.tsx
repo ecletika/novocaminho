@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Search, Music, Users, Calendar, Mic, Trash2, Edit, Eye, Upload, Settings, ChevronLeft, ChevronRight, Phone, Share2, Youtube, ExternalLink } from "lucide-react";
+import { Plus, Search, Music, Users, Calendar, Mic, Trash2, Edit, Eye, Upload, Settings, ChevronLeft, ChevronRight, Phone, Share2, Youtube, ExternalLink, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -44,6 +44,13 @@ import {
   WorshipMember,
 } from "@/hooks/useWorship";
 import {
+  useGeneralSchedules,
+  useCreateGeneralSchedule,
+  useUpdateGeneralSchedule,
+  useDeleteGeneralSchedule,
+  GeneralSchedule,
+} from "@/hooks/useGeneralSchedules";
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -55,10 +62,14 @@ import {
 } from "@/components/ui/alert-dialog";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths, isSameMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useAuth } from "@/contexts/AuthContext";
+import { useProfiles } from "@/hooks/useUserPermissions";
 
 const MUSICAL_KEYS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+const scheduleTypes = ["Culto Domingo", "Culto Quarta", "Culto de Oração", "Evento Especial"];
 
 export default function LouvorPage() {
+  const { isAdmin, user: currentUser } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedMinisterId, setSelectedMinisterId] = useState<string | null>(null);
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -90,6 +101,7 @@ export default function LouvorPage() {
   const [newMemberPhotoPreview, setNewMemberPhotoPreview] = useState<string | null>(null);
   const [newMemberPrimaryFunctionId, setNewMemberPrimaryFunctionId] = useState("");
   const [newMemberSecondaryFunctionIds, setNewMemberSecondaryFunctionIds] = useState<string[]>([]);
+  const [newMemberUserId, setNewMemberUserId] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Form states - Song
@@ -108,13 +120,6 @@ export default function LouvorPage() {
   const [editSongContentType, setEditSongContentType] = useState<"cifra" | "letra">("cifra");
   const [editSongYoutubeUrl, setEditSongYoutubeUrl] = useState("");
 
-  // Form states - Schedule
-  const [newScheduleDate, setNewScheduleDate] = useState("");
-  const [newScheduleMinisterId, setNewScheduleMinisterId] = useState("");
-  const [newScheduleVocalistIds, setNewScheduleVocalistIds] = useState<string[]>([]);
-  const [newScheduleTecladoId, setNewScheduleTecladoId] = useState("");
-  const [newScheduleViolaoId, setNewScheduleViolaoId] = useState("");
-  const [newScheduleBateriaId, setNewScheduleBateriaId] = useState("");
 
   // Form states - Assignment
   const [assignSongId, setAssignSongId] = useState("");
@@ -124,16 +129,51 @@ export default function LouvorPage() {
   // Form states - Function
   const [newFunctionName, setNewFunctionName] = useState("");
 
+  // Form states - General Schedule
+  const [formDate, setFormDate] = useState("");
+  const [formType, setFormType] = useState("");
+  const [selectedMinistrantes, setSelectedMinistrantes] = useState<string[]>([]);
+  const [selectedLouvor, setSelectedLouvor] = useState<string[]>([]);
+  const [selectedMusicos, setSelectedMusicos] = useState<{ member_id: string; instrument: string }[]>([]);
+
   // Queries
   const { data: members = [], isLoading: membersLoading } = useWorshipMembers();
   const { data: songs = [], isLoading: songsLoading } = useWorshipSongs();
   const { data: assignments = [] } = useSongMinisterAssignments();
-  const { data: schedules = [] } = useWorshipSchedules();
+  const { data: profiles = [] } = useProfiles();
+  const { data: generalSchedules = [], isLoading: schedulesLoading } = useGeneralSchedules();
   const { data: functions = [], isLoading: functionsLoading } = useWorshipFunctions();
 
   // Form states - Minister (using members with Ministrante function)
   const ministranteFunctionId = functions.find(f => f.name.toLowerCase().includes("ministrante"))?.id;
+  const tecladoFunctionId = functions.find(f => f.name.toLowerCase().includes("teclado"))?.id;
+  const violaoFunctionId = functions.find(f => f.name.toLowerCase().includes("violão") || f.name.toLowerCase().includes("violao"))?.id;
+  const bateriaFunctionId = functions.find(f => f.name.toLowerCase().includes("bateria"))?.id;
+  const vocalFunctionId = functions.find(f => f.name.toLowerCase().includes("vocal") || f.name.toLowerCase().includes("back"))?.id;
+
   const ministers = members.filter(m =>
+    m.primary_function_id === ministranteFunctionId ||
+    m.secondary_functions?.some(sf => sf.function_id === ministranteFunctionId)
+  );
+
+  const tecladoMembers = members.filter(m =>
+    m.primary_function_id === tecladoFunctionId ||
+    m.secondary_functions?.some(sf => sf.function_id === tecladoFunctionId)
+  );
+
+  const violaoMembers = members.filter(m =>
+    m.primary_function_id === violaoFunctionId ||
+    m.secondary_functions?.some(sf => sf.function_id === violaoFunctionId)
+  );
+
+  const bateriaMembers = members.filter(m =>
+    m.primary_function_id === bateriaFunctionId ||
+    m.secondary_functions?.some(sf => sf.function_id === bateriaFunctionId)
+  );
+
+  const vocalMembers = members.filter(m =>
+    m.primary_function_id === vocalFunctionId ||
+    m.secondary_functions?.some(sf => sf.function_id === vocalFunctionId) ||
     m.primary_function_id === ministranteFunctionId ||
     m.secondary_functions?.some(sf => sf.function_id === ministranteFunctionId)
   );
@@ -147,11 +187,26 @@ export default function LouvorPage() {
   const deleteSong = useDeleteWorshipSong();
   const createAssignment = useCreateSongMinisterAssignment();
   const deleteAssignment = useDeleteSongMinisterAssignment();
-  const createSchedule = useCreateWorshipSchedule();
-  const updateSchedule = useUpdateWorshipSchedule();
-  const deleteSchedule = useDeleteWorshipSchedule();
+  const createWorshipSchedule = useCreateWorshipSchedule();
+  const updateWorshipSchedule = useUpdateWorshipSchedule();
+  const deleteWorshipSchedule = useDeleteWorshipSchedule();
+  const createGeneralSchedule = useCreateGeneralSchedule();
+  const updateGeneralSchedule = useUpdateGeneralSchedule();
+  const deleteGeneralSchedule = useDeleteGeneralSchedule();
   const createFunction = useCreateWorshipFunction();
   const deleteFunction = useDeleteWorshipFunction();
+
+  // Get current user's member profile and skills
+  const myMemberProfile = members.find(m => m.user_id === currentUser?.id);
+  const myFunctions = [
+    myMemberProfile?.primary_function?.name.toLowerCase(),
+    ...(myMemberProfile?.secondary_functions?.map(sf => sf.function?.name.toLowerCase()) || [])
+  ].filter(Boolean);
+
+  const isMusician = myFunctions.some(f => ["teclado", "violão", "violao", "bateria", "baixo", "guitarra"].some(instr => f?.includes(instr)));
+  const isMinister = myFunctions.some(f => f?.includes("ministrante"));
+  const isVocal = myFunctions.some(f => f?.includes("vocal") || f?.includes("back"));
+  const hasLouvorAccess = isAdmin || isMusician || isMinister || isVocal;
 
   // Handlers
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -176,6 +231,7 @@ export default function LouvorPage() {
       phone: newMemberPhone.trim() || undefined,
       photo_url: photoUrl,
       primary_function_id: newMemberPrimaryFunctionId,
+      user_id: newMemberUserId || undefined,
       secondary_function_ids: newMemberSecondaryFunctionIds
     });
 
@@ -198,11 +254,79 @@ export default function LouvorPage() {
       phone: newMemberPhone.trim() || undefined,
       photo_url: photoUrl || selectedMember.photo_url || undefined,
       primary_function_id: newMemberPrimaryFunctionId,
+      user_id: newMemberUserId || null,
       secondary_function_ids: newMemberSecondaryFunctionIds
     });
 
     resetMemberForm();
     setIsEditMemberDialogOpen(false);
+  };
+
+  const resetGeneralScheduleForm = () => {
+    setFormDate("");
+    setFormType("");
+    setSelectedMinistrantes([]);
+    setSelectedLouvor([]);
+    setSelectedMusicos([]);
+    setSelectedSchedule(null);
+  };
+
+  const handleGeneralScheduleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const team_assignments: { member_id: string; role: string; instrument?: string }[] = [];
+
+    selectedMinistrantes.forEach(id => team_assignments.push({ member_id: id, role: "ministrante" }));
+    selectedLouvor.forEach(id => team_assignments.push({ member_id: id, role: "louvor" }));
+    selectedMusicos.forEach(m => team_assignments.push({ member_id: m.member_id, role: "musicos", instrument: m.instrument }));
+
+    if (selectedSchedule) {
+      await updateGeneralSchedule.mutateAsync({
+        id: selectedSchedule.id,
+        date: formDate,
+        type: formType,
+        team_assignments,
+      });
+    } else {
+      await createGeneralSchedule.mutateAsync({
+        date: formDate,
+        type: formType,
+        team_assignments,
+      });
+    }
+
+    setIsNewScheduleDialogOpen(false);
+    setIsEditScheduleDialogOpen(false);
+    resetGeneralScheduleForm();
+  };
+
+  const handleEditGeneralSchedule = (schedule: GeneralSchedule) => {
+    setSelectedSchedule(schedule as any);
+    setFormDate(schedule.date);
+    setFormType(schedule.type);
+
+    const teamMembers = schedule.team_members || [];
+    setSelectedMinistrantes(teamMembers.filter(tm => tm.role === "ministrante").map(tm => tm.member_id));
+    setSelectedLouvor(teamMembers.filter(tm => tm.role === "louvor").map(tm => tm.member_id));
+    setSelectedMusicos(teamMembers.filter(tm => tm.role === "musicos").map(tm => ({ member_id: tm.member_id, instrument: tm.instrument || "" })));
+
+    setIsEditScheduleDialogOpen(true);
+  };
+
+  const toggleLouvorMember = (list: string[], setList: (val: string[]) => void, memberId: string) => {
+    if (list.includes(memberId)) {
+      setList(list.filter(id => id !== memberId));
+    } else {
+      setList([...list, memberId]);
+    }
+  };
+
+  const toggleLouvorMusician = (memberId: string, instrument: string) => {
+    const existing = selectedMusicos.find(m => m.member_id === memberId);
+    if (existing) {
+      setSelectedMusicos(selectedMusicos.filter(m => m.member_id !== memberId));
+    } else {
+      setSelectedMusicos([...selectedMusicos, { member_id: memberId, instrument }]);
+    }
   };
 
   const openEditMemberDialog = (member: WorshipMember) => {
@@ -212,6 +336,7 @@ export default function LouvorPage() {
     setNewMemberPhotoPreview(member.photo_url);
     setNewMemberPrimaryFunctionId(member.primary_function_id || "");
     setNewMemberSecondaryFunctionIds(member.secondary_functions?.map(sf => sf.function_id) || []);
+    setNewMemberUserId(member.user_id || "");
     setIsEditMemberDialogOpen(true);
   };
 
@@ -222,6 +347,7 @@ export default function LouvorPage() {
     setNewMemberPhotoPreview(null);
     setNewMemberPrimaryFunctionId("");
     setNewMemberSecondaryFunctionIds([]);
+    setNewMemberUserId("");
     setSelectedMember(null);
   };
 
@@ -438,9 +564,29 @@ export default function LouvorPage() {
     ? assignments.filter(a => a.minister_id === selectedMinisterId)
     : [];
 
-  const filteredMembers = members.filter(m =>
-    m.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredMembers = members.filter(m => {
+    const matchesSearch = m.name.toLowerCase().includes(searchTerm.toLowerCase());
+    if (isAdmin) return matchesSearch;
+
+    // For non-admins, show members who share at least one function type (Musician, Minister, Vocal)
+    const mFunctions = [
+      m.primary_function?.name.toLowerCase(),
+      ...(m.secondary_functions?.map(sf => sf.function?.name.toLowerCase()) || [])
+    ].filter(Boolean);
+
+    const mIsMusician = mFunctions.some(f => ["teclado", "violão", "violao", "bateria", "baixo", "guitarra"].some(instr => f?.includes(instr)));
+    const mIsMinister = mFunctions.some(f => f?.includes("ministrante"));
+    const mIsVocal = mFunctions.some(f => f?.includes("vocal") || f?.includes("back"));
+
+    if (isMusician && mIsMusician) return matchesSearch;
+    if (isMinister && mIsMinister) return matchesSearch;
+    if (isVocal && mIsVocal) return matchesSearch;
+
+    // If no direct group match, but they are the user themselves
+    if (m.user_id === currentUser?.id) return matchesSearch;
+
+    return false;
+  });
 
   const filteredSongs = songs.filter(s =>
     s.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -450,30 +596,51 @@ export default function LouvorPage() {
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
   const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
-  const schedulesInMonth = schedules.filter(s => {
+  const schedulesInMonth = generalSchedules.filter(s => {
     const scheduleDate = new Date(s.date);
     return isSameMonth(scheduleDate, currentMonth);
   });
 
   const getScheduleForDay = (day: Date) => {
-    return schedules.find(s => isSameDay(new Date(s.date), day));
+    return generalSchedules.find(s => isSameDay(new Date(s.date), day));
   };
 
-  const shareScheduleWhatsApp = (schedule: WorshipSchedule) => {
+  const shareScheduleWhatsApp = (schedule: GeneralSchedule) => {
     const dateStr = format(new Date(schedule.date), "EEEE, d 'de' MMMM", { locale: ptBR });
-    let msg = `🎵 *Escala de Louvor*\n📅 ${dateStr}\n`;
-    if (schedule.minister?.name) msg += `🎤 *Ministrante:* ${schedule.minister.name}\n`;
-    if (schedule.vocalists && schedule.vocalists.length > 0) {
-      msg += `\n🎶 *Vocais:*\n`;
-      schedule.vocalists.forEach(v => { msg += `  • ${v.member?.name || ""}\n`; });
+    let msg = `🎵 *Escala de Louvor*\n📅 ${dateStr}\n📍 ${schedule.type}\n`;
+
+    const ministrantes = schedule.team_members?.filter(tm => tm.role === "ministrante") || [];
+    const louvor = schedule.team_members?.filter(tm => tm.role === "louvor") || [];
+    const musicos = schedule.team_members?.filter(tm => tm.role === "musicos") || [];
+
+    if (ministrantes.length > 0) {
+      msg += `\n🎤 *Ministrante(s):*\n`;
+      ministrantes.forEach(m => { msg += `  • ${m.member?.name || ""}\n`; });
     }
-    if (schedule.musicians && schedule.musicians.length > 0) {
+    if (louvor.length > 0) {
+      msg += `\n🎶 *Vocais:*\n`;
+      louvor.forEach(v => { msg += `  • ${v.member?.name || ""}\n`; });
+    }
+    if (musicos.length > 0) {
       msg += `\n🎸 *Músicos:*\n`;
-      schedule.musicians.forEach(m => { msg += `  • ${m.member?.name || ""} (${m.instrument})\n`; });
+      musicos.forEach(m => { msg += `  • ${m.member?.name || ""} (${m.instrument || ""})\n`; });
     }
     msg += `\n_Deus abençoe o nosso louvor!_ 🙏`;
     window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
   };
+
+  if (!hasLouvorAccess && !membersLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[60vh] text-center px-4">
+        <Music className="w-12 h-12 text-muted-foreground mb-4" />
+        <h2 className="text-xl font-semibold mb-2">Acesso Restrito</h2>
+        <p className="text-muted-foreground">
+          Você não possui habilidades de louvor vinculadas ao seu perfil.
+          Entre em contato com um administrador para configurar seu acesso.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -486,7 +653,7 @@ export default function LouvorPage() {
       </div>
 
       <Tabs defaultValue="members" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-grid">
+        <TabsList className="grid w-full grid-cols-3 sm:grid-cols-5 lg:w-auto lg:inline-grid">
           <TabsTrigger value="members" className="gap-2">
             <Users className="w-4 h-4" />
             <span className="hidden sm:inline">Integrantes</span>
@@ -499,10 +666,16 @@ export default function LouvorPage() {
             <Mic className="w-4 h-4" />
             <span className="hidden sm:inline">Ministrantes</span>
           </TabsTrigger>
-          <TabsTrigger value="functions" className="gap-2">
-            <Settings className="w-4 h-4" />
-            <span className="hidden sm:inline">Funções</span>
+          <TabsTrigger value="schedules" className="gap-2">
+            <Calendar className="w-4 h-4" />
+            <span className="hidden sm:inline">Escalas</span>
           </TabsTrigger>
+          {isAdmin && (
+            <TabsTrigger value="functions" className="gap-2">
+              <Settings className="w-4 h-4" />
+              <span className="hidden sm:inline">Funções</span>
+            </TabsTrigger>
+          )}
         </TabsList>
 
         {/* Members Tab */}
@@ -517,98 +690,116 @@ export default function LouvorPage() {
                 className="pl-9"
               />
             </div>
-            <Dialog open={isNewMemberDialogOpen} onOpenChange={setIsNewMemberDialogOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Novo Integrante
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-md">
-                <DialogHeader>
-                  <DialogTitle className="font-display text-xl">Adicionar Integrante</DialogTitle>
-                </DialogHeader>
-                <form onSubmit={handleAddMember} className="space-y-4 mt-4">
-                  <div className="flex flex-col items-center gap-4">
-                    <div
-                      className="w-24 h-24 rounded-full bg-muted flex items-center justify-center cursor-pointer hover:bg-muted/80 transition-colors overflow-hidden"
-                      onClick={() => fileInputRef.current?.click()}
-                    >
-                      {newMemberPhotoPreview ? (
-                        <img src={newMemberPhotoPreview} alt="Preview" className="w-full h-full object-cover" />
-                      ) : (
-                        <Upload className="w-8 h-8 text-muted-foreground" />
-                      )}
+            {isAdmin && (
+              <Dialog open={isNewMemberDialogOpen} onOpenChange={setIsNewMemberDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Novo Integrante
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-md">
+                  <DialogHeader>
+                    <DialogTitle className="font-display text-xl">Adicionar Integrante</DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={handleAddMember} className="space-y-4 mt-4">
+                    <div className="flex flex-col items-center gap-4">
+                      <div
+                        className="w-24 h-24 rounded-full bg-muted flex items-center justify-center cursor-pointer hover:bg-muted/80 transition-colors overflow-hidden"
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        {newMemberPhotoPreview ? (
+                          <img src={newMemberPhotoPreview} alt="Preview" className="w-full h-full object-cover" />
+                        ) : (
+                          <Upload className="w-8 h-8 text-muted-foreground" />
+                        )}
+                      </div>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handlePhotoChange}
+                      />
+                      <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+                        Escolher Foto
+                      </Button>
                     </div>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handlePhotoChange}
-                    />
-                    <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
-                      Escolher Foto
-                    </Button>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">Nome *</label>
-                    <Input
-                      placeholder="Nome completo"
-                      value={newMemberName}
-                      onChange={(e) => setNewMemberName(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">Telefone</label>
-                    <Input
-                      placeholder="Ex: +5511999999999"
-                      value={newMemberPhone}
-                      onChange={(e) => setNewMemberPhone(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">Função Principal *</label>
-                    <Select value={newMemberPrimaryFunctionId} onValueChange={setNewMemberPrimaryFunctionId}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione a função principal" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {functions.map((func) => (
-                          <SelectItem key={func.id} value={func.id}>{func.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">Funções Secundárias</label>
-                    <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto">
-                      {functions
-                        .filter(f => f.id !== newMemberPrimaryFunctionId)
-                        .map((func) => (
-                          <div key={func.id} className="flex items-center gap-2">
-                            <Checkbox
-                              id={`func-${func.id}`}
-                              checked={newMemberSecondaryFunctionIds.includes(func.id)}
-                              onCheckedChange={() => toggleSecondaryFunction(func.id)}
-                            />
-                            <label htmlFor={`func-${func.id}`} className="text-sm">{func.name}</label>
-                          </div>
-                        ))}
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-2">Nome *</label>
+                      <Input
+                        placeholder="Nome completo"
+                        value={newMemberName}
+                        onChange={(e) => setNewMemberName(e.target.value)}
+                        required
+                      />
                     </div>
-                  </div>
-                  <div className="flex gap-3 pt-4">
-                    <Button type="button" variant="outline" className="flex-1" onClick={() => setIsNewMemberDialogOpen(false)}>
-                      Cancelar
-                    </Button>
-                    <Button type="submit" className="flex-1" disabled={createMember.isPending}>
-                      {createMember.isPending ? "Adicionando..." : "Adicionar"}
-                    </Button>
-                  </div>
-                </form>
-              </DialogContent>
-            </Dialog>
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-2">Telefone</label>
+                      <Input
+                        placeholder="Ex: +5511999999999"
+                        value={newMemberPhone}
+                        onChange={(e) => setNewMemberPhone(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-2">Função Principal *</label>
+                      <Select value={newMemberPrimaryFunctionId} onValueChange={setNewMemberPrimaryFunctionId}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione a função principal" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {functions.map((func) => (
+                            <SelectItem key={func.id} value={func.id}>{func.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    {isAdmin && (
+                      <div>
+                        <label className="block text-sm font-medium text-foreground mb-2">Usuário Vinculado (Opcional)</label>
+                        <Select value={newMemberUserId} onValueChange={setNewMemberUserId}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione um usuário" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">Nenhum</SelectItem>
+                            {profiles.map((profile) => (
+                              <SelectItem key={profile.id} value={profile.user_id}>{profile.full_name || 'Sem nome'}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-2">Funções Secundárias</label>
+                      <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto">
+                        {functions
+                          .filter(f => f.id !== newMemberPrimaryFunctionId)
+                          .map((func) => (
+                            <div key={func.id} className="flex items-center gap-2">
+                              <Checkbox
+                                id={`func-${func.id}`}
+                                checked={newMemberSecondaryFunctionIds.includes(func.id)}
+                                onCheckedChange={() => toggleSecondaryFunction(func.id)}
+                              />
+                              <label htmlFor={`func-${func.id}`} className="text-sm">{func.name}</label>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                    <div className="flex gap-3 pt-4">
+                      <Button type="button" variant="outline" className="flex-1" onClick={() => setIsNewMemberDialogOpen(false)}>
+                        Cancelar
+                      </Button>
+                      <Button type="submit" className="flex-1" disabled={createMember.isPending}>
+                        {createMember.isPending ? "Adicionando..." : "Adicionar"}
+                      </Button>
+                    </div>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            )}
           </div>
 
           {membersLoading ? (
@@ -620,22 +811,26 @@ export default function LouvorPage() {
               {filteredMembers.map((member) => (
                 <div key={member.id} className="bg-card rounded-xl shadow-soft p-4 hover:shadow-card transition-all text-center group relative">
                   <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => openEditMemberDialog(member)}
-                    >
-                      <Edit className="w-4 h-4 text-muted-foreground" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => openDeleteDialog(member.id, "member")}
-                    >
-                      <Trash2 className="w-4 h-4 text-destructive" />
-                    </Button>
+                    {isAdmin && (
+                      <>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => openEditMemberDialog(member)}
+                        >
+                          <Edit className="w-4 h-4 text-muted-foreground" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => openDeleteDialog(member.id, "member")}
+                        >
+                          <Trash2 className="w-4 h-4 text-destructive" />
+                        </Button>
+                      </>
+                    )}
                   </div>
                   <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3 overflow-hidden">
                     {member.photo_url ? (
@@ -676,122 +871,37 @@ export default function LouvorPage() {
               />
             </div>
             <div className="flex gap-2">
-              <Dialog open={isAssignSongDialogOpen} onOpenChange={setIsAssignSongDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button variant="outline">
-                    <Mic className="w-4 h-4 mr-2" />
-                    Associar a Ministrante
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle className="font-display text-xl">Associar Música a Ministrante</DialogTitle>
-                  </DialogHeader>
-                  <form onSubmit={handleAssignSong} className="space-y-4 mt-4">
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-2">Música *</label>
-                      <Select value={assignSongId} onValueChange={setAssignSongId}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione a música" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {songs.map((song) => (
-                            <SelectItem key={song.id} value={song.id}>{song.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-2">Ministrante *</label>
-                      <Select value={assignMinisterId} onValueChange={setAssignMinisterId}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione o ministrante" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {ministers.map((minister) => (
-                            <SelectItem key={minister.id} value={minister.id}>{minister.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-2">Tom *</label>
-                      <Select value={assignKey} onValueChange={setAssignKey}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione o tom" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {MUSICAL_KEYS.map((key) => (
-                            <SelectItem key={key} value={key}>{key}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="flex gap-3 pt-4">
-                      <Button type="button" variant="outline" className="flex-1" onClick={() => setIsAssignSongDialogOpen(false)}>
-                        Cancelar
-                      </Button>
-                      <Button type="submit" className="flex-1" disabled={createAssignment.isPending}>
-                        {createAssignment.isPending ? "Associando..." : "Associar"}
-                      </Button>
-                    </div>
-                  </form>
-                </DialogContent>
-              </Dialog>
-              <Dialog open={isNewSongDialogOpen} onOpenChange={setIsNewSongDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Nova Música
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl">
-                  <DialogHeader>
-                    <DialogTitle className="font-display text-xl">Adicionar Música</DialogTitle>
-                  </DialogHeader>
-                  <form onSubmit={handleAddSong} className="space-y-4 mt-4">
-                    <div className="grid grid-cols-2 gap-4">
+              {isAdmin && (
+                <Dialog open={isAssignSongDialogOpen} onOpenChange={setIsAssignSongDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline">
+                      <Mic className="w-4 h-4 mr-2" />
+                      Associar a Ministrante
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle className="font-display text-xl">Associar Música a Ministrante</DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={handleAssignSong} className="space-y-4 mt-4">
                       <div>
-                        <label className="block text-sm font-medium text-foreground mb-2">Nome da Música *</label>
-                        <Input
-                          placeholder="Nome do hino"
-                          value={newSongName}
-                          onChange={(e) => setNewSongName(e.target.value)}
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-foreground mb-2">Tom Original *</label>
-                        <Select value={newSongKey} onValueChange={setNewSongKey}>
+                        <label className="block text-sm font-medium text-foreground mb-2">Música *</label>
+                        <Select value={assignSongId} onValueChange={setAssignSongId}>
                           <SelectTrigger>
-                            <SelectValue placeholder="Selecione" />
+                            <SelectValue placeholder="Selecione a música" />
                           </SelectTrigger>
                           <SelectContent>
-                            {MUSICAL_KEYS.map((key) => (
-                              <SelectItem key={key} value={key}>{key}</SelectItem>
+                            {songs.map((song) => (
+                              <SelectItem key={song.id} value={song.id}>{song.name}</SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
                       </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-foreground mb-2">Tipo de Conteúdo *</label>
-                        <Select value={newSongContentType} onValueChange={(v) => setNewSongContentType(v as "cifra" | "letra")}>
+                        <label className="block text-sm font-medium text-foreground mb-2">Ministrante *</label>
+                        <Select value={assignMinisterId} onValueChange={setAssignMinisterId}>
                           <SelectTrigger>
-                            <SelectValue placeholder="Selecione" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="cifra">Cifra</SelectItem>
-                            <SelectItem value="letra">Letra</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-foreground mb-2">Ministrante (opcional)</label>
-                        <Select value={newSongMinisterId} onValueChange={setNewSongMinisterId}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione" />
+                            <SelectValue placeholder="Selecione o ministrante" />
                           </SelectTrigger>
                           <SelectContent>
                             {ministers.map((minister) => (
@@ -800,13 +910,11 @@ export default function LouvorPage() {
                           </SelectContent>
                         </Select>
                       </div>
-                    </div>
-                    {newSongMinisterId && (
                       <div>
-                        <label className="block text-sm font-medium text-foreground mb-2">Tom para o Ministrante</label>
-                        <Select value={newSongMinisterKey} onValueChange={setNewSongMinisterKey}>
+                        <label className="block text-sm font-medium text-foreground mb-2">Tom *</label>
+                        <Select value={assignKey} onValueChange={setAssignKey}>
                           <SelectTrigger>
-                            <SelectValue placeholder="Selecione" />
+                            <SelectValue placeholder="Selecione o tom" />
                           </SelectTrigger>
                           <SelectContent>
                             {MUSICAL_KEYS.map((key) => (
@@ -815,35 +923,126 @@ export default function LouvorPage() {
                           </SelectContent>
                         </Select>
                       </div>
-                    )}
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-2">Link do YouTube (opcional)</label>
-                      <Input
-                        placeholder="https://youtube.com/watch?v=..."
-                        value={newSongYoutubeUrl}
-                        onChange={(e) => setNewSongYoutubeUrl(e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-2">Cifra / Letra</label>
-                      <Textarea
-                        placeholder="Cole aqui a cifra ou letra..."
-                        rows={8}
-                        value={newSongLyrics}
-                        onChange={(e) => setNewSongLyrics(e.target.value)}
-                      />
-                    </div>
-                    <div className="flex gap-3 pt-4">
-                      <Button type="button" variant="outline" className="flex-1" onClick={() => setIsNewSongDialogOpen(false)}>
-                        Cancelar
-                      </Button>
-                      <Button type="submit" className="flex-1" disabled={createSong.isPending}>
-                        {createSong.isPending ? "Adicionando..." : "Adicionar"}
-                      </Button>
-                    </div>
-                  </form>
-                </DialogContent>
-              </Dialog>
+                      <div className="flex gap-3 pt-4">
+                        <Button type="button" variant="outline" className="flex-1" onClick={() => setIsAssignSongDialogOpen(false)}>
+                          Cancelar
+                        </Button>
+                        <Button type="submit" className="flex-1" disabled={createAssignment.isPending}>
+                          {createAssignment.isPending ? "Associando..." : "Associar"}
+                        </Button>
+                      </div>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+              )}
+              {isAdmin && (
+                <Dialog open={isNewSongDialogOpen} onOpenChange={setIsNewSongDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Nova Música
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle className="font-display text-xl">Adicionar Música</DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={handleAddSong} className="space-y-4 mt-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-foreground mb-2">Nome da Música *</label>
+                          <Input
+                            placeholder="Nome do hino"
+                            value={newSongName}
+                            onChange={(e) => setNewSongName(e.target.value)}
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-foreground mb-2">Tom Original *</label>
+                          <Select value={newSongKey} onValueChange={setNewSongKey}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {MUSICAL_KEYS.map((key) => (
+                                <SelectItem key={key} value={key}>{key}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-foreground mb-2">Tipo de Conteúdo *</label>
+                          <Select value={newSongContentType} onValueChange={(v) => setNewSongContentType(v as "cifra" | "letra")}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="cifra">Cifra</SelectItem>
+                              <SelectItem value="letra">Letra</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-foreground mb-2">Ministrante (opcional)</label>
+                          <Select value={newSongMinisterId} onValueChange={setNewSongMinisterId}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {ministers.map((minister) => (
+                                <SelectItem key={minister.id} value={minister.id}>{minister.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      {newSongMinisterId && (
+                        <div>
+                          <label className="block text-sm font-medium text-foreground mb-2">Tom para o Ministrante</label>
+                          <Select value={newSongMinisterKey} onValueChange={setNewSongMinisterKey}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {MUSICAL_KEYS.map((key) => (
+                                <SelectItem key={key} value={key}>{key}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
+                      <div>
+                        <label className="block text-sm font-medium text-foreground mb-2">Link do YouTube (opcional)</label>
+                        <Input
+                          placeholder="https://youtube.com/watch?v=..."
+                          value={newSongYoutubeUrl}
+                          onChange={(e) => setNewSongYoutubeUrl(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-foreground mb-2">Cifra / Letra</label>
+                        <Textarea
+                          placeholder="Cole aqui a cifra ou letra..."
+                          rows={8}
+                          value={newSongLyrics}
+                          onChange={(e) => setNewSongLyrics(e.target.value)}
+                        />
+                      </div>
+                      <div className="flex gap-3 pt-4">
+                        <Button type="button" variant="outline" className="flex-1" onClick={() => setIsNewSongDialogOpen(false)}>
+                          Cancelar
+                        </Button>
+                        <Button type="submit" className="flex-1" disabled={createSong.isPending}>
+                          {createSong.isPending ? "Adicionando..." : "Adicionar"}
+                        </Button>
+                      </div>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+              )}
             </div>
           </div>
 
@@ -1165,6 +1364,177 @@ export default function LouvorPage() {
             </div>
           )}
         </TabsContent>
+        {/* Schedules Tab */}
+        <TabsContent value="schedules" className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="font-display text-xl font-semibold text-foreground">Escalas de Louvor</h2>
+            {isAdmin && (
+              <Button onClick={() => { resetGeneralScheduleForm(); setIsNewScheduleDialogOpen(true); }}>
+                <Plus className="w-4 h-4 mr-2" />
+                Nova Escala
+              </Button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-4 justify-center">
+            <Button variant="outline" size="icon" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
+            <h2 className="font-display text-xl font-semibold text-foreground min-w-[200px] text-center">
+              {format(currentMonth, "MMMM yyyy", { locale: ptBR })}
+            </h2>
+            <Button variant="outline" size="icon" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
+
+          <div className="bg-card rounded-xl shadow-soft p-4">
+            <div className="grid grid-cols-7 gap-1 mb-2">
+              {["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map((day) => (
+                <div key={day} className="text-center text-sm font-semibold text-muted-foreground py-2">
+                  {day}
+                </div>
+              ))}
+            </div>
+            <div className="grid grid-cols-7 gap-1">
+              {Array.from({ length: monthStart.getDay() }).map((_, i) => (
+                <div key={`empty-start-${i}`} className="aspect-square" />
+              ))}
+              {daysInMonth.map((day) => {
+                const schedule = getScheduleForDay(day);
+                const isToday = isSameDay(day, new Date());
+                return (
+                  <div
+                    key={day.toISOString()}
+                    className={`aspect-square rounded-lg p-1 flex flex-col items-center justify-start transition-colors ${schedule
+                      ? 'bg-primary/20 hover:bg-primary/30 cursor-pointer'
+                      : 'hover:bg-muted/50'
+                      } ${isToday ? 'ring-2 ring-primary' : ''}`}
+                    onClick={() => schedule && handleEditGeneralSchedule(schedule)}
+                  >
+                    <span className={`text-sm font-medium ${isToday ? 'text-primary' : 'text-foreground'}`}>
+                      {format(day, "d")}
+                    </span>
+                    {schedule && (
+                      <div className="mt-1 w-full">
+                        <div className="text-[10px] text-primary font-medium truncate text-center">
+                          {schedule.type.split(' ')[0]}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="grid gap-4">
+            {schedulesInMonth.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground bg-card rounded-xl">
+                Nenhuma escala neste mês
+              </div>
+            ) : (
+              schedulesInMonth
+                .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                .map((schedule) => {
+                  const ministrantes = schedule.team_members?.filter(tm => tm.role === "ministrante") || [];
+                  const louvor = schedule.team_members?.filter(tm => tm.role === "louvor") || [];
+                  const musicos = schedule.team_members?.filter(tm => tm.role === "musicos") || [];
+
+                  return (
+                    <div
+                      key={schedule.id}
+                      className="bg-card rounded-xl p-6 shadow-soft hover:shadow-card transition-all"
+                    >
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-4">
+                          <div className="w-14 h-14 rounded-xl bg-primary/10 flex flex-col items-center justify-center">
+                            <Calendar className="w-6 h-6 text-primary" />
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-foreground text-lg">{schedule.type}</h3>
+                            <div className="flex items-center gap-2 text-muted-foreground text-sm mt-1">
+                              <span>{format(new Date(schedule.date), "EEEE, dd 'de' MMMM", { locale: ptBR })}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button variant="outline" size="sm" onClick={() => shareScheduleWhatsApp(schedule)}>
+                            <Share2 className="w-4 h-4 mr-2" />
+                            WhatsApp
+                          </Button>
+                          {isAdmin && (
+                            <div className="flex items-center gap-1">
+                              <Button variant="outline" size="sm" onClick={() => handleEditGeneralSchedule(schedule)}>
+                                <Edit className="w-4 h-4 mr-1" />
+                                Editar
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-destructive"
+                                onClick={() => { setDeleteItemId(schedule.id); setDeleteType("schedule" as any); }}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="grid sm:grid-cols-3 gap-4 mt-4 pt-4 border-t border-border">
+                        {ministrantes.length > 0 && (
+                          <div>
+                            <div className="flex items-center gap-2 text-sm font-medium text-foreground mb-2">
+                              <Mic className="w-4 h-4 text-primary" />
+                              Ministrante
+                            </div>
+                            <div className="space-y-1">
+                              {ministrantes.map((tm) => (
+                                <span key={tm.id} className="block text-sm text-muted-foreground">
+                                  {tm.member?.name}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {louvor.length > 0 && (
+                          <div>
+                            <div className="flex items-center gap-2 text-sm font-medium text-foreground mb-2">
+                              <Music className="w-4 h-4 text-secondary" />
+                              Louvor
+                            </div>
+                            <div className="space-y-1">
+                              {louvor.map((tm) => (
+                                <span key={tm.id} className="block text-sm text-muted-foreground">
+                                  {tm.member?.name}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {musicos.length > 0 && (
+                          <div>
+                            <div className="flex items-center gap-2 text-sm font-medium text-foreground mb-2">
+                              <Music className="w-4 h-4 text-accent" />
+                              Músicos
+                            </div>
+                            <div className="space-y-1">
+                              {musicos.map((tm) => (
+                                <span key={tm.id} className="block text-sm text-muted-foreground">
+                                  {tm.member?.name} {tm.instrument && `(${tm.instrument})`}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+            )}
+          </div>
+        </TabsContent>
       </Tabs>
 
       {/* View Lyrics Dialog */}
@@ -1261,100 +1631,164 @@ export default function LouvorPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Schedule Dialog */}
-      <Dialog open={isEditScheduleDialogOpen} onOpenChange={setIsEditScheduleDialogOpen}>
-        <DialogContent className="max-w-lg">
+      {/* New/Edit Schedule Dialog */}
+      <Dialog open={isNewScheduleDialogOpen || isEditScheduleDialogOpen} onOpenChange={(open) => {
+        if (!open) {
+          setIsNewScheduleDialogOpen(false);
+          setIsEditScheduleDialogOpen(false);
+          resetGeneralScheduleForm();
+        }
+      }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="font-display text-xl">Editar Escala</DialogTitle>
+            <DialogTitle className="font-display text-xl">
+              {selectedSchedule ? "Editar Escala" : "Criar Nova Escala"}
+            </DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleEditSchedule} className="space-y-4 mt-4">
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Data *</label>
-              <Input
-                type="date"
-                value={newScheduleDate}
-                onChange={(e) => setNewScheduleDate(e.target.value)}
-                required
-              />
+          <form onSubmit={handleGeneralScheduleSubmit} className="space-y-4 mt-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">Data *</label>
+                <Input
+                  type="date"
+                  value={formDate}
+                  onChange={(e) => setFormDate(e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">Tipo *</label>
+                <Select value={formType} onValueChange={setFormType}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {scheduleTypes.map((type) => (
+                      <SelectItem key={type} value={type}>{type}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
+
+            {/* Ministrante */}
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Ministrante *</label>
-              <Select value={newScheduleMinisterId} onValueChange={setNewScheduleMinisterId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o ministrante" />
-                </SelectTrigger>
-                <SelectContent>
-                  {ministers.map((minister) => (
-                    <SelectItem key={minister.id} value={minister.id}>{minister.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Vocais</label>
-              <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto border rounded-md p-2">
-                {members.map((member) => (
+              <label className="block text-sm font-medium text-foreground mb-2 flex items-center gap-2">
+                <Mic className="w-4 h-4 text-primary" />
+                Ministrante
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-32 overflow-y-auto border rounded-md p-2">
+                {ministers.map((member) => (
                   <div key={member.id} className="flex items-center gap-2">
                     <Checkbox
-                      id={`edit-vocalist-${member.id}`}
-                      checked={newScheduleVocalistIds.includes(member.id)}
-                      onCheckedChange={() => toggleVocalist(member.id)}
+                      id={`ministrante-${member.id}`}
+                      checked={selectedMinistrantes.includes(member.id)}
+                      onCheckedChange={() => toggleLouvorMember(selectedMinistrantes, setSelectedMinistrantes, member.id)}
                     />
-                    <label htmlFor={`edit-vocalist-${member.id}`} className="text-sm">{member.name}</label>
+                    <label htmlFor={`ministrante-${member.id}`} className="text-sm">{member.name}</label>
                   </div>
                 ))}
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Teclado</label>
-                <Select value={newScheduleTecladoId} onValueChange={setNewScheduleTecladoId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">Nenhum</SelectItem>
-                    {members.map((member) => (
-                      <SelectItem key={member.id} value={member.id}>{member.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Violão</label>
-                <Select value={newScheduleViolaoId} onValueChange={setNewScheduleViolaoId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">Nenhum</SelectItem>
-                    {members.map((member) => (
-                      <SelectItem key={member.id} value={member.id}>{member.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Bateria</label>
-                <Select value={newScheduleBateriaId} onValueChange={setNewScheduleBateriaId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">Nenhum</SelectItem>
-                    {members.map((member) => (
-                      <SelectItem key={member.id} value={member.id}>{member.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+
+            {/* Louvor */}
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2 flex items-center gap-2">
+                <Music className="w-4 h-4 text-secondary" />
+                Louvor (Vocal)
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-32 overflow-y-auto border rounded-md p-2">
+                {vocalMembers.map((member) => (
+                  <div key={member.id} className="flex items-center gap-2">
+                    <Checkbox
+                      id={`louvor-${member.id}`}
+                      checked={selectedLouvor.includes(member.id)}
+                      onCheckedChange={() => toggleLouvorMember(selectedLouvor, setSelectedLouvor, member.id)}
+                    />
+                    <label htmlFor={`louvor-${member.id}`} className="text-sm">{member.name}</label>
+                  </div>
+                ))}
               </div>
             </div>
+
+            {/* Músicos */}
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2 flex items-center gap-2">
+                <Music className="w-4 h-4 text-accent" />
+                Músicos
+              </label>
+              <div className="space-y-2 max-h-40 overflow-y-auto border rounded-md p-2">
+                {members.filter(m =>
+                  ["teclado", "violão", "violao", "bateria", "baixo", "guitarra"].some(instr =>
+                    m.primary_function?.name.toLowerCase().includes(instr) ||
+                    m.secondary_functions?.some(sf => sf.function?.name.toLowerCase().includes(instr))
+                  )
+                ).map((member) => {
+                  const selected = selectedMusicos.find(m => m.member_id === member.id);
+                  const hasSkill = (instr: string) => {
+                    return member.primary_function?.name.toLowerCase().includes(instr) ||
+                      member.secondary_functions?.some(sf => sf.function?.name.toLowerCase().includes(instr));
+                  };
+
+                  return (
+                    <div key={member.id} className="flex items-center gap-4">
+                      <Checkbox
+                        id={`musico-${member.id}`}
+                        checked={!!selected}
+                        onCheckedChange={() => {
+                          if (selected) {
+                            setSelectedMusicos(selectedMusicos.filter(m => m.member_id !== member.id));
+                          } else {
+                            let defaultInstrument = "";
+                            const instrList = ["teclado", "violão", "bateria", "baixo", "guitarra"];
+                            for (const instr of instrList) {
+                              if (hasSkill(instr)) {
+                                defaultInstrument = instr === "violão" ? "violao" : instr;
+                                break;
+                              }
+                            }
+                            setSelectedMusicos([...selectedMusicos, { member_id: member.id, instrument: defaultInstrument }]);
+                          }
+                        }}
+                      />
+                      <label htmlFor={`musico-${member.id}`} className="text-sm min-w-[120px]">{member.name}</label>
+                      {selected && (
+                        <Select
+                          value={selected.instrument}
+                          onValueChange={(v) => {
+                            setSelectedMusicos(selectedMusicos.map(m =>
+                              m.member_id === member.id ? { ...m, instrument: v } : m
+                            ));
+                          }}
+                        >
+                          <SelectTrigger className="w-32 h-8">
+                            <SelectValue placeholder="Instr." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {hasSkill("teclado") && <SelectItem value="teclado">Teclado</SelectItem>}
+                            {(hasSkill("violão") || hasSkill("violao")) && <SelectItem value="violao">Violão</SelectItem>}
+                            {hasSkill("bateria") && <SelectItem value="bateria">Bateria</SelectItem>}
+                            {hasSkill("baixo") && <SelectItem value="baixo">Baixo</SelectItem>}
+                            {hasSkill("guitarra") && <SelectItem value="guitarra">Guitarra</SelectItem>}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
             <div className="flex gap-3 pt-4">
-              <Button type="button" variant="outline" className="flex-1" onClick={() => { setIsEditScheduleDialogOpen(false); resetScheduleForm(); setSelectedSchedule(null); }}>
+              <Button type="button" variant="outline" className="flex-1" onClick={() => {
+                setIsNewScheduleDialogOpen(false);
+                setIsEditScheduleDialogOpen(false);
+                resetGeneralScheduleForm();
+              }}>
                 Cancelar
               </Button>
-              <Button type="submit" className="flex-1" disabled={updateSchedule.isPending}>
-                {updateSchedule.isPending ? "Salvando..." : "Salvar"}
+              <Button type="submit" className="flex-1" disabled={createGeneralSchedule.isPending || updateGeneralSchedule.isPending}>
+                {createGeneralSchedule.isPending || updateGeneralSchedule.isPending ? "Salvando..." : selectedSchedule ? "Salvar" : "Criar"}
               </Button>
             </div>
           </form>
@@ -1420,6 +1854,22 @@ export default function LouvorPage() {
                 </SelectContent>
               </Select>
             </div>
+            {isAdmin && (
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">Usuário Vinculado (Opcional)</label>
+                <Select value={newMemberUserId} onValueChange={setNewMemberUserId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um usuário" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Nenhum</SelectItem>
+                    {profiles.map((profile) => (
+                      <SelectItem key={profile.id} value={profile.user_id}>{profile.full_name || 'Sem nome'}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Funções Secundárias</label>
               <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto">

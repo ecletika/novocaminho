@@ -25,9 +25,14 @@ export default function PublicBirthdayRegister() {
     man_name: "",
     birthday_date: "",
     birthday_type: "personal" as "personal" | "wedding",
+    nickname: "",
+    photo_url: "",
     phone: "",
     email: "",
     address: "",
+    woman_birthday: "",
+    man_birthday: "",
+    leader_name: "",
     ministry_ids: [] as string[],
   });
 
@@ -67,7 +72,7 @@ export default function PublicBirthdayRegister() {
           <p className="text-muted-foreground">
             Obrigado por se cadastrar. Seus dados foram salvos com sucesso.
           </p>
-          <Button onClick={() => { setSubmitted(false); setFormData({ woman_name: "", man_name: "", birthday_date: "", birthday_type: "personal", phone: "", email: "", address: "", ministry_ids: [] }); }}>
+          <Button onClick={() => { setSubmitted(false); setFormData({ woman_name: "", man_name: "", nickname: "", photo_url: "", birthday_date: "", birthday_type: "personal", phone: "", email: "", address: "", woman_birthday: "", man_birthday: "", leader_name: "", ministry_ids: [] }); }}>
             Fazer outro cadastro
           </Button>
         </div>
@@ -104,24 +109,49 @@ export default function PublicBirthdayRegister() {
           </div>
 
           {formData.birthday_type === "wedding" ? (
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Nome do Marido</Label>
-                <Input
-                  value={formData.man_name}
-                  onChange={(e) => setFormData({ ...formData, man_name: e.target.value })}
-                  placeholder="Nome do marido"
-                />
+            <>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Nome do Marido *</Label>
+                  <Input
+                    value={formData.man_name}
+                    onChange={(e) => setFormData({ ...formData, man_name: e.target.value })}
+                    placeholder="Nome do marido"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Nome da Mulher *</Label>
+                  <Input
+                    value={formData.woman_name}
+                    onChange={(e) => setFormData({ ...formData, woman_name: e.target.value })}
+                    placeholder="Nome da mulher"
+                    required
+                  />
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label>Nome da Mulher</Label>
-                <Input
-                  value={formData.woman_name}
-                  onChange={(e) => setFormData({ ...formData, woman_name: e.target.value })}
-                  placeholder="Nome da mulher"
-                />
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Aniversário do Marido *</Label>
+                  <Input
+                    type="date"
+                    value={formData.man_birthday}
+                    onChange={(e) => setFormData({ ...formData, man_birthday: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Aniversário da Mulher *</Label>
+                  <Input
+                    type="date"
+                    value={formData.woman_birthday}
+                    onChange={(e) => setFormData({ ...formData, woman_birthday: e.target.value })}
+                    required
+                  />
+                </div>
               </div>
-            </div>
+            </>
           ) : (
             <div className="space-y-2">
               <Label>Nome *</Label>
@@ -134,8 +164,31 @@ export default function PublicBirthdayRegister() {
             </div>
           )}
 
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="nickname">Apelido (Como prefere ser chamado)</Label>
+              <Input
+                id="nickname"
+                value={formData.nickname}
+                onChange={(e) => setFormData({ ...formData, nickname: e.target.value })}
+                placeholder="Ex: Pedro, Maria"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="photo_url">Link da sua Foto</Label>
+              <Input
+                id="photo_url"
+                value={formData.photo_url}
+                onChange={(e) => setFormData({ ...formData, photo_url: e.target.value })}
+                placeholder="https://..."
+              />
+            </div>
+          </div>
+
           <div className="space-y-2">
-            <Label>Data de Aniversário *</Label>
+            <Label>
+              {formData.birthday_type === "wedding" ? "Data do Casamento *" : "Data de Aniversário *"}
+            </Label>
             <Input
               type="date"
               value={formData.birthday_date}
@@ -169,6 +222,15 @@ export default function PublicBirthdayRegister() {
               value={formData.address}
               onChange={(e) => setFormData({ ...formData, address: e.target.value })}
               placeholder="Seu endereço"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Líder / Supervisor</Label>
+            <Input
+              value={formData.leader_name}
+              onChange={(e) => setFormData({ ...formData, leader_name: e.target.value })}
+              placeholder="Nome do seu líder (se souber)"
             />
           </div>
 

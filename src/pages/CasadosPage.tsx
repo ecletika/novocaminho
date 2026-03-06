@@ -9,6 +9,17 @@ import { useCasadosGallery } from "@/hooks/useCasadosGallery";
 import { useEvents } from "@/hooks/useEvents";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CASADOS_COURSES, CASADOS_RESOURCES } from "@/constants/casadosData";
+import { FileText, GraduationCap, ClipboardList, BookOpen, UserPlus, Link as LinkIcon } from "lucide-react";
+
+const resourceIconMap: Record<string, React.ElementType> = {
+  FileText,
+  GraduationCap,
+  ClipboardList,
+  BookOpen,
+  UserPlus
+};
 
 export default function CasadosPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -231,9 +242,8 @@ export default function CasadosPage() {
             {displayGallery.map((img, index) => (
               <div
                 key={index}
-                className={`aspect-square rounded-xl overflow-hidden shadow-soft hover:shadow-card transition-all duration-300 ${
-                  index === 0 ? "md:col-span-2 md:row-span-2 aspect-auto md:aspect-square" : ""
-                }`}
+                className={`aspect-square rounded-xl overflow-hidden shadow-soft hover:shadow-card transition-all duration-300 ${index === 0 ? "md:col-span-2 md:row-span-2 aspect-auto md:aspect-square" : ""
+                  }`}
               >
                 <img
                   src={img.src}
@@ -246,15 +256,107 @@ export default function CasadosPage() {
         </div>
       </section>
 
-      {/* Registration CTA */}
-      <section id="inscricao" className="section-padding gradient-hero">
+      {/* Inscrições e Recursos Section */}
+      <section id="inscricao" className="section-padding bg-card border-t border-border">
+        <div className="container-church">
+          <div className="text-center mb-12">
+            <span className="text-secondary font-medium text-sm uppercase tracking-wider">Participe</span>
+            <h2 className="font-display text-4xl font-bold text-foreground mt-3 mb-4">
+              Inscrições e Recursos
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Confira as próximas turmas e acesse os materiais necessários para o seu crescimento.
+            </p>
+          </div>
+
+          <Tabs defaultValue="cursos" className="max-w-4xl mx-auto">
+            <div className="flex justify-center mb-8">
+              <TabsList className="bg-muted/50 p-1">
+                <TabsTrigger value="cursos" className="px-8">Cursos Disponíveis</TabsTrigger>
+                <TabsTrigger value="recursos" className="px-8">Recursos para Alunos</TabsTrigger>
+              </TabsList>
+            </div>
+
+            <TabsContent value="cursos" className="space-y-6">
+              <div className="grid gap-6">
+                {CASADOS_COURSES.map((course) => (
+                  <div
+                    key={course.id}
+                    className="bg-muted/30 rounded-2xl p-6 border border-border flex flex-col md:flex-row items-center justify-between gap-6"
+                  >
+                    <div className="flex items-center gap-5">
+                      <div className="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center shrink-0">
+                        <BookOpen className="w-6 h-6 text-secondary" />
+                      </div>
+                      <div>
+                        <h4 className="font-display text-xl font-bold text-foreground">{course.name}</h4>
+                        <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
+                          <Calendar className="w-4 h-4" /> Próxima turma: {course.startDate}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${course.status === 'Inscrições Abertas'
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-secondary/10 text-secondary'
+                        }`}>
+                        {course.status}
+                      </span>
+                      <Button asChild size="lg">
+                        <a href={course.link} target="_blank" rel="noopener noreferrer">
+                          Fazer Inscrição
+                          <ArrowRight className="w-4 h-4 ml-2" />
+                        </a>
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="recursos">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {CASADOS_RESOURCES.map((resource) => {
+                  const Icon = resourceIconMap[resource.icon] || FileText;
+                  return (
+                    <a
+                      key={resource.title}
+                      href={resource.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-muted/30 rounded-2xl p-6 border border-border hover:border-secondary transition-all group"
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className={`w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center shrink-0 group-hover:bg-secondary group-hover:text-primary-foreground transition-all`}>
+                          <Icon className="w-6 h-6 text-secondary group-hover:text-inherit" />
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-foreground transition-colors">{resource.title}</h4>
+                          <p className="text-sm text-muted-foreground mt-1">{resource.description}</p>
+                          <div className="flex items-center gap-2 mt-3 text-xs font-medium text-secondary">
+                            <span>Acessar Material</span>
+                            <ArrowRight className="w-3 h-3" />
+                          </div>
+                        </div>
+                      </div>
+                    </a>
+                  );
+                })}
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </section>
+
+      {/* Footer CTA (Modified) */}
+      <section className="section-padding gradient-hero">
         <div className="container-church text-center text-primary-foreground">
           <Heart className="w-12 h-12 mx-auto mb-6 text-secondary fill-secondary" />
           <h2 className="font-display text-4xl md:text-5xl font-bold mb-6">
-            Faça Parte do Casados Para Sempre
+            Dúvidas ou Informações?
           </h2>
           <p className="text-xl text-primary-foreground/80 max-w-2xl mx-auto mb-10">
-            Inscreva-se para participar dos nossos encontros e fortalecer seu casamento
+            Fale conosco para saber mais sobre o ministério ou como participar das turmas.
           </p>
           <Button variant="hero" size="xl" asChild>
             <Link to="/contato">

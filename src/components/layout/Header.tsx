@@ -10,6 +10,7 @@ const baseNavigation = [
   { name: "Início", href: "/" },
   { name: "Eventos", href: "/eventos" },
   { name: "Casados Para Sempre", href: "/casados" },
+  { name: "No que Cremos", href: "/no-que-cremos" },
   { name: "Contato", href: "/contato" },
 ];
 
@@ -36,8 +37,8 @@ export default function Header() {
     <>
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled
-            ? "bg-card/95 backdrop-blur-md shadow-soft"
-            : "bg-transparent"
+          ? "bg-card/95 backdrop-blur-md shadow-soft"
+          : "bg-transparent"
           }`}
       >
         <div className="container-church">
@@ -50,11 +51,11 @@ export default function Header() {
                 className="w-12 h-12 object-cover rounded-sm border border-white/10"
               />
               <div className="hidden sm:flex flex-col">
-                <span className={`font-serif text-2xl uppercase tracking-[0.15em] transition-colors ${isScrolled ? "text-primary" : "text-white"
+                <span className={`font-display text-2xl font-bold uppercase tracking-[0.15em] transition-colors ${isScrolled ? "text-primary" : "text-white"
                   }`}>
                   Novo Caminho
                 </span>
-                <span className={`block text-[10px] uppercase tracking-[0.3em] font-light transition-colors ${isScrolled ? "text-muted-foreground" : "text-white/50"
+                <span className={`block text-[10px] uppercase tracking-[0.3em] font-medium transition-colors ${isScrolled ? "text-muted-foreground" : "text-white/50"
                   }`}>
                   Portugal
                 </span>
@@ -66,12 +67,12 @@ export default function Header() {
               <Link
                 to="/"
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${isActive("/")
-                    ? isScrolled
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-primary-foreground/20 text-primary-foreground"
-                    : isScrolled
-                      ? "text-foreground hover:bg-muted"
-                      : "text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10"
+                  ? isScrolled
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-primary-foreground/20 text-primary-foreground"
+                  : isScrolled
+                    ? "text-foreground hover:bg-muted"
+                    : "text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10"
                   }`}
               >
                 Início
@@ -83,12 +84,12 @@ export default function Header() {
                   onClick={() => setIsMinisteriosOpen(!isMinisteriosOpen)}
                   onBlur={() => setTimeout(() => setIsMinisteriosOpen(false), 150)}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-1 ${isMinisteriosActive
-                      ? isScrolled
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-primary-foreground/20 text-primary-foreground"
-                      : isScrolled
-                        ? "text-foreground hover:bg-muted"
-                        : "text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10"
+                    ? isScrolled
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-primary-foreground/20 text-primary-foreground"
+                    : isScrolled
+                      ? "text-foreground hover:bg-muted"
+                      : "text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10"
                     }`}
                 >
                   Ministérios
@@ -107,7 +108,7 @@ export default function Header() {
                     {ministries?.filter(m => m.is_active).map((ministry) => (
                       <Link
                         key={ministry.id}
-                        to={`/ministerios/${ministry.slug}`}
+                        to={ministry.slug === "casados" ? "/casados" : `/ministerios/${ministry.slug}`}
                         className="block px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors"
                       >
                         {ministry.title}
@@ -122,12 +123,12 @@ export default function Header() {
                   key={item.name}
                   to={item.href}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${isActive(item.href)
-                      ? isScrolled
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-primary-foreground/20 text-primary-foreground"
-                      : isScrolled
-                        ? "text-foreground hover:bg-muted"
-                        : "text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10"
+                    ? isScrolled
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-primary-foreground/20 text-primary-foreground"
+                    : isScrolled
+                      ? "text-foreground hover:bg-muted"
+                      : "text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10"
                     }`}
                 >
                   {item.name}
@@ -156,8 +157,8 @@ export default function Header() {
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className={`lg:hidden p-2 rounded-lg transition-colors ${isScrolled
-                    ? "text-foreground hover:bg-muted"
-                    : "text-primary-foreground hover:bg-primary-foreground/10"
+                  ? "text-foreground hover:bg-muted"
+                  : "text-primary-foreground hover:bg-primary-foreground/10"
                   }`}
               >
                 {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -173,8 +174,8 @@ export default function Header() {
                   to="/"
                   onClick={() => setIsMobileMenuOpen(false)}
                   className={`block px-4 py-3 rounded-lg text-base font-medium transition-colors ${isActive("/")
-                      ? "bg-primary text-primary-foreground"
-                      : "text-foreground hover:bg-muted"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-foreground hover:bg-muted"
                     }`}
                 >
                   Início
@@ -183,8 +184,8 @@ export default function Header() {
                   to="/ministerios"
                   onClick={() => setIsMobileMenuOpen(false)}
                   className={`block px-4 py-3 rounded-lg text-base font-medium transition-colors ${isMinisteriosActive
-                      ? "bg-primary text-primary-foreground"
-                      : "text-foreground hover:bg-muted"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-foreground hover:bg-muted"
                     }`}
                 >
                   Ministérios
@@ -192,7 +193,7 @@ export default function Header() {
                 {ministries?.filter(m => m.is_active).map((ministry) => (
                   <Link
                     key={ministry.id}
-                    to={`/ministerios/${ministry.slug}`}
+                    to={ministry.slug === "casados" ? "/casados" : `/ministerios/${ministry.slug}`}
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="block px-8 py-2 rounded-lg text-sm text-muted-foreground hover:bg-muted transition-colors"
                   >
@@ -205,8 +206,8 @@ export default function Header() {
                     to={item.href}
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={`block px-4 py-3 rounded-lg text-base font-medium transition-colors ${isActive(item.href)
-                        ? "bg-primary text-primary-foreground"
-                        : "text-foreground hover:bg-muted"
+                      ? "bg-primary text-primary-foreground"
+                      : "text-foreground hover:bg-muted"
                       }`}
                   >
                     {item.name}

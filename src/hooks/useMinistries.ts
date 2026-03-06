@@ -7,6 +7,7 @@ export interface Ministry {
   slug: string;
   title: string;
   description: string | null;
+  bible_verse: string | null;
   icon: string;
   image_url: string | null;
   features: string[] | null;

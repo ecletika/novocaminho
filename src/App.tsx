@@ -15,6 +15,7 @@ import ContatoPage from "./pages/ContatoPage";
 import CasadosPage from "./pages/CasadosPage";
 import AuthPage from "./pages/AuthPage";
 import PublicBirthdayRegister from "./pages/PublicBirthdayRegister";
+import BelievePage from "./pages/BelievePage";
 import NotFound from "./pages/NotFound";
 
 // Admin Layout & Pages
@@ -26,9 +27,7 @@ import TechPage from "./pages/admin/TechPage";
 import DocsPage from "./pages/admin/DocsPage";
 import AdminMinisteriosPage from "./pages/admin/AdminMinisteriosPage";
 import AdminEventosPage from "./pages/admin/AdminEventosPage";
-import EscalasPage from "./pages/admin/EscalasPage";
 import AniversariosPage from "./pages/admin/AniversariosPage";
-import ConteudosPage from "./pages/admin/ConteudosPage";
 import ConfigPage from "./pages/admin/ConfigPage";
 import AdminCasadosPage from "./pages/admin/AdminCasadosPage";
 import UsersPage from "./pages/admin/UsersPage";
@@ -51,6 +50,7 @@ const App = () => (
             <Route element={<PublicLayout><EventosPage /></PublicLayout>} path="/eventos" />
             <Route element={<PublicLayout><ContatoPage /></PublicLayout>} path="/contato" />
             <Route element={<PublicLayout><CasadosPage /></PublicLayout>} path="/casados" />
+            <Route element={<PublicLayout><BelievePage /></PublicLayout>} path="/no-que-cremos" />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/cadastro-aniversario" element={<PublicBirthdayRegister />} />
 
@@ -63,9 +63,7 @@ const App = () => (
               <Route path="docs" element={<DocsPage />} />
               <Route path="ministerios" element={<AdminMinisteriosPage />} />
               <Route path="eventos" element={<AdminEventosPage />} />
-              <Route path="escalas" element={<EscalasPage />} />
               <Route path="aniversarios" element={<AniversariosPage />} />
-              <Route path="conteudos" element={<ConteudosPage />} />
               <Route path="casados" element={<AdminCasadosPage />} />
               <Route path="users" element={<UsersPage />} />
               <Route path="config" element={<ConfigPage />} />

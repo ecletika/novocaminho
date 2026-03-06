@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Plus, Search, Trash2, Edit, Loader2, Eye, Image, Heart, Camera, Save, Info } from "lucide-react";
+import { Plus, Search, Trash2, Edit, Loader2, Eye, Image, Heart, Camera, Save, Info, ClipboardList, GraduationCap, BookOpen, UserPlus, Calendar as CalendarIcon, ExternalLink, Link as LinkIcon, FileText, GraduationCap as GradIcon, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,6 +21,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import RichTextEditor from "@/components/editor/RichTextEditor";
 import {
   useCasadosPosts,
@@ -39,6 +46,15 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { CASADOS_COURSES, CASADOS_RESOURCES, CASADOS_PORTAL_LOGINS } from "@/constants/casadosData";
+
+const resourceIconMap: Record<string, React.ElementType> = {
+  FileText,
+  BookOpen,
+  GraduationCap: GradIcon,
+  ClipboardList,
+  Lock
+};
 
 export default function AdminCasadosPage() {
   const { toast } = useToast();
@@ -69,6 +85,20 @@ export default function AdminCasadosPage() {
   const [isUploadingGallery, setIsUploadingGallery] = useState(false);
   const [deleteGalleryId, setDeleteGalleryId] = useState<string | null>(null);
   const galleryFileRef = useRef<HTMLInputElement>(null);
+
+  // New Management State (Using shared data as initial state)
+  const [courses, setCourses] = useState(CASADOS_COURSES);
+  const [students, setStudents] = useState([
+    { id: "1", name: "João Silva & Maria Silva", phone: "(11) 99999-9999", courseId: "1", status: "Confirmado", link: "https://exemplo.com/aluno/joao-maria" },
+    { id: "2", name: "Pedro Santos & Ana Santos", phone: "(11) 88888-8888", courseId: "1", status: "Confirmado", link: "https://exemplo.com/aluno/pedro-ana" },
+  ]);
+
+  const [isCourseDialogOpen, setIsCourseDialogOpen] = useState(false);
+  const [isStudentDialogOpen, setIsStudentDialogOpen] = useState(false);
+  const [courseFormData, setCourseFormData] = useState({ name: "", startDate: "", status: "Inscrições Abertas", link: "" });
+  const [studentFormData, setStudentFormData] = useState({ name: "", phone: "", courseId: "", status: "Confirmado", link: "" });
+  const [editingCourseId, setEditingCourseId] = useState<string | null>(null);
+  const [editingStudentId, setEditingStudentId] = useState<string | null>(null);
 
   // Load about content from site_config
   useEffect(() => {
@@ -214,6 +244,10 @@ export default function AdminCasadosPage() {
           </TabsTrigger>
           <TabsTrigger value="palavras">Palavras</TabsTrigger>
           <TabsTrigger value="galeria">Galeria</TabsTrigger>
+          <TabsTrigger value="inscricoes">
+            <ClipboardList className="w-4 h-4 mr-1" />
+            Inscrições
+          </TabsTrigger>
         </TabsList>
 
         {/* SOBRE TAB */}
@@ -348,6 +382,157 @@ export default function AdminCasadosPage() {
             )}
           </div>
         </TabsContent>
+
+        {/* INSCRIÇÕES TAB */}
+        <TabsContent value="inscricoes" className="space-y-6 mt-6">
+          <Tabs defaultValue="cursos">
+            <TabsList className="bg-muted/50 p-1">
+              <TabsTrigger value="cursos" className="text-xs">
+                <BookOpen className="w-3 h-3 mr-1" />
+                Cursos
+              </TabsTrigger>
+              <TabsTrigger value="alunos" className="text-xs">
+                <GraduationCap className="w-3 h-3 mr-1" />
+                Alunos
+              </TabsTrigger>
+              <TabsTrigger value="recursos" className="text-xs">
+                <LinkIcon className="w-3 h-3 mr-1" />
+                Recursos
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="cursos" className="space-y-4 mt-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold">Cursos Casados Para Sempre</h3>
+                <Button size="sm" onClick={() => { setEditingCourseId(null); setCourseFormData({ name: "", startDate: "", status: "Inscrições Abertas", link: "" }); setIsCourseDialogOpen(true); }}>
+                  <Plus className="w-4 h-4 mr-1" /> Novo Curso
+                </Button>
+              </div>
+              <div className="grid gap-4">
+                {courses.map(course => (
+                  <div key={course.id} className="bg-card rounded-xl p-4 shadow-soft border border-border flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium">{course.name}</h4>
+                      <div className="flex flex-col gap-1 mt-1">
+                        <p className="text-sm text-muted-foreground flex items-center gap-2">
+                          <CalendarIcon className="w-3 h-3" /> Início: {course.startDate}
+                        </p>
+                        {course.link && (
+                          <a href={course.link} target="_blank" rel="noopener noreferrer" className="text-xs text-primary flex items-center gap-1 hover:underline">
+                            <ExternalLink className="w-3 h-3" /> Link de Cadastro
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${course.status === 'Inscrições Abertas' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
+                        {course.status}
+                      </span>
+                      <div className="flex gap-1">
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {
+                          setEditingCourseId(course.id);
+                          setCourseFormData({ name: course.name, startDate: course.startDate, status: course.status, link: course.link || "" });
+                          setIsCourseDialogOpen(true);
+                        }}>
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => setCourses(courses.filter(c => c.id !== course.id))}>
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="alunos" className="space-y-4 mt-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold">Alunos Matriculados</h3>
+                <Button size="sm" onClick={() => { setEditingStudentId(null); setStudentFormData({ name: "", phone: "", courseId: "", status: "Confirmado", link: "" }); setIsStudentDialogOpen(true); }}>
+                  <UserPlus className="w-4 h-4 mr-1" /> Novo Aluno
+                </Button>
+              </div>
+              <div className="grid gap-4">
+                {students.map(student => {
+                  const course = courses.find(c => c.id === student.courseId);
+                  return (
+                    <div key={student.id} className="bg-card rounded-xl p-4 shadow-soft border border-border flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">{student.name}</h4>
+                        <p className="text-sm text-muted-foreground">{student.phone} • {course?.name || "Sem curso"}</p>
+                        {student.link && (
+                          <a href={student.link} target="_blank" rel="noopener noreferrer" className="text-xs text-primary flex items-center gap-1 mt-1 hover:underline">
+                            <ExternalLink className="w-3 h-3" /> Link do Aluno
+                          </a>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase">
+                          {student.status}
+                        </span>
+                        <div className="flex gap-1">
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {
+                            setEditingStudentId(student.id);
+                            setStudentFormData({ name: student.name, phone: student.phone, courseId: student.courseId, status: student.status, link: student.link || "" });
+                            setIsStudentDialogOpen(true);
+                          }}>
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => setStudents(students.filter(s => s.id !== student.id))}>
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="recursos" className="space-y-4 mt-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold">Links e Recursos do Curso</h3>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {CASADOS_PORTAL_LOGINS.map((portal) => (
+                  <a key={portal.title} href={portal.link} target="_blank" rel="noopener noreferrer" className="bg-card rounded-xl p-5 shadow-soft border-2 border-primary/20 hover:border-primary transition-all group lg:col-span-2 bg-primary/5">
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center shrink-0 shadow-lg">
+                        <Lock className="w-6 h-6 text-primary-foreground" />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-lg group-hover:text-primary transition-colors">{portal.title}</h4>
+                        <p className="text-sm text-muted-foreground mt-1">{portal.description} Utilize seu e-mail e senha de acesso.</p>
+                        <div className="flex items-center gap-2 mt-2 text-xs font-medium text-primary">
+                          <span>Acessar Login</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </div>
+                      </div>
+                    </div>
+                  </a>
+                ))}
+
+                {CASADOS_RESOURCES.map((resource) => {
+                  const Icon = resourceIconMap[resource.icon] || FileText;
+                  return (
+                    <a key={resource.title} href={resource.link} target="_blank" rel="noopener noreferrer" className="bg-card rounded-xl p-5 shadow-soft border border-border hover:border-primary transition-colors group">
+                      <div className="flex items-start gap-4">
+                        <div className={`w-10 h-10 rounded-lg bg-${resource.color || 'primary'}/10 flex items-center justify-center shrink-0`}>
+                          <Icon className={`w-5 h-5 text-${resource.color || 'primary'}`} />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold group-hover:text-primary transition-colors">{resource.title}</h4>
+                          <p className="text-sm text-muted-foreground mt-1">{resource.description}</p>
+                        </div>
+                      </div>
+                    </a>
+                  );
+                })}
+              </div>
+            </TabsContent>
+          </Tabs>
+        </TabsContent>
       </Tabs>
 
       {/* Post Dialog */}
@@ -440,6 +625,100 @@ export default function AdminCasadosPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Course Dialog */}
+      <Dialog open={isCourseDialogOpen} onOpenChange={setIsCourseDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{editingCourseId ? "Editar Curso" : "Novo Curso"}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="courseName">Nome do Curso</Label>
+              <Input id="courseName" value={courseFormData.name} onChange={e => setCourseFormData({ ...courseFormData, name: e.target.value })} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="courseDate">Data de Início</Label>
+              <Input id="courseDate" type="date" value={courseFormData.startDate} onChange={e => setCourseFormData({ ...courseFormData, startDate: e.target.value })} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="courseLink">Link de Cadastro (Externo)</Label>
+              <Input id="courseLink" value={courseFormData.link} onChange={e => setCourseFormData({ ...courseFormData, link: e.target.value })} placeholder="https://..." />
+            </div>
+            <div className="space-y-2">
+              <Label>Status</Label>
+              <Select value={courseFormData.status} onValueChange={v => setCourseFormData({ ...courseFormData, status: v })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Inscrições Abertas">Inscrições Abertas</SelectItem>
+                  <SelectItem value="Em andamento">Em andamento</SelectItem>
+                  <SelectItem value="Finalizado">Finalizado</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setIsCourseDialogOpen(false)}>Cancelar</Button>
+            <Button onClick={() => {
+              if (editingCourseId) {
+                setCourses(courses.map(c => c.id === editingCourseId ? { ...c, ...courseFormData } : c));
+              } else {
+                setCourses([...courses, { id: Math.random().toString(), ...courseFormData }]);
+              }
+              setIsCourseDialogOpen(false);
+            }}>Salvar</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Student Dialog */}
+      <Dialog open={isStudentDialogOpen} onOpenChange={setIsStudentDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{editingStudentId ? "Editar Aluno" : "Novo Aluno"}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="studentName">Nome do Casal</Label>
+              <Input id="studentName" value={studentFormData.name} onChange={e => setStudentFormData({ ...studentFormData, name: e.target.value })} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="studentPhone">Telefone</Label>
+              <Input id="studentPhone" value={studentFormData.phone} onChange={e => setStudentFormData({ ...studentFormData, phone: e.target.value })} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="studentLink">Link Personalizado do Aluno</Label>
+              <Input id="studentLink" value={studentFormData.link} onChange={e => setStudentFormData({ ...studentFormData, link: e.target.value })} placeholder="https://..." />
+            </div>
+            <div className="space-y-2">
+              <Label>Curso</Label>
+              <Select value={studentFormData.courseId} onValueChange={v => setStudentFormData({ ...studentFormData, courseId: v })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione um curso" />
+                </SelectTrigger>
+                <SelectContent>
+                  {courses.map(course => (
+                    <SelectItem key={course.id} value={course.id}>{course.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setIsStudentDialogOpen(false)}>Cancelar</Button>
+            <Button onClick={() => {
+              if (editingStudentId) {
+                setStudents(students.map(s => s.id === editingStudentId ? { ...s, ...studentFormData } : s));
+              } else {
+                setStudents([...students, { id: Math.random().toString(), ...studentFormData }]);
+              }
+              setIsStudentDialogOpen(false);
+            }}>Salvar</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

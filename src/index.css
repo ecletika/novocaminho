@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -7,30 +7,29 @@
 @layer base {
   :root {
     --background: 13 52.9% 96.7%;
-    /* #FBF4F2 */
+    /* #FBF4F2 - Off-white Background */
     --foreground: 214 69.4% 28.2%;
-    /* #16417A - Primary Blue */
+    /* #16417A - Dark Blue Text */
 
     --card: 0 0% 100%;
-    /* Full white */
     --card-foreground: 214 69.4% 28.2%;
 
     --popover: 0 0% 100%;
     --popover-foreground: 214 69.4% 28.2%;
 
-    --primary: 214 69.4% 28.2%;
-    /* #16417A */
-    --primary-foreground: 13 52.9% 96.7%;
+    --primary: 198 75.5% 49.6%;
+    /* #1FA6DE - Azul Principal */
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 213 53.8% 45.9%;
-    /* #366EB4 - Medium Blue */
-    --secondary-foreground: 13 52.9% 96.7%;
+    /* #366EB4 - Azul Médio */
+    --secondary-foreground: 0 0% 100%;
 
     --muted: 213 30% 90%;
     --muted-foreground: 214 40% 50%;
 
-    --accent: 198 75.5% 49.6%;
-    /* #1FA6DE - Light Blue */
+    --accent: 214 69.4% 28.2%;
+    /* #16417A - Azul Escuro */
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
@@ -38,7 +37,7 @@
 
     --border: 213 30% 85%;
     --input: 213 30% 90%;
-    --ring: 214 69.4% 28.2%;
+    --ring: 198 75.5% 49.6%;
 
     --radius: 0.5rem;
     /* Corporate style */
@@ -49,14 +48,14 @@
     --brand-blue-light: 198 75.5% 49.6%;
     --brand-cream: 13 52.9% 96.7%;
 
-    /* Gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(214 69.4% 28.2%) 0%, hsl(213 53.8% 45.9%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(198 75.5% 49.6%) 0%, hsl(213 53.8% 45.9%) 100%);
+    /* Gradients as per Manual */
+    --gradient-hero: linear-gradient(135deg, hsl(198 75.5% 49.6%) 0%, hsl(213 53.8% 45.9%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(214 69.4% 28.2%) 0%, hsl(213 53.8% 45.9%) 100%);
     --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(13 52.9% 96.7%) 100%);
 
     /* Shadows */
-    --shadow-soft: 0 4px 20px -4px rgba(22, 65, 122, 0.15);
-    --shadow-card: 0 8px 30px -8px rgba(22, 65, 122, 0.2);
+    --shadow-soft: 0 4px 20px -4px rgba(31, 166, 222, 0.15);
+    --shadow-card: 0 8px 30px -8px rgba(31, 166, 222, 0.2);
     --shadow-glow: 0 0 40px hsl(198 75.5% 49.6% / 0.3);
 
     --sidebar-background: 0 0% 100%;
@@ -205,6 +204,12 @@
 @layer utilities {
   .glass-effect {
     @apply backdrop-blur-md bg-background/80;
+  }
+
+  /* Badge/Crachá Pattern */
+  .badge-pattern {
+    background-image: radial-gradient(circle at 100% 100%, hsl(var(--primary) / 0.1) 0%, transparent 50%),
+                      radial-gradient(circle at 0% 0%, hsl(var(--secondary) / 0.1) 0%, transparent 50%);
   }
 }
 

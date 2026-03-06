@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMyPermissions } from "@/hooks/useUserPermissions";
+import { useUserWorshipSkills } from "@/hooks/useWorship";
 import logoImage from "@/assets/logo-igreja.jpeg";
 
 const navigation = [
@@ -33,10 +34,8 @@ const navigation = [
   { name: "Mesa & Mídia", href: "/admin/tech", icon: Tv, perm: "tech" },
   { name: "Ministérios", href: "/admin/ministerios", icon: Users, perm: "ministerios" },
   { name: "Eventos", href: "/admin/eventos", icon: Calendar, perm: "eventos" },
-  { name: "Conteúdos", href: "/admin/conteudos", icon: Layers, perm: "conteudos" },
   { name: "Casados Para Sempre", href: "/admin/casados", icon: Heart, perm: "casados" },
   { name: "Aniversários", href: "/admin/aniversarios", icon: Cake, perm: "aniversarios" },
-  { name: "Escalas", href: "/admin/escalas", icon: Calendar, perm: "escalas" },
   { name: "Documentação", href: "/admin/docs", icon: FileText, perm: "docs" },
   { name: "Utilizadores", href: "/admin/users", icon: Users, perm: null },
   { name: "Configurações", href: "/admin/config", icon: Settings, perm: "config" },
@@ -47,9 +46,15 @@ export default function AdminLayout() {
   const location = useLocation();
   const { signOut, user, isAdmin } = useAuth();
   const { data: myPermissions = [] } = useMyPermissions();
+  const worshipSkills = useUserWorshipSkills(user?.id);
 
   const visibleNavigation = navigation.filter((item) => {
     if (isAdmin) return true;
+
+    // Check specific worship skills for restricted menus
+    if (item.href === "/admin/louvor" && worshipSkills.hasLouvorAccess) return true;
+    if (item.href === "/admin/tech" && worshipSkills.hasTechAccess) return true;
+
     if (item.perm === null) {
       // Dashboard visible to all, Users only to admin
       if (item.href === "/admin/users") return false;
@@ -77,17 +82,16 @@ export default function AdminLayout() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-72 bg-card border-r border-border transform transition-transform duration-300 lg:translate-x-0 ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed inset-y-0 left-0 z-50 w-72 bg-card border-r border-border transform transition-transform duration-300 lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         <div className="h-full flex flex-col">
           {/* Logo */}
           <div className="h-16 flex items-center justify-between px-6 border-b border-border">
             <Link to="/" className="flex items-center gap-3">
-              <img 
-                src={logoImage} 
-                alt="Logo Igreja" 
+              <img
+                src={logoImage}
+                alt="Logo Igreja"
                 className="w-10 h-10 rounded-full object-cover"
               />
               <div>
@@ -110,11 +114,10 @@ export default function AdminLayout() {
                 key={item.name}
                 to={item.href}
                 onClick={() => setSidebarOpen(false)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                  isActive(item.href)
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                }`}
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${isActive(item.href)
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  }`}
               >
                 <item.icon className="w-5 h-5" />
                 {item.name}
@@ -154,9 +157,9 @@ export default function AdminLayout() {
                 </span>
                 <span className="block text-xs text-muted-foreground">Administrador</span>
               </div>
-              <Button 
-                variant="ghost" 
-                size="icon" 
+              <Button
+                variant="ghost"
+                size="icon"
                 className="text-muted-foreground hover:text-foreground"
                 onClick={() => signOut()}
               >

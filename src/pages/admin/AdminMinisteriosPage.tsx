@@ -54,6 +54,7 @@ export default function AdminMinisteriosPage() {
     slug: "",
     title: "",
     description: "",
+    bible_verse: "",
     icon: "Users",
     features: "",
     is_active: true,
@@ -65,6 +66,7 @@ export default function AdminMinisteriosPage() {
       slug: "",
       title: "",
       description: "",
+      bible_verse: "",
       icon: "Users",
       features: "",
       is_active: true,
@@ -79,6 +81,7 @@ export default function AdminMinisteriosPage() {
       slug: ministry.slug,
       title: ministry.title,
       description: ministry.description || "",
+      bible_verse: (ministry as any).bible_verse || "",
       icon: ministry.icon,
       features: (ministry.features || []).join(", "),
       is_active: ministry.is_active,
@@ -94,6 +97,7 @@ export default function AdminMinisteriosPage() {
       slug: formData.slug,
       title: formData.title,
       description: formData.description || null,
+      bible_verse: formData.bible_verse || null,
       icon: formData.icon,
       image_url: null,
       features: formData.features.split(",").map((f) => f.trim()).filter(Boolean),
@@ -186,7 +190,18 @@ export default function AdminMinisteriosPage() {
                   id="description"
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  rows={3}
+                  rows={2}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="bible_verse">Versículo Bíblico</Label>
+                <Textarea
+                  id="bible_verse"
+                  value={formData.bible_verse}
+                  onChange={(e) => setFormData({ ...formData, bible_verse: e.target.value })}
+                  rows={2}
+                  placeholder="Ex: 'Ide por todo o mundo...' - Marcos 16:15"
                 />
               </div>
 
@@ -199,11 +214,10 @@ export default function AdminMinisteriosPage() {
                         key={opt.value}
                         type="button"
                         onClick={() => setFormData({ ...formData, icon: opt.value })}
-                        className={`p-2 rounded-lg border transition-colors ${
-                          formData.icon === opt.value
+                        className={`p-2 rounded-lg border transition-colors ${formData.icon === opt.value
                             ? "bg-primary text-primary-foreground border-primary"
                             : "border-border hover:bg-muted"
-                        }`}
+                          }`}
                         title={opt.label}
                       >
                         <opt.Icon className="w-5 h-5" />

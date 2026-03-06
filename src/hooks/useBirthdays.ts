@@ -5,28 +5,38 @@ export interface Birthday {
   id: string;
   woman_name: string | null;
   man_name: string | null;
+  nickname: string | null;
+  photo_url: string | null;
   birthday_date: string;
   birthday_type: "personal" | "wedding";
   phone: string | null;
   email: string | null;
   address: string | null;
+  leader_name: string | null;
+  woman_birthday?: string | null;
+  man_birthday?: string | null;
   created_at: string;
   updated_at: string;
 }
 
 export interface BirthdayWithMinistries extends Birthday {
-  ministries: { ministry_id: string }[];
+  ministries: { ministry_id: string; is_leader: boolean }[];
 }
 
 export interface BirthdayInsert {
   woman_name?: string | null;
   man_name?: string | null;
+  nickname?: string | null;
+  photo_url?: string | null;
   birthday_date: string;
   birthday_type: "personal" | "wedding";
   phone?: string | null;
   email?: string | null;
   address?: string | null;
-  ministry_ids?: string[];
+  leader_name?: string | null;
+  woman_birthday?: string | null;
+  man_birthday?: string | null;
+  ministry_selections?: { ministry_id: string; is_leader: boolean }[];
 }
 
 // Fetch all birthdays
@@ -36,7 +46,7 @@ export function useBirthdays() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("birthdays")
-        .select("*, ministries:birthday_ministries(ministry_id)")
+        .select("*, ministries:birthday_ministries(ministry_id, is_leader)")
         .order("birthday_date", { ascending: true });
 
       if (error) throw error;
@@ -79,21 +89,24 @@ export function useBirthdaysByMinistry(ministryId: string | undefined) {
 
       const { data, error } = await supabase
         .from("birthday_ministries")
-        .select("birthday_id, birthdays(*)")
+        .select("birthday_id, is_leader, birthdays(*)")
         .eq("ministry_id", ministryId);
 
       if (error) throw error;
 
-      // Extract birthdays and filter by current month
-      const birthdays = data
-        .map((item) => item.birthdays as unknown as Birthday)
-        .filter((b) => {
-          if (!b) return false;
-          const month = new Date(b.birthday_date + "T00:00:00").getMonth() + 1;
-          return month === currentMonth;
-        });
+      // Extract birthdays with leader status
+      const members = data
+        .map((item) => {
+          const birthday = item.birthdays as unknown as Birthday;
+          if (!birthday) return null;
+          return {
+            ...birthday,
+            is_leader: item.is_leader,
+          };
+        })
+        .filter(Boolean);
 
-      return birthdays;
+      return members as (Birthday & { is_leader: boolean })[];
     },
     enabled: !!ministryId,
   });
@@ -105,7 +118,7 @@ export function useCreateBirthday() {
 
   return useMutation({
     mutationFn: async (data: BirthdayInsert) => {
-      const { ministry_ids, ...birthdayData } = data;
+      const { ministry_selections, ...birthdayData } = data;
 
       // Create birthday
       const { data: birthday, error } = await supabase
@@ -117,10 +130,11 @@ export function useCreateBirthday() {
       if (error) throw error;
 
       // Add ministry relationships
-      if (ministry_ids && ministry_ids.length > 0) {
-        const relationships = ministry_ids.map((ministry_id) => ({
+      if (ministry_selections && ministry_selections.length > 0) {
+        const relationships = ministry_selections.map((sel) => ({
           birthday_id: birthday.id,
-          ministry_id,
+          ministry_id: sel.ministry_id,
+          is_leader: sel.is_leader,
         }));
 
         const { error: relError } = await supabase
@@ -144,7 +158,7 @@ export function useUpdateBirthday() {
 
   return useMutation({
     mutationFn: async ({ id, ...data }: BirthdayInsert & { id: string }) => {
-      const { ministry_ids, ...birthdayData } = data;
+      const { ministry_selections, ...birthdayData } = data;
 
       // Update birthday
       const { data: birthday, error } = await supabase
@@ -157,15 +171,16 @@ export function useUpdateBirthday() {
       if (error) throw error;
 
       // Update ministry relationships
-      if (ministry_ids !== undefined) {
+      if (ministry_selections !== undefined) {
         // Remove existing relationships
         await supabase.from("birthday_ministries").delete().eq("birthday_id", id);
 
         // Add new relationships
-        if (ministry_ids.length > 0) {
-          const relationships = ministry_ids.map((ministry_id) => ({
+        if (ministry_selections.length > 0) {
+          const relationships = ministry_selections.map((sel) => ({
             birthday_id: id,
-            ministry_id,
+            ministry_id: sel.ministry_id,
+            is_leader: sel.is_leader,
           }));
 
           const { error: relError } = await supabase

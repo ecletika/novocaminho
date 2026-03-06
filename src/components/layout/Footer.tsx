@@ -33,6 +33,7 @@ export default function Footer() {
                 { name: "Ministérios", href: "/ministerios" },
                 { name: "Eventos", href: "/eventos" },
                 { name: "Casados Para Sempre", href: "/casados" },
+                { name: "No que Cremos", href: "/no-que-cremos" },
                 { name: "Contato", href: "/contato" },
                 { name: "Documentação", href: "/admin/docs" },
               ].map((link) => (
