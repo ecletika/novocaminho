@@ -10,6 +10,7 @@ import RadioPlayer from "@/components/RadioPlayer";
 import BirthdayCard from "@/components/BirthdayCard";
 import FacebookLiveModal from "@/components/FacebookLiveModal";
 import PhotoGallery from "@/components/PhotoGallery";
+import DailyVerse from "@/components/DailyVerse";
 import { useMonthlyBirthdays } from "@/hooks/useBirthdays";
 
 const ministries = [
@@ -57,9 +58,23 @@ const upcomingEvents = [
   },
 ];
 
+import { useMinistries } from "@/hooks/useMinistries";
+
+const iconMap: Record<string, any> = {
+  Music: Music,
+  Tv: Tv,
+  Heart: Heart,
+  Users: Users,
+};
+
 export default function HomePage() {
   const { data: monthlyBirthdays = [] } = useMonthlyBirthdays();
+  const { data: dbMinistries = [] } = useMinistries();
   const [showLive, setShowLive] = useState(false);
+
+  const activeMinistries = dbMinistries.filter(m => m.is_active).slice(0, 3);
+  const getIcon = (iconName: string) => iconMap[iconName] || Users;
+  const getHref = (m: any) => m.slug === 'casados' ? '/casados' : `/ministerios`;
 
   return (
     <>
@@ -105,11 +120,9 @@ export default function HomePage() {
             <span className="text-white">Busque a Deus.</span>
           </h1>
 
-          <p className="text-sm md:text-base text-white/60 font-medium max-w-2xl mx-auto mb-12 animate-fade-up delay-200 uppercase tracking-[0.2em] flex items-center justify-center gap-2">
-            <span className="w-8 h-px bg-white/20"></span>
-            Rua da Parada 06, Agualva-Cacém
-            <span className="w-8 h-px bg-white/20"></span>
-          </p>
+          <div className="max-w-3xl mx-auto mb-12 animate-fade-up delay-200">
+            <DailyVerse />
+          </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 animate-fade-up delay-300">
             <Button className="bg-white text-primary hover:bg-primary-foreground transition-all duration-500 rounded-full px-10 py-7 uppercase tracking-widest text-xs font-bold shadow-lg shadow-black/20" asChild>
@@ -181,33 +194,36 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {ministries.map((ministry, index) => (
-              <Link
-                key={ministry.title}
-                to={ministry.href}
-                className={`group relative overflow-hidden rounded-2xl shadow-card hover:shadow-xl transition-all duration-500 animate-fade-up delay-${(index + 1) * 100}`}
-              >
-                <div className="aspect-[4/3] overflow-hidden">
-                  <img
-                    src={ministry.image}
-                    alt={ministry.title}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/50 to-transparent opacity-90" />
-                <div className="absolute bottom-0 left-0 right-0 p-6 text-primary-foreground">
-                  <div className="w-12 h-12 rounded-xl bg-secondary/20 backdrop-blur-sm flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <ministry.icon className="w-6 h-6 text-secondary" />
+            {activeMinistries.map((ministry, index) => {
+              const IconComp = getIcon(ministry.icon);
+              return (
+                <Link
+                  key={ministry.id}
+                  to={getHref(ministry)}
+                  className={`group relative overflow-hidden rounded-2xl shadow-card hover:shadow-xl transition-all duration-500 animate-fade-up delay-${(index + 1) * 100}`}
+                >
+                  <div className="aspect-[4/3] overflow-hidden">
+                    <img
+                      src={ministry.image_url || worshipImage}
+                      alt={ministry.title}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
                   </div>
-                  <h3 className="font-display text-2xl font-semibold mb-2">{ministry.title}</h3>
-                  <p className="text-primary-foreground/80 text-sm">{ministry.description}</p>
-                  <div className="mt-4 flex items-center text-secondary text-sm font-medium">
-                    Saiba mais
-                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-2 transition-transform" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/50 to-transparent opacity-90" />
+                  <div className="absolute bottom-0 left-0 right-0 p-6 text-primary-foreground">
+                    <div className="w-12 h-12 rounded-xl bg-secondary/20 backdrop-blur-sm flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                      <IconComp className="w-6 h-6 text-secondary" />
+                    </div>
+                    <h3 className="font-display text-2xl font-semibold mb-2">{ministry.title}</h3>
+                    <p className="text-primary-foreground/80 text-sm line-clamp-2">{ministry.description}</p>
+                    <div className="mt-4 flex items-center text-secondary text-sm font-medium">
+                      Saiba mais
+                      <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-2 transition-transform" />
+                    </div>
                   </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              );
+            })}
           </div>
 
           <div className="text-center mt-12">

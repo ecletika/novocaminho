@@ -12,6 +12,7 @@ import { ptBR } from "date-fns/locale";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CASADOS_COURSES, CASADOS_RESOURCES } from "@/constants/casadosData";
 import { FileText, GraduationCap, ClipboardList, BookOpen, UserPlus, Link as LinkIcon } from "lucide-react";
+import CouplesStudy from "@/components/CouplesStudy";
 
 const resourceIconMap: Record<string, React.ElementType> = {
   FileText,
@@ -269,13 +270,18 @@ export default function CasadosPage() {
             </p>
           </div>
 
-          <Tabs defaultValue="cursos" className="max-w-4xl mx-auto">
+          <Tabs defaultValue="cursos" className="max-w-5xl mx-auto">
             <div className="flex justify-center mb-8">
               <TabsList className="bg-muted/50 p-1">
-                <TabsTrigger value="cursos" className="px-8">Cursos Disponíveis</TabsTrigger>
-                <TabsTrigger value="recursos" className="px-8">Recursos para Alunos</TabsTrigger>
+                <TabsTrigger value="cursos" className="px-4 md:px-8">Cursos</TabsTrigger>
+                <TabsTrigger value="estudos" className="px-4 md:px-8">Estudos Bíblicos</TabsTrigger>
+                <TabsTrigger value="recursos" className="px-4 md:px-8">Recursos</TabsTrigger>
               </TabsList>
             </div>
+
+            <TabsContent value="estudos" className="animate-in fade-in duration-500">
+              <CouplesStudy />
+            </TabsContent>
 
             <TabsContent value="cursos" className="space-y-6">
               <div className="grid gap-6">
@@ -297,8 +303,8 @@ export default function CasadosPage() {
                     </div>
                     <div className="flex items-center gap-4">
                       <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${course.status === 'Inscrições Abertas'
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-secondary/10 text-secondary'
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-secondary/10 text-secondary'
                         }`}>
                         {course.status}
                       </span>

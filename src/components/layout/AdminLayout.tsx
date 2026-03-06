@@ -36,6 +36,7 @@ const navigation = [
   { name: "Eventos", href: "/admin/eventos", icon: Calendar, perm: "eventos" },
   { name: "Casados Para Sempre", href: "/admin/casados", icon: Heart, perm: "casados" },
   { name: "Aniversários", href: "/admin/aniversarios", icon: Cake, perm: "aniversarios" },
+  { name: "Lideranças", href: "/admin/lideranca", icon: Layers, perm: "ministerios" },
   { name: "Documentação", href: "/admin/docs", icon: FileText, perm: "docs" },
   { name: "Utilizadores", href: "/admin/users", icon: Users, perm: null },
   { name: "Configurações", href: "/admin/config", icon: Settings, perm: "config" },

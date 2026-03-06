@@ -1,4 +1,41 @@
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import {
+  Users,
+  Music,
+  Tv,
+  Heart,
+  ArrowRight,
+  Loader2,
+  Quote,
+  Star
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Dialog,
+  DialogContent,
+} from "@/components/ui/dialog";
 import MemberBadge from "@/components/MemberBadge";
+import { useMinistries, Ministry } from "@/hooks/useMinistries";
+import { useBirthdaysByMinistry } from "@/hooks/useBirthdays";
+import worshipImage from "@/assets/ministry-worship.jpg";
+import techImage from "@/assets/ministry-tech.jpg";
+import casadosImage from "@/assets/casados-para-sempre.jpg";
+
+const iconMap: Record<string, any> = {
+  Music: Music,
+  Tv: Tv,
+  Heart: Heart,
+  Users: Users,
+};
+
+const defaultImages: Record<string, string> = {
+  louvor: worshipImage,
+  tech: techImage,
+  casados: casadosImage,
+};
 
 export default function MinisteriosPage() {
   const { data: ministries, isLoading } = useMinistries();
@@ -148,8 +185,14 @@ function CardContent({ ministry, IconComponent, imageUrl }: any) {
   );
 }
 
+import { MOCK_MEMBERS } from "@/data/mockData";
+
 function MinistryDetailModal({ ministry, isOpen, onClose }: { ministry: Ministry | null, isOpen: boolean, onClose: () => void }) {
-  const { data: members = [], isLoading } = useBirthdaysByMinistry(ministry?.id);
+  const { data: dbMembers = [], isLoading } = useBirthdaysByMinistry(ministry?.id);
+
+  // Use DB members if they exist, otherwise use mock data
+  const members = dbMembers.length > 0 ? dbMembers : (ministry ? (MOCK_MEMBERS[ministry.slug] || MOCK_MEMBERS.default) : []);
+
   const IconComponent = ministry ? (iconMap[ministry.icon] || Users) : Users;
 
   const leaders = members.filter(m => m.is_leader);
@@ -226,7 +269,7 @@ function MinistryDetailModal({ ministry, isOpen, onClose }: { ministry: Ministry
                       leaders.map(leader => (
                         <div key={leader.id} className="scale-90 sm:scale-100">
                           <MemberBadge
-                            name={leader.nickname || leader.man_name || leader.woman_name || "Líder"}
+                            name={leader.man_name || leader.woman_name || "Líder"}
                             photo_url={leader.photo_url}
                             role="Líder / Supervisor"
                             variant="blue"
@@ -255,7 +298,7 @@ function MinistryDetailModal({ ministry, isOpen, onClose }: { ministry: Ministry
                       {regularMembers.map(member => (
                         <div key={member.id} className="scale-75 sm:scale-90 -m-4">
                           <MemberBadge
-                            name={member.nickname || member.man_name || member.woman_name || "Membro"}
+                            name={member.man_name || member.woman_name || "Membro"}
                             photo_url={member.photo_url}
                             role="Integrante"
                             variant="white"

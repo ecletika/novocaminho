@@ -25,7 +25,6 @@ export default function PublicBirthdayRegister() {
     man_name: "",
     birthday_date: "",
     birthday_type: "personal" as "personal" | "wedding",
-    nickname: "",
     photo_url: "",
     phone: "",
     email: "",
@@ -35,6 +34,39 @@ export default function PublicBirthdayRegister() {
     leader_name: "",
     ministry_ids: [] as string[],
   });
+  const [uploading, setUploading] = useState(false);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `avatars/${fileName}`;
+
+      const { data, error } = await supabase.storage
+        .from('photos')
+        .upload(filePath, file);
+
+      if (error) {
+        // Create bucket if it doesn't exist (assuming browser has permission or it's public)
+        throw error;
+      };
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('photos')
+        .getPublicUrl(filePath);
+
+      setFormData(prev => ({ ...prev, photo_url: publicUrl }));
+      toast.success("Foto carregada com sucesso!");
+    } catch (err: any) {
+      toast.error("Erro ao carregar foto: " + err.message);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const toggleMinistry = (id: string) => {
     setFormData((prev) => ({
@@ -72,7 +104,7 @@ export default function PublicBirthdayRegister() {
           <p className="text-muted-foreground">
             Obrigado por se cadastrar. Seus dados foram salvos com sucesso.
           </p>
-          <Button onClick={() => { setSubmitted(false); setFormData({ woman_name: "", man_name: "", nickname: "", photo_url: "", birthday_date: "", birthday_type: "personal", phone: "", email: "", address: "", woman_birthday: "", man_birthday: "", leader_name: "", ministry_ids: [] }); }}>
+          <Button onClick={() => { setSubmitted(false); setFormData({ woman_name: "", man_name: "", photo_url: "", birthday_date: "", birthday_type: "personal", phone: "", email: "", address: "", woman_birthday: "", man_birthday: "", leader_name: "", ministry_ids: [] }); }}>
             Fazer outro cadastro
           </Button>
         </div>
@@ -164,24 +196,19 @@ export default function PublicBirthdayRegister() {
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="nickname">Apelido (Como prefere ser chamado)</Label>
+              <Label htmlFor="photo">Sua Foto {uploading && <Loader2 className="w-4 h-4 inline animate-spin" />}</Label>
               <Input
-                id="nickname"
-                value={formData.nickname}
-                onChange={(e) => setFormData({ ...formData, nickname: e.target.value })}
-                placeholder="Ex: Pedro, Maria"
+                id="photo"
+                type="file"
+                accept="image/*"
+                onChange={handleFileUpload}
+                disabled={uploading}
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="photo_url">Link da sua Foto</Label>
-              <Input
-                id="photo_url"
-                value={formData.photo_url}
-                onChange={(e) => setFormData({ ...formData, photo_url: e.target.value })}
-                placeholder="https://..."
-              />
+              {formData.photo_url && (
+                <div className="mt-2 text-xs text-green-600 font-medium">Foto enviada com sucesso!</div>
+              )}
             </div>
           </div>
 
@@ -260,7 +287,7 @@ export default function PublicBirthdayRegister() {
             </div>
           </div>
 
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
+          <Button type="submit" className="w-full" disabled={isSubmitting || uploading}>
             {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
             Cadastrar
           </Button>

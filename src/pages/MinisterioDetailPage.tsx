@@ -14,10 +14,12 @@ const iconMap: Record<string, React.ElementType> = {
   Mic2,
 };
 
+import { MOCK_MEMBERS } from "@/data/mockData";
+
 export default function MinisterioDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const { data: ministry, isLoading: ministryLoading } = useMinistry(slug || "");
-  const { data: members = [], isLoading: membersLoading } = useBirthdaysByMinistry(ministry?.id);
+  const { data: dbMembers = [], isLoading: membersLoading } = useBirthdaysByMinistry(ministry?.id);
 
   if (ministryLoading || membersLoading) {
     return (
@@ -29,12 +31,12 @@ export default function MinisterioDetailPage() {
 
   if (!ministry) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="font-display text-2xl font-bold text-foreground mb-4">
+      <div className="min-h-screen flex items-center justify-center text-center p-8">
+        <div>
+          <h1 className="font-display text-4xl font-black text-primary uppercase tracking-tighter mb-4">
             Ministério não encontrado
           </h1>
-          <Button asChild>
+          <Button asChild className="rounded-full px-8">
             <Link to="/ministerios">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Voltar aos Ministérios
@@ -45,6 +47,7 @@ export default function MinisterioDetailPage() {
     );
   }
 
+  const members = dbMembers.length > 0 ? dbMembers : (MOCK_MEMBERS[ministry.slug] || MOCK_MEMBERS.default);
   const IconComponent = iconMap[ministry.icon] || Users;
   const leaders = members.filter(m => m.is_leader);
   const regularMembers = members.filter(m => !m.is_leader);
@@ -104,7 +107,7 @@ export default function MinisterioDetailPage() {
                 leaders.map((leader) => (
                   <div key={leader.id} className="animate-fade-up">
                     <MemberBadge
-                      name={leader.nickname || leader.man_name || leader.woman_name || "Líder"}
+                      name={leader.man_name || leader.woman_name || "Líder"}
                       photo_url={leader.photo_url}
                       role="Líder / Supervisor"
                       variant="blue"
@@ -130,7 +133,7 @@ export default function MinisterioDetailPage() {
                 regularMembers.map((member) => (
                   <div key={member.id} className="animate-fade-up">
                     <MemberBadge
-                      name={member.nickname || member.man_name || member.woman_name || "Membro"}
+                      name={member.man_name || member.woman_name || "Membro"}
                       photo_url={member.photo_url}
                       role="Integrante"
                       variant="white"

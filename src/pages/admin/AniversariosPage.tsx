@@ -53,7 +53,6 @@ export default function AniversariosPage() {
     man_name: "",
     birthday_date: "",
     birthday_type: "personal" as "personal" | "wedding",
-    nickname: "",
     photo_url: "",
     phone: "",
     email: "",
@@ -61,7 +60,7 @@ export default function AniversariosPage() {
     woman_birthday: "",
     man_birthday: "",
     leader_name: "",
-    ministry_selections: [] as { ministry_id: string; is_leader: boolean }[],
+    ministry_selections: [] as { ministry_id: string; is_leader: boolean; leader_id?: string | null }[],
   });
 
   const { data: birthdays = [], isLoading } = useBirthdays();
@@ -76,7 +75,6 @@ export default function AniversariosPage() {
       man_name: "",
       birthday_date: "",
       birthday_type: "personal",
-      nickname: "",
       photo_url: "",
       phone: "",
       email: "",
@@ -96,49 +94,82 @@ export default function AniversariosPage() {
       man_name: birthday.man_name || "",
       birthday_date: birthday.birthday_date,
       birthday_type: birthday.birthday_type as "personal" | "wedding",
-      nickname: (birthday as any).nickname || "",
-      photo_url: (birthday as any).photo_url || "",
-      phone: (birthday as any).phone || "",
-      email: (birthday as any).email || "",
-      address: (birthday as any).address || "",
-      leader_name: (birthday as any).leader_name || "",
-      woman_birthday: (birthday as any).woman_birthday || "",
-      man_birthday: (birthday as any).man_birthday || "",
+      photo_url: birthday.photo_url || "",
+      phone: birthday.phone || "",
+      email: birthday.email || "",
+      address: birthday.address || "",
+      leader_name: birthday.leader_name || "",
+      woman_birthday: birthday.woman_birthday || "",
+      man_birthday: birthday.man_birthday || "",
       ministry_selections: birthday.ministries?.map((m) => ({
         ministry_id: m.ministry_id,
         is_leader: m.is_leader,
+        leader_id: m.leader_id,
       })) || [],
     });
     setIsDialogOpen(true);
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `avatars/${fileName}`;
+
+      const { data, error } = await supabase.storage.from('photos').upload(filePath, file);
+      if (error) throw error;
+
+      const { data: { publicUrl } } = supabase.storage.from('photos').getPublicUrl(filePath);
+      setFormData(prev => ({ ...prev, photo_url: publicUrl }));
+      toast.success("Foto carregada com sucesso!");
+    } catch (err: any) {
+      console.error("Erro upload:", err);
+      toast.error("Erro ao carregar foto: " + err.message);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Iniciando submissão do formulário...");
 
-    const data = {
-      woman_name: formData.woman_name || null,
-      man_name: formData.man_name || null,
-      birthday_date: formData.birthday_date,
-      birthday_type: formData.birthday_type,
-      phone: formData.phone || null,
-      email: formData.email || null,
-      address: formData.address || null,
-      nickname: formData.nickname || null,
-      photo_url: formData.photo_url || null,
-      woman_birthday: formData.woman_birthday || null,
-      man_birthday: formData.man_birthday || null,
-      leader_name: formData.leader_name || null,
-      ministry_selections: formData.ministry_selections,
-    };
+    try {
+      const data = {
+        woman_name: formData.woman_name || (formData.birthday_type === "personal" ? formData.woman_name : null),
+        man_name: formData.man_name || null,
+        birthday_date: formData.birthday_date,
+        birthday_type: formData.birthday_type,
+        phone: formData.phone || null,
+        email: formData.email || null,
+        address: formData.address || null,
+        photo_url: formData.photo_url || null,
+        woman_birthday: formData.woman_birthday || null,
+        man_birthday: formData.man_birthday || null,
+        leader_name: formData.leader_name || null,
+        ministry_selections: formData.ministry_selections,
+      };
 
-    if (selectedBirthday) {
-      await updateBirthday.mutateAsync({ id: selectedBirthday.id, ...data });
-    } else {
-      await createBirthday.mutateAsync(data);
+      console.log("Dados formatados para envio:", data);
+
+      if (selectedBirthday) {
+        console.log("Modo de edição: atualizando ID", selectedBirthday.id);
+        await updateBirthday.mutateAsync({ id: selectedBirthday.id, ...data });
+        toast.success("Aniversário atualizado com sucesso!");
+      } else {
+        console.log("Modo de criação: inserindo novo registro...");
+        await createBirthday.mutateAsync(data);
+        toast.success("Aniversário cadastrado com sucesso!");
+      }
+
+      setIsDialogOpen(false);
+      resetForm();
+      console.log("Submissão concluída com sucesso.");
+    } catch (error: any) {
+      console.error("Erro detalhado na submissão:", error);
+      toast.error("Erro ao salvar: " + (error.message || "Ocorreu um erro inesperado"));
     }
-
-    setIsDialogOpen(false);
-    resetForm();
   };
 
   const handleDelete = async () => {
@@ -159,7 +190,7 @@ export default function AniversariosPage() {
       } else {
         return {
           ...prev,
-          ministry_selections: [...prev.ministry_selections, { ministry_id: ministryId, is_leader: false }],
+          ministry_selections: [...prev.ministry_selections, { ministry_id: ministryId, is_leader: false, leader_id: null }],
         };
       }
     });
@@ -487,14 +518,17 @@ export default function AniversariosPage() {
               <Input value={formData.leader_name} onChange={(e) => setFormData({ ...formData, leader_name: e.target.value })} placeholder="Nome do líder/supervisor" />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Apelido</Label>
-                <Input value={formData.nickname} onChange={(e) => setFormData({ ...formData, nickname: e.target.value })} placeholder="Como prefere ser chamado" />
-              </div>
-              <div className="space-y-2">
-                <Label>Foto (URL)</Label>
-                <Input value={formData.photo_url} onChange={(e) => setFormData({ ...formData, photo_url: e.target.value })} placeholder="URL da foto" />
+            <div className="space-y-2">
+              <Label>Sua Foto</Label>
+              <div className="flex items-center gap-4">
+                {formData.photo_url && (
+                  <img src={formData.photo_url} alt="Preview" className="w-12 h-12 rounded-full object-cover border" />
+                )}
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                />
               </div>
             </div>
 

@@ -16,6 +16,7 @@ import CasadosPage from "./pages/CasadosPage";
 import AuthPage from "./pages/AuthPage";
 import PublicBirthdayRegister from "./pages/PublicBirthdayRegister";
 import BelievePage from "./pages/BelievePage";
+import BibliaPage from "./pages/BibliaPage";
 import NotFound from "./pages/NotFound";
 
 // Admin Layout & Pages
@@ -30,6 +31,7 @@ import AdminEventosPage from "./pages/admin/AdminEventosPage";
 import AniversariosPage from "./pages/admin/AniversariosPage";
 import ConfigPage from "./pages/admin/ConfigPage";
 import AdminCasadosPage from "./pages/admin/AdminCasadosPage";
+import AdminLiderancaPage from "./pages/admin/AdminLiderancaPage";
 import UsersPage from "./pages/admin/UsersPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -51,6 +53,7 @@ const App = () => (
             <Route element={<PublicLayout><ContatoPage /></PublicLayout>} path="/contato" />
             <Route element={<PublicLayout><CasadosPage /></PublicLayout>} path="/casados" />
             <Route element={<PublicLayout><BelievePage /></PublicLayout>} path="/no-que-cremos" />
+            <Route element={<PublicLayout><BibliaPage /></PublicLayout>} path="/biblia" />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/cadastro-aniversario" element={<PublicBirthdayRegister />} />
 
@@ -66,6 +69,7 @@ const App = () => (
               <Route path="aniversarios" element={<AniversariosPage />} />
               <Route path="casados" element={<AdminCasadosPage />} />
               <Route path="users" element={<UsersPage />} />
+              <Route path="lideranca" element={<AdminLiderancaPage />} />
               <Route path="config" element={<ConfigPage />} />
             </Route>
 

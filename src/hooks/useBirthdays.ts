@@ -5,7 +5,6 @@ export interface Birthday {
   id: string;
   woman_name: string | null;
   man_name: string | null;
-  nickname: string | null;
   photo_url: string | null;
   birthday_date: string;
   birthday_type: "personal" | "wedding";
@@ -20,13 +19,12 @@ export interface Birthday {
 }
 
 export interface BirthdayWithMinistries extends Birthday {
-  ministries: { ministry_id: string; is_leader: boolean }[];
+  ministries: { ministry_id: string; is_leader: boolean; leader_id: string | null }[];
 }
 
 export interface BirthdayInsert {
   woman_name?: string | null;
   man_name?: string | null;
-  nickname?: string | null;
   photo_url?: string | null;
   birthday_date: string;
   birthday_type: "personal" | "wedding";
@@ -36,7 +34,7 @@ export interface BirthdayInsert {
   leader_name?: string | null;
   woman_birthday?: string | null;
   man_birthday?: string | null;
-  ministry_selections?: { ministry_id: string; is_leader: boolean }[];
+  ministry_selections?: { ministry_id: string; is_leader: boolean; leader_id?: string | null }[];
 }
 
 // Fetch all birthdays
@@ -46,7 +44,7 @@ export function useBirthdays() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("birthdays")
-        .select("*, ministries:birthday_ministries(ministry_id, is_leader)")
+        .select("*, ministries:birthday_ministries(ministry_id, is_leader, leader_id)")
         .order("birthday_date", { ascending: true });
 
       if (error) throw error;

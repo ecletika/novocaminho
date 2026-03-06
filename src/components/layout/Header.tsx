@@ -9,6 +9,7 @@ import RadioModal from "@/components/RadioModal";
 const baseNavigation = [
   { name: "Início", href: "/" },
   { name: "Eventos", href: "/eventos" },
+  { name: "Bíblia", href: "/biblia" },
   { name: "Casados Para Sempre", href: "/casados" },
   { name: "No que Cremos", href: "/no-que-cremos" },
   { name: "Contato", href: "/contato" },
