@@ -515,8 +515,6 @@ export default function AniversariosPage() {
               <Input value={formData.leader_name} onChange={(e) => setFormData({ ...formData, leader_name: e.target.value })} placeholder="Nome do líder/supervisor" />
             </div>
 
-            </div>
-
             <div className="space-y-2">
               <Label>Ministérios</Label>
               <div className="space-y-2 max-h-48 overflow-y-auto p-2 border rounded-lg">
