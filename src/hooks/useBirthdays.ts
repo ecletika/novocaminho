@@ -87,24 +87,20 @@ export function useBirthdaysByMinistry(ministryId: string | undefined) {
 
       const { data, error } = await supabase
         .from("birthday_ministries")
-        .select("birthday_id, is_leader, birthdays(*)")
+        .select("birthday_id, birthdays(*)")
         .eq("ministry_id", ministryId);
 
       if (error) throw error;
 
-      // Extract birthdays with leader status
       const members = data
         .map((item) => {
           const birthday = item.birthdays as unknown as Birthday;
           if (!birthday) return null;
-          return {
-            ...birthday,
-            is_leader: item.is_leader,
-          };
+          return birthday;
         })
         .filter(Boolean);
 
-      return members as (Birthday & { is_leader: boolean })[];
+      return members as Birthday[];
     },
     enabled: !!ministryId,
   });

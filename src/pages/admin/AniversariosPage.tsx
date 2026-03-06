@@ -101,8 +101,8 @@ export default function AniversariosPage() {
       man_birthday: birthday.man_birthday || "",
       ministry_selections: birthday.ministries?.map((m) => ({
         ministry_id: m.ministry_id,
-        is_leader: m.is_leader,
-        leader_id: m.leader_id,
+        is_leader: false,
+        leader_id: null,
       })) || [],
     });
     setIsDialogOpen(true);
@@ -335,7 +335,7 @@ export default function AniversariosPage() {
                         const ministry = ministries.find((min) => min.id === m.ministry_id);
                         return ministry ? (
                           <span key={m.ministry_id} className="px-2 py-0.5 rounded-full bg-muted text-muted-foreground text-xs">
-                            {ministry.title} {m.is_leader && "👑"}
+                            {ministry.title}
                           </span>
                         ) : null;
                       })}
@@ -423,7 +423,7 @@ export default function AniversariosPage() {
                               const ministry = ministries.find((min) => min.id === m.ministry_id);
                               return ministry ? (
                                 <span key={m.ministry_id} className="px-2 py-0.5 rounded-full bg-muted text-muted-foreground text-xs">
-                                  {ministry.title} {m.is_leader && "(Líder)"}
+                                  {ministry.title}
                                 </span>
                               ) : null;
                             })}
@@ -515,18 +515,6 @@ export default function AniversariosPage() {
               <Input value={formData.leader_name} onChange={(e) => setFormData({ ...formData, leader_name: e.target.value })} placeholder="Nome do líder/supervisor" />
             </div>
 
-            <div className="space-y-2">
-              <Label>Sua Foto</Label>
-              <div className="flex items-center gap-4">
-                {formData.photo_url && (
-                  <img src={formData.photo_url} alt="Preview" className="w-12 h-12 rounded-full object-cover border" />
-                )}
-                <Input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileUpload}
-                />
-              </div>
             </div>
 
             <div className="space-y-2">
