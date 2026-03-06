@@ -19,7 +19,7 @@ export interface Birthday {
 }
 
 export interface BirthdayWithMinistries extends Birthday {
-  ministries: { ministry_id: string; is_leader: boolean; leader_id: string | null }[];
+  ministries: { ministry_id: string }[];
 }
 
 export interface BirthdayInsert {
@@ -44,7 +44,7 @@ export function useBirthdays() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("birthdays")
-        .select("*, ministries:birthday_ministries(ministry_id, is_leader, leader_id)")
+        .select("*, ministries:birthday_ministries(ministry_id)")
         .order("birthday_date", { ascending: true });
 
       if (error) throw error;

@@ -24,7 +24,7 @@ export const getDailyVerse = async (): Promise<Verse | null> => {
         .limit(30);
 
     if (data && data.length > 0) {
-        const v = data[Math.floor(Math.random() * data.length)];
+        const v = data[Math.floor(Math.random() * data.length)] as any;
         return {
             text: v.text,
             book: v.verses.chapters.books.name,

@@ -49,9 +49,9 @@ serve(async (req) => {
             JSON.stringify(data),
             { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
         )
-    } catch (error) {
+    } catch (error: unknown) {
         return new Response(
-            JSON.stringify({ error: error.message }),
+            JSON.stringify({ error: (error as Error).message }),
             { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
         )
     }

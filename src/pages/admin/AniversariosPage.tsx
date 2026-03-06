@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Plus, Search, Cake, Heart, Trash2, Edit, Loader2, Calendar, Phone, Mail, MapPin, FileText, Link2, Copy } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -53,7 +54,6 @@ export default function AniversariosPage() {
     man_name: "",
     birthday_date: "",
     birthday_type: "personal" as "personal" | "wedding",
-    photo_url: "",
     phone: "",
     email: "",
     address: "",
@@ -75,7 +75,6 @@ export default function AniversariosPage() {
       man_name: "",
       birthday_date: "",
       birthday_type: "personal",
-      photo_url: "",
       phone: "",
       email: "",
       address: "",
@@ -94,7 +93,6 @@ export default function AniversariosPage() {
       man_name: birthday.man_name || "",
       birthday_date: birthday.birthday_date,
       birthday_type: birthday.birthday_type as "personal" | "wedding",
-      photo_url: birthday.photo_url || "",
       phone: birthday.phone || "",
       email: birthday.email || "",
       address: birthday.address || "",
@@ -144,7 +142,6 @@ export default function AniversariosPage() {
         phone: formData.phone || null,
         email: formData.email || null,
         address: formData.address || null,
-        photo_url: formData.photo_url || null,
         woman_birthday: formData.woman_birthday || null,
         man_birthday: formData.man_birthday || null,
         leader_name: formData.leader_name || null,
