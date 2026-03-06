@@ -129,6 +129,14 @@ export default function LouvorPage() {
   // Form states - Function
   const [newFunctionName, setNewFunctionName] = useState("");
 
+  // Form states - Worship Schedule
+  const [newScheduleDate, setNewScheduleDate] = useState("");
+  const [newScheduleMinisterId, setNewScheduleMinisterId] = useState("");
+  const [newScheduleVocalistIds, setNewScheduleVocalistIds] = useState<string[]>([]);
+  const [newScheduleTecladoId, setNewScheduleTecladoId] = useState("");
+  const [newScheduleViolaoId, setNewScheduleViolaoId] = useState("");
+  const [newScheduleBateriaId, setNewScheduleBateriaId] = useState("");
+
   // Form states - General Schedule
   const [formDate, setFormDate] = useState("");
   const [formType, setFormType] = useState("");
@@ -430,7 +438,7 @@ export default function LouvorPage() {
     if (newScheduleViolaoId) musicianAssignments.push({ member_id: newScheduleViolaoId, instrument: "violao" });
     if (newScheduleBateriaId) musicianAssignments.push({ member_id: newScheduleBateriaId, instrument: "bateria" });
 
-    await createSchedule.mutateAsync({
+    await createWorshipSchedule.mutateAsync({
       date: newScheduleDate,
       minister_id: newScheduleMinisterId,
       vocalist_ids: newScheduleVocalistIds,
@@ -450,7 +458,7 @@ export default function LouvorPage() {
     if (newScheduleViolaoId) musicianAssignments.push({ member_id: newScheduleViolaoId, instrument: "violao" });
     if (newScheduleBateriaId) musicianAssignments.push({ member_id: newScheduleBateriaId, instrument: "bateria" });
 
-    await updateSchedule.mutateAsync({
+    await updateWorshipSchedule.mutateAsync({
       id: selectedSchedule.id,
       date: newScheduleDate,
       minister_id: newScheduleMinisterId,
@@ -524,7 +532,7 @@ export default function LouvorPage() {
         await deleteSong.mutateAsync(deleteItemId);
         break;
       case "schedule":
-        await deleteSchedule.mutateAsync(deleteItemId);
+        await deleteWorshipSchedule.mutateAsync(deleteItemId);
         break;
       case "assignment":
         await deleteAssignment.mutateAsync(deleteItemId);
