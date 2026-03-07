@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Heart, Calendar, MapPin, Camera, ArrowRight, Search, ChevronDown, Users, ClipboardList } from "lucide-react";
+import { Heart, Calendar, MapPin, Camera, ArrowRight, Search, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import casadosImage from "@/assets/casados-para-sempre.jpg";
@@ -9,19 +9,6 @@ import { useCasadosGallery } from "@/hooks/useCasadosGallery";
 import { useEvents } from "@/hooks/useEvents";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CASADOS_COURSES, CASADOS_RESOURCES } from "@/constants/casadosData";
-import { FileText, GraduationCap, BookOpen, UserPlus, Link as LinkIcon } from "lucide-react";
-import CouplesStudy from "@/components/CouplesStudy";
-import CasadosOnlineMaterial from "@/components/CasadosOnlineMaterial";
-
-const resourceIconMap: Record<string, React.ElementType> = {
-  FileText,
-  GraduationCap,
-  ClipboardList,
-  BookOpen,
-  UserPlus
-};
 
 export default function CasadosPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -258,127 +245,6 @@ export default function CasadosPage() {
         </div>
       </section>
 
-      {/* Inscrições e Recursos Section */}
-      <section id="inscricao" className="section-padding bg-card border-t border-border">
-        <div className="container-church">
-          <div className="text-center mb-12">
-            <span className="text-secondary font-medium text-sm uppercase tracking-wider">Participe</span>
-            <h2 className="font-display text-4xl font-bold text-foreground mt-3 mb-4">
-              Inscrições e Recursos
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Confira as próximas turmas e acesse os materiais necessários para o seu crescimento.
-            </p>
-          </div>
-
-          <Tabs defaultValue="online" className="max-w-7xl mx-auto">
-            <div className="flex justify-center mb-8">
-              <TabsList className="bg-muted/50 p-1">
-                <TabsTrigger value="online" className="px-4 md:px-8 flex items-center gap-2">
-                  <BookOpen className="w-4 h-4" /> Material Online
-                </TabsTrigger>
-                <TabsTrigger value="participe" className="px-4 md:px-8 flex items-center gap-2">
-                  <ClipboardList className="w-4 h-4" /> Inscrições & Apoio
-                </TabsTrigger>
-              </TabsList>
-            </div>
-
-            <TabsContent value="online" className="animate-in fade-in duration-500">
-              <CasadosOnlineMaterial />
-            </TabsContent>
-
-            <TabsContent value="participe" className="animate-in fade-in duration-500">
-              <Tabs defaultValue="cursos" className="w-full">
-                <div className="flex justify-center mb-10">
-                  <TabsList className="bg-secondary/10 p-1 border border-secondary/20 rounded-xl">
-                    <TabsTrigger value="cursos" className="flex items-center gap-2 px-6">
-                      <GraduationCap className="w-4 h-4" /> Cursos
-                    </TabsTrigger>
-                    <TabsTrigger value="estudos" className="flex items-center gap-2 px-6">
-                      <FileText className="w-4 h-4" /> Estudos Bíblicos
-                    </TabsTrigger>
-                    <TabsTrigger value="recursos" className="flex items-center gap-2 px-6">
-                      <LinkIcon className="w-4 h-4" /> Recursos
-                    </TabsTrigger>
-                  </TabsList>
-                </div>
-
-                <TabsContent value="cursos" className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
-                  <div className="grid gap-6">
-                    {CASADOS_COURSES.map((course) => (
-                      <div
-                        key={course.id}
-                        className="bg-card rounded-2xl p-6 border border-border shadow-soft flex flex-col md:flex-row items-center justify-between gap-6 hover:border-secondary/30 transition-all"
-                      >
-                        <div className="flex items-center gap-5">
-                          <div className="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center shrink-0">
-                            <BookOpen className="w-6 h-6 text-secondary" />
-                          </div>
-                          <div>
-                            <h4 className="font-display text-xl font-bold text-foreground">{course.name}</h4>
-                            <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
-                              <Calendar className="w-4 h-4" /> Próxima turma: {course.startDate}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${course.status === 'Inscrições Abertas'
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-secondary/10 text-secondary'
-                            }`}>
-                            {course.status}
-                          </span>
-                          <Button asChild size="lg" className="rounded-xl font-bold shadow-md hover:shadow-lg transition-all active:scale-95">
-                            <a href={course.link} target="_blank" rel="noopener noreferrer">
-                              Fazer Inscrição
-                              <ArrowRight className="w-4 h-4 ml-2" />
-                            </a>
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="estudos" className="animate-in slide-in-from-bottom-4 duration-500">
-                  <CouplesStudy />
-                </TabsContent>
-
-                <TabsContent value="recursos" className="animate-in slide-in-from-bottom-4 duration-500">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {CASADOS_RESOURCES.map((resource) => {
-                      const Icon = resourceIconMap[resource.icon] || FileText;
-                      return (
-                        <a
-                          key={resource.title}
-                          href={resource.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="bg-card rounded-2xl p-6 border border-border hover:border-secondary shadow-soft hover:shadow-card transition-all group"
-                        >
-                          <div className="flex items-start gap-4">
-                            <div className={`w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center shrink-0 group-hover:bg-secondary group-hover:text-primary-foreground transition-all`}>
-                              <Icon className="w-6 h-6 text-secondary group-hover:text-inherit" />
-                            </div>
-                            <div>
-                              <h4 className="font-bold text-foreground transition-colors">{resource.title}</h4>
-                              <p className="text-sm text-muted-foreground mt-1">{resource.description}</p>
-                              <div className="flex items-center gap-2 mt-3 text-xs font-bold text-secondary uppercase tracking-widest">
-                                <span>Acessar Material</span>
-                                <ArrowRight className="w-3 h-3" />
-                              </div>
-                            </div>
-                          </div>
-                        </a>
-                      );
-                    })}
-                  </div>
-                </TabsContent>
-              </Tabs>
-            </TabsContent>
-          </Tabs>
-        </div>
-      </section>
 
       {/* Footer CTA (Modified) */}
       <section className="section-padding gradient-hero">

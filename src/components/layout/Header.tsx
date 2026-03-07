@@ -10,7 +10,6 @@ const baseNavigation = [
   { name: "Início", href: "/" },
   { name: "Eventos", href: "/eventos" },
   { name: "Bíblia", href: "/biblia" },
-  { name: "Casados Para Sempre", href: "/casados" },
   { name: "No que Cremos", href: "/no-que-cremos" },
   { name: "Contato", href: "/contato" },
 ];
@@ -19,6 +18,7 @@ export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMinisteriosOpen, setIsMinisteriosOpen] = useState(false);
+  const [isCasadosOpen, setIsCasadosOpen] = useState(false);
   const [isRadioOpen, setIsRadioOpen] = useState(false);
   const location = useLocation();
   const { data: ministries } = useMinistries();
@@ -119,6 +119,61 @@ export default function Header() {
                 )}
               </div>
 
+              {/* Casados Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => setIsCasadosOpen(!isCasadosOpen)}
+                  onBlur={() => setTimeout(() => setIsCasadosOpen(false), 150)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-1 ${location.pathname.startsWith("/casados")
+                    ? isScrolled
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-primary-foreground/20 text-primary-foreground"
+                    : isScrolled
+                      ? "text-foreground hover:bg-muted"
+                      : "text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10"
+                    }`}
+                >
+                  Casados Para Sempre
+                  <ChevronDown className={`w-4 h-4 transition-transform ${isCasadosOpen ? "rotate-180" : ""}`} />
+                </button>
+
+                {isCasadosOpen && (
+                  <div className="absolute top-full left-0 mt-2 w-64 bg-card rounded-xl shadow-xl border border-border py-2 z-50">
+                    <Link
+                      to="/casados"
+                      className="block px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors"
+                    >
+                      Sobre o Ministério
+                    </Link>
+                    <div className="h-px bg-border my-1" />
+                    <Link
+                      to="/casados/cursos"
+                      className="block px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors"
+                    >
+                      Cursos
+                    </Link>
+                    <Link
+                      to="/casados/material"
+                      className="block px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors"
+                    >
+                      Material Online
+                    </Link>
+                    <Link
+                      to="/casados/estudos"
+                      className="block px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors"
+                    >
+                      Estudo para Casais
+                    </Link>
+                    <Link
+                      to="/casados/recursos"
+                      className="block px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors"
+                    >
+                      Recursos
+                    </Link>
+                  </div>
+                )}
+              </div>
+
               {baseNavigation.slice(1).map((item) => (
                 <Link
                   key={item.name}
@@ -195,6 +250,48 @@ export default function Header() {
                     {ministry.title}
                   </Link>
                 ))}
+
+                {/* Mobile Casados Submenu */}
+                <div className="space-y-1">
+                  <div className="px-4 py-2 text-xs font-bold text-muted-foreground uppercase tracking-widest mt-2">
+                    Casados Para Sempre
+                  </div>
+                  <Link
+                    to="/casados"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="block px-8 py-2 rounded-lg text-sm text-muted-foreground hover:bg-muted transition-colors"
+                  >
+                    Sobre
+                  </Link>
+                  <Link
+                    to="/casados/cursos"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="block px-8 py-2 rounded-lg text-sm text-muted-foreground hover:bg-muted transition-colors"
+                  >
+                    Cursos
+                  </Link>
+                  <Link
+                    to="/casados/material"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="block px-8 py-2 rounded-lg text-sm text-muted-foreground hover:bg-muted transition-colors"
+                  >
+                    Material Online
+                  </Link>
+                  <Link
+                    to="/casados/estudos"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="block px-8 py-2 rounded-lg text-sm text-muted-foreground hover:bg-muted transition-colors"
+                  >
+                    Estudo para Casais
+                  </Link>
+                  <Link
+                    to="/casados/recursos"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="block px-8 py-2 rounded-lg text-sm text-muted-foreground hover:bg-muted transition-colors"
+                  >
+                    Recursos
+                  </Link>
+                </div>
                 {baseNavigation.slice(1).map((item) => (
                   <Link
                     key={item.name}

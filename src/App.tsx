@@ -13,6 +13,10 @@ import MinisterioDetailPage from "./pages/MinisterioDetailPage";
 import EventosPage from "./pages/EventosPage";
 import ContatoPage from "./pages/ContatoPage";
 import CasadosPage from "./pages/CasadosPage";
+import CasadosCursosPage from "./pages/casados/CasadosCursosPage";
+import CasadosMaterialPage from "./pages/casados/CasadosMaterialPage";
+import CasadosEstudosPage from "./pages/casados/CasadosEstudosPage";
+import CasadosRecursosPage from "./pages/casados/CasadosRecursosPage";
 import AuthPage from "./pages/AuthPage";
 import PublicBirthdayRegister from "./pages/PublicBirthdayRegister";
 import BelievePage from "./pages/BelievePage";
@@ -53,6 +57,10 @@ const App = () => (
             <Route element={<PublicLayout><EventosPage /></PublicLayout>} path="/eventos" />
             <Route element={<PublicLayout><ContatoPage /></PublicLayout>} path="/contato" />
             <Route element={<PublicLayout><CasadosPage /></PublicLayout>} path="/casados" />
+            <Route element={<PublicLayout><CasadosCursosPage /></PublicLayout>} path="/casados/cursos" />
+            <Route element={<PublicLayout><CasadosMaterialPage /></PublicLayout>} path="/casados/material" />
+            <Route element={<PublicLayout><CasadosEstudosPage /></PublicLayout>} path="/casados/estudos" />
+            <Route element={<PublicLayout><CasadosRecursosPage /></PublicLayout>} path="/casados/recursos" />
             <Route element={<PublicLayout><BelievePage /></PublicLayout>} path="/no-que-cremos" />
             <Route element={<PublicLayout><BibliaPage /></PublicLayout>} path="/biblia" />
             <Route path="/auth" element={<AuthPage />} />
