@@ -78,6 +78,7 @@ Deno.serve(async (req) => {
     await supabase.from("profiles").insert({
       user_id: data.user.id,
       full_name: full_name || email,
+      email: email,
     });
 
     // Add ministry associations

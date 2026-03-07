@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Users, Shield, Loader2, Save, Search, Plus, Eye, EyeOff, Church } from "lucide-react";
+import { Users, Shield, Loader2, Save, Search, Plus, Eye, EyeOff, Church, Mail, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -29,7 +29,8 @@ import { toast } from "sonner";
 
 interface UserWithRole {
   id: string;
-  email: string;
+  name: string;
+  email: string | null;
   role: string | null;
 }
 
@@ -43,6 +44,7 @@ export default function UsersPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [editingUser, setEditingUser] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState("");
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
   const [selectedMinistries, setSelectedMinistries] = useState<string[]>([]);
   const [editingRole, setEditingRole] = useState<string>("member");
@@ -92,7 +94,8 @@ export default function UsersPage() {
         const profile = profiles?.find((p) => p.user_id === uid);
         return {
           id: uid,
-          email: profile?.full_name || `Utilizador ${uid.substring(0, 5)}`,
+          name: profile?.full_name || `Utilizador ${uid.substring(0, 5)}`,
+          email: (profile as any)?.email || null,
           role: role?.role || "member",
         };
       });
@@ -124,6 +127,7 @@ export default function UsersPage() {
 
   const startEditing = (user: UserWithRole) => {
     setEditingUser(user.id);
+    setEditingName(user.name);
     setEditingRole(user.role || "member");
     setSelectedPermissions(getUserPermissions(user.id));
     setSelectedMinistries(getUserMinistryIds(user.id));
@@ -132,15 +136,22 @@ export default function UsersPage() {
   const handleSave = async () => {
     if (!editingUser) return;
     try {
+      // 1. Update Permissions
       await setPerms.mutateAsync({ userId: editingUser, permissions: selectedPermissions });
 
-      // Save role
+      // 2. Update Role
       await supabase.from("user_roles").upsert({
         user_id: editingUser,
         role: editingRole as any
       }, { onConflict: "user_id,role" });
 
-      // Save ministries
+      // 3. Update Name in Profile
+      await supabase.from("profiles").upsert({
+        user_id: editingUser,
+        full_name: editingName,
+      }, { onConflict: "user_id" });
+
+      // 4. Save ministries
       await supabase.from("user_ministries").delete().eq("user_id", editingUser);
       if (selectedMinistries.length > 0) {
         await supabase.from("user_ministries").insert(
@@ -150,9 +161,10 @@ export default function UsersPage() {
 
       loadUsers();
       loadUserMinistries();
-      toast.success("Permissões, cargo e ministérios atualizados!");
+      toast.success("Dados do utilizador atualizados!");
       setEditingUser(null);
     } catch (err) {
+      console.error(err);
       toast.error("Erro ao atualizar");
     }
   };
@@ -162,7 +174,13 @@ export default function UsersPage() {
     setIsCreating(true);
     try {
       const { data, error } = await supabase.functions.invoke("create-user", {
-        body: { email: newEmail, password: newPassword, full_name: newName, ministry_ids: newMinistries, role: newRole },
+        body: {
+          email: newEmail,
+          password: newPassword,
+          full_name: newName,
+          ministry_ids: newMinistries,
+          role: newRole
+        },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
@@ -192,7 +210,9 @@ export default function UsersPage() {
   };
 
   const filteredUsers = users.filter(
-    (u) => u.email.toLowerCase().includes(searchTerm.toLowerCase())
+    (u) =>
+      u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (u.email?.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   if (isLoading || permsLoading || ministriesLoading) {
@@ -223,7 +243,7 @@ export default function UsersPage() {
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Pesquisar utilizadores..."
+            placeholder="Pesquisar por nome ou email..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-9"
@@ -244,15 +264,34 @@ export default function UsersPage() {
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
                     <span className="text-primary-foreground font-medium">
-                      {user.email.charAt(0).toUpperCase()}
+                      {user.name.charAt(0).toUpperCase()}
                     </span>
                   </div>
                   <div>
-                    <h3 className="font-semibold text-foreground">{user.email}</h3>
-                    <div className="flex items-center gap-2">
-                      <Shield className="w-3 h-3 text-muted-foreground" />
-                      <span className="text-xs text-muted-foreground capitalize">{user.role}</span>
-                    </div>
+                    {isEditing ? (
+                      <div className="space-y-1">
+                        <Label className="text-xs">Nome do Utilizador</Label>
+                        <Input
+                          value={editingName}
+                          onChange={(e) => setEditingName(e.target.value)}
+                          className="h-8 py-1"
+                        />
+                      </div>
+                    ) : (
+                      <>
+                        <h3 className="font-semibold text-foreground">{user.name}</h3>
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <Mail className="w-3 h-3" />
+                            {user.email || "Sem email"}
+                          </div>
+                          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <Shield className="w-3 h-3" />
+                            <span className="capitalize">{user.role}</span>
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
                 <div className="flex gap-2">
@@ -280,7 +319,7 @@ export default function UsersPage() {
                 </div>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-4 pt-4 border-t border-border">
                 {isAdmin && !isEditing && (
                   <div className="bg-primary/5 p-3 rounded-lg border border-primary/20 mb-2">
                     <p className="text-sm text-primary font-medium flex items-center gap-2">
@@ -289,14 +328,14 @@ export default function UsersPage() {
                   </div>
                 )}
 
-                <div className="space-y-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Ministries */}
                   <div>
-                    <h4 className="text-sm font-medium text-foreground mb-2 flex items-center gap-2">
-                      <Church className="w-4 h-4" /> Ministérios
+                    <h4 className="text-sm font-medium text-foreground mb-3 flex items-center gap-2">
+                      <Church className="w-4 h-4 text-primary" /> Ministérios Atribuídos
                     </h4>
                     {isEditing ? (
-                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                      <div className="grid grid-cols-2 gap-2 p-3 border rounded-lg bg-muted/20">
                         {ministries.filter(m => m.is_active).map((m) => (
                           <div key={m.id} className="flex items-center gap-2">
                             <Checkbox
@@ -304,20 +343,20 @@ export default function UsersPage() {
                               checked={userMins.includes(m.id)}
                               onCheckedChange={() => toggleMinistry(m.id, selectedMinistries, setSelectedMinistries)}
                             />
-                            <Label htmlFor={`min-${user.id}-${m.id}`} className="text-sm cursor-pointer">
+                            <Label htmlFor={`min-${user.id}-${m.id}`} className="text-sm cursor-pointer truncate">
                               {m.title}
                             </Label>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <div className="flex flex-wrap gap-1">
+                      <div className="flex flex-wrap gap-1.5">
                         {userMins.length === 0 ? (
-                          <span className="text-xs text-muted-foreground">Nenhum ministério atribuído</span>
+                          <span className="text-xs text-muted-foreground italic">Nenhum ministério atribuído</span>
                         ) : (
                           userMins.map((mid) => {
                             const m = ministries.find((x) => x.id === mid);
-                            return m ? <Badge key={mid} variant="secondary" className="text-xs">{m.title}</Badge> : null;
+                            return m ? <Badge key={mid} variant="secondary" className="text-[10px] px-2 py-0">{m.title}</Badge> : null;
                           })
                         )}
                       </div>
@@ -326,8 +365,10 @@ export default function UsersPage() {
 
                   {/* Permissions */}
                   <div>
-                    <h4 className="text-sm font-medium text-foreground mb-2">Permissões</h4>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                    <h4 className="text-sm font-medium text-foreground mb-3 flex items-center gap-2">
+                      <Shield className="w-4 h-4 text-primary" /> Permissões de Acesso
+                    </h4>
+                    <div className={`grid grid-cols-2 gap-3 p-3 border rounded-lg ${isEditing ? 'bg-muted/20' : 'bg-transparent'}`}>
                       {ALL_PERMISSIONS.map((perm) => (
                         <div key={perm.key} className="flex items-center gap-2">
                           <Checkbox
@@ -336,7 +377,7 @@ export default function UsersPage() {
                             onCheckedChange={() => isEditing && togglePermission(perm.key)}
                             disabled={!isEditing}
                           />
-                          <Label htmlFor={`${user.id}-${perm.key}`} className="text-sm cursor-pointer">
+                          <Label htmlFor={`${user.id}-${perm.key}`} className="text-sm cursor-pointer whitespace-nowrap">
                             {perm.label}
                           </Label>
                         </div>
@@ -350,9 +391,9 @@ export default function UsersPage() {
         })}
 
         {filteredUsers.length === 0 && (
-          <div className="text-center py-12 text-muted-foreground">
-            <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p>Nenhum utilizador encontrado.</p>
+          <div className="text-center py-12 text-muted-foreground bg-card rounded-xl border border-dashed">
+            <Users className="w-12 h-12 mx-auto mb-4 opacity-20" />
+            <p>Nenhum utilizador encontrado com estes termos.</p>
           </div>
         )}
       </div>
@@ -365,11 +406,11 @@ export default function UsersPage() {
           </DialogHeader>
           <form onSubmit={handleCreateUser} className="space-y-4 mt-4">
             <div className="space-y-2">
-              <Label>Nome</Label>
+              <Label>Nome Completo</Label>
               <Input
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
-                placeholder="Nome completo"
+                placeholder="Ex: João Silva"
               />
             </div>
             <div className="space-y-2">
@@ -383,25 +424,25 @@ export default function UsersPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label>Cargo</Label>
+              <Label>Cargo no Sistema</Label>
               <Select value={newRole} onValueChange={setNewRole}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="member">Membro</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="member">Membro / Utilizador Comum</SelectItem>
+                  <SelectItem value="admin">Administrador Geral</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Senha *</Label>
+              <Label>Senha Temporária *</Label>
               <div className="relative">
                 <Input
                   type={showPassword ? "text" : "password"}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Senha de acesso"
+                  placeholder="Mínimo 6 caracteres"
                   required
                   minLength={6}
                 />
@@ -419,8 +460,8 @@ export default function UsersPage() {
 
             {/* Ministry selection */}
             <div className="space-y-2">
-              <Label>Ministérios</Label>
-              <div className="grid grid-cols-2 gap-2 border rounded-lg p-3">
+              <Label>Atribuir Ministérios</Label>
+              <div className="grid grid-cols-2 gap-2 border rounded-lg p-3 bg-muted/10 max-h-40 overflow-y-auto">
                 {ministries.filter(m => m.is_active).map((m) => (
                   <div key={m.id} className="flex items-center gap-2">
                     <Checkbox
@@ -428,7 +469,7 @@ export default function UsersPage() {
                       checked={newMinistries.includes(m.id)}
                       onCheckedChange={() => toggleMinistry(m.id, newMinistries, setNewMinistries)}
                     />
-                    <Label htmlFor={`new-min-${m.id}`} className="text-sm cursor-pointer">
+                    <Label htmlFor={`new-min-${m.id}`} className="text-sm cursor-pointer truncate">
                       {m.title}
                     </Label>
                   </div>
@@ -436,13 +477,13 @@ export default function UsersPage() {
               </div>
             </div>
 
-            <div className="flex gap-3 pt-4">
+            <div className="flex gap-3 pt-4 border-t mt-6">
               <Button type="button" variant="outline" className="flex-1" onClick={() => { setIsCreateOpen(false); }}>
                 Cancelar
               </Button>
               <Button type="submit" className="flex-1" disabled={isCreating}>
                 {isCreating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                Criar
+                Criar Utilizador
               </Button>
             </div>
           </form>
