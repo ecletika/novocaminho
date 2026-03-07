@@ -43,6 +43,7 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMont
 import { pt } from "date-fns/locale";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfiles } from "@/hooks/useUserPermissions";
+import { supabase } from "@/integrations/supabase/client";
 
 const techRoles = [
   { id: "som", name: "Mesa de Som", icon: Radio },
@@ -78,6 +79,8 @@ export default function TechPage() {
   const [newMemberPrimaryFunctionId, setNewMemberPrimaryFunctionId] = useState("");
   const [newMemberSecondaryFunctionIds, setNewMemberSecondaryFunctionIds] = useState<string[]>([]);
   const [newMemberUserId, setNewMemberUserId] = useState<string>("");
+  const [newMemberPhotoUrl, setNewMemberPhotoUrl] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
   const [newFunctionName, setNewFunctionName] = useState("");
 
   // Queries
@@ -194,6 +197,7 @@ export default function TechPage() {
     setNewMemberPrimaryFunctionId("");
     setNewMemberSecondaryFunctionIds([]);
     setNewMemberUserId("");
+    setNewMemberPhotoUrl("");
     setSelectedMember(null);
   };
 
@@ -262,6 +266,7 @@ export default function TechPage() {
       phone: newMemberPhone.trim() || undefined,
       primary_function_id: newMemberPrimaryFunctionId,
       user_id: newMemberUserId || undefined,
+      photo_url: newMemberPhotoUrl.trim() || undefined,
       secondary_function_ids: newMemberSecondaryFunctionIds,
     });
 
@@ -279,6 +284,7 @@ export default function TechPage() {
       phone: newMemberPhone.trim() || undefined,
       primary_function_id: newMemberPrimaryFunctionId,
       user_id: newMemberUserId || null,
+      photo_url: newMemberPhotoUrl.trim() || null,
       secondary_function_ids: newMemberSecondaryFunctionIds,
     });
 
@@ -293,6 +299,7 @@ export default function TechPage() {
     setNewMemberPrimaryFunctionId(member.primary_function_id || "");
     setNewMemberSecondaryFunctionIds(member.secondary_functions?.map(sf => sf.function_id) || []);
     setNewMemberUserId(member.user_id || "");
+    setNewMemberPhotoUrl(member.photo_url || "");
     setIsEditMemberDialogOpen(true);
   };
 
@@ -326,6 +333,35 @@ export default function TechPage() {
         ? prev.filter(id => id !== functionId)
         : [...prev, functionId]
     );
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `avatars/${fileName}`;
+
+      const { data, error } = await supabase.storage
+        .from('photos')
+        .upload(filePath, file);
+
+      if (error) throw error;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('photos')
+        .getPublicUrl(filePath);
+
+      setNewMemberPhotoUrl(publicUrl);
+      toast({ title: "Foto carregada com sucesso!" });
+    } catch (err: any) {
+      toast({ title: "Erro ao carregar foto", description: err.message, variant: "destructive" });
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleSendWhatsApp = (schedule: GeneralSchedule) => {
@@ -464,10 +500,14 @@ export default function TechPage() {
                   className="bg-card rounded-xl shadow-soft p-5 hover:shadow-card transition-all"
                 >
                   <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-full bg-secondary/20 flex items-center justify-center shrink-0">
-                      <span className="font-semibold text-secondary">
-                        {member.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
-                      </span>
+                    <div className="w-12 h-12 rounded-full bg-secondary/20 flex items-center justify-center shrink-0 overflow-hidden">
+                      {member.photo_url ? (
+                        <img src={member.photo_url} alt={member.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="font-semibold text-secondary">
+                          {member.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                        </span>
+                      )}
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
@@ -738,6 +778,39 @@ export default function TechPage() {
                 placeholder="912 345 678"
               />
             </div>
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-foreground">Foto</label>
+              <Tabs defaultValue="upload" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 mb-2">
+                  <TabsTrigger value="upload" className="text-xs">Ficheiro</TabsTrigger>
+                  <TabsTrigger value="link" className="text-xs">Link da Foto</TabsTrigger>
+                </TabsList>
+                <TabsContent value="upload">
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    className="text-xs"
+                    disabled={isUploading}
+                  />
+                </TabsContent>
+                <TabsContent value="link">
+                  <Input
+                    type="url"
+                    placeholder="https://exemplo.com/foto.jpg"
+                    value={newMemberPhotoUrl}
+                    onChange={(e) => setNewMemberPhotoUrl(e.target.value)}
+                    className="text-xs"
+                  />
+                </TabsContent>
+              </Tabs>
+              {isUploading && <div className="text-xs text-muted-foreground animate-pulse">Carregando...</div>}
+              {newMemberPhotoUrl && (
+                <div className="mt-2 flex justify-center">
+                  <img src={newMemberPhotoUrl} alt="Preview" className="w-20 h-20 rounded-full object-cover border-2 border-primary/20" />
+                </div>
+              )}
+            </div>
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Função Principal *</label>
               <Select value={newMemberPrimaryFunctionId} onValueChange={setNewMemberPrimaryFunctionId}>
@@ -759,7 +832,7 @@ export default function TechPage() {
                     <SelectValue placeholder="Selecione um usuário" />
                   </SelectTrigger>
                   <SelectContent>
-                     <SelectItem value="none">Nenhum</SelectItem>
+                    <SelectItem value="none">Nenhum</SelectItem>
                     {profiles.map((profile) => (
                       <SelectItem key={profile.id} value={profile.user_id}>{profile.full_name || 'Sem nome'}</SelectItem>
                     ))}
@@ -842,7 +915,7 @@ export default function TechPage() {
                     <SelectValue placeholder="Selecione um usuário" />
                   </SelectTrigger>
                   <SelectContent>
-                     <SelectItem value="none">Nenhum</SelectItem>
+                    <SelectItem value="none">Nenhum</SelectItem>
                     {profiles.map((profile) => (
                       <SelectItem key={profile.id} value={profile.user_id}>{profile.full_name || 'Sem nome'}</SelectItem>
                     ))}
