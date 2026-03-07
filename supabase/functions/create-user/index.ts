@@ -84,7 +84,7 @@ Deno.serve(async (req) => {
         full_name: full_name || email,
         email: email,
       }, { onConflict: "user_id" });
-      
+
       if (profileError) {
         console.error("Profile upsert error:", profileError);
       }
@@ -146,6 +146,12 @@ Deno.serve(async (req) => {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
+
+      // Cleanup related tables first to avoid FK constraints
+      await supabase.from("user_roles").delete().eq("user_id", user_id);
+      await supabase.from("user_permissions").delete().eq("user_id", user_id);
+      await supabase.from("user_ministries").delete().eq("user_id", user_id);
+      await supabase.from("profiles").delete().eq("user_id", user_id);
 
       const { error: deleteError } = await supabase.auth.admin.deleteUser(user_id);
       if (deleteError) throw deleteError;
