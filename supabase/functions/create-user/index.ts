@@ -139,6 +139,22 @@ Deno.serve(async (req) => {
       });
     }
 
+    if (action === "delete") {
+      if (!user_id) {
+        return new Response(JSON.stringify({ error: "user_id é obrigatório para exclusão" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const { error: deleteError } = await supabase.auth.admin.deleteUser(user_id);
+      if (deleteError) throw deleteError;
+
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     return new Response(JSON.stringify({ error: "Ação inválida" }), {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

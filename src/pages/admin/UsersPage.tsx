@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Users, Shield, Loader2, Save, Search, Plus, Eye, EyeOff, Church, Mail, Key } from "lucide-react";
+import { Users, Shield, Loader2, Save, Search, Plus, Eye, EyeOff, Church, Mail, Key, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -18,6 +18,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import {
   useAllUserPermissions,
@@ -62,6 +72,7 @@ export default function UsersPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [userMinistries, setUserMinistries] = useState<UserMinistry[]>([]);
+  const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
 
   const { data: allPermissions = [], isLoading: permsLoading } = useAllUserPermissions();
   const setPerms = useSetUserPermissions();
@@ -181,6 +192,26 @@ export default function UsersPage() {
       toast.error(err.message || "Erro ao atualizar");
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    if (!deleteUserId) return;
+    try {
+      const { data, error } = await supabase.functions.invoke("create-user", {
+        body: {
+          action: "delete",
+          user_id: deleteUserId
+        },
+      });
+      if (error || data?.error) throw new Error(error?.message || data?.error);
+
+      toast.success("Utilizador excluído com sucesso!");
+      setDeleteUserId(null);
+      loadUsers();
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Erro ao excluir utilizador");
     }
   };
 
@@ -352,9 +383,14 @@ export default function UsersPage() {
                       </Button>
                     </div>
                   ) : (
-                    <Button size="sm" variant="outline" onClick={() => startEditing(user)}>
-                      Editar Perfil
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button size="sm" variant="outline" onClick={() => startEditing(user)}>
+                        Editar Perfil
+                      </Button>
+                      <Button size="sm" variant="ghost" className="text-destructive hover:bg-destructive/10" onClick={() => setDeleteUserId(user.id)}>
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   )}
                 </div>
               </div>
@@ -529,6 +565,24 @@ export default function UsersPage() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Delete User Confirmation */}
+      <AlertDialog open={!!deleteUserId} onOpenChange={(open) => !open && setDeleteUserId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir Utilizador?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir este utilizador? Esta ação removerá o acesso dele ao sistema e não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteUser} className="bg-destructive hover:bg-destructive/90">
+              Excluir permanentemente
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
