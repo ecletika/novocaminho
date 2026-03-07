@@ -759,7 +759,7 @@ export default function TechPage() {
                     <SelectValue placeholder="Selecione um usuário" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Nenhum</SelectItem>
+                     <SelectItem value="none">Nenhum</SelectItem>
                     {profiles.map((profile) => (
                       <SelectItem key={profile.id} value={profile.user_id}>{profile.full_name || 'Sem nome'}</SelectItem>
                     ))}
@@ -842,7 +842,7 @@ export default function TechPage() {
                     <SelectValue placeholder="Selecione um usuário" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Nenhum</SelectItem>
+                     <SelectItem value="none">Nenhum</SelectItem>
                     {profiles.map((profile) => (
                       <SelectItem key={profile.id} value={profile.user_id}>{profile.full_name || 'Sem nome'}</SelectItem>
                     ))}

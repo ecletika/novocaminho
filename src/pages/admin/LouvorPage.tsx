@@ -1586,7 +1586,7 @@ export default function LouvorPage() {
                     <SelectValue placeholder="Selecione um usuário" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Nenhum</SelectItem>
+                    <SelectItem value="none">Nenhum</SelectItem>
                     {profiles.filter(p => p.user_id && p.id).map((profile) => (
                       <SelectItem key={`new-user-${profile.id}`} value={profile.user_id as string}>{profile.full_name || 'Sem nome'}</SelectItem>
                     ))}
@@ -1695,7 +1695,7 @@ export default function LouvorPage() {
                     <SelectValue placeholder="Selecione um usuário" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Nenhum</SelectItem>
+                    <SelectItem value="none">Nenhum</SelectItem>
                     {profiles.filter(p => p.user_id && p.id).map((profile) => (
                       <SelectItem key={`edit-user-${profile.id}`} value={profile.user_id as string}>{profile.full_name || 'Sem nome'}</SelectItem>
                     ))}
@@ -1858,7 +1858,7 @@ export default function LouvorPage() {
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Nenhum</SelectItem>
+                    <SelectItem value="none">Nenhum</SelectItem>
                     {ministers.filter(m => m.id).map((minister) => (
                       <SelectItem key={`new-song-minister-${minister.id}`} value={minister.id}>{minister.name}</SelectItem>
                     ))}
