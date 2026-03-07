@@ -72,6 +72,8 @@ export default function TechPage() {
   const [formType, setFormType] = useState("");
   const [selectedSom, setSelectedSom] = useState<string[]>([]);
   const [selectedMidia, setSelectedMidia] = useState<string[]>([]);
+  const [selectedTransmissao, setSelectedTransmissao] = useState<string[]>([]);
+  const [selectedCamera, setSelectedCamera] = useState<string[]>([]);
 
   // Form states
   const [newMemberName, setNewMemberName] = useState("");
@@ -111,7 +113,9 @@ export default function TechPage() {
     f.name.toLowerCase().includes("câmera") ||
     f.name.toLowerCase().includes("camera") ||
     f.name.toLowerCase().includes("técnico") ||
-    f.name.toLowerCase().includes("tecnico")
+    f.name.toLowerCase().includes("tecnico") ||
+    f.name.toLowerCase().includes("mesa") ||
+    f.name.toLowerCase().includes("live")
   );
 
   // Filter members that have tech functions
@@ -123,22 +127,40 @@ export default function TechPage() {
     return hasTechPrimary || hasTechSecondary;
   });
 
-  // Filter schedules that have som or midia team members
+  // Filter schedules that have any tech team members
   const techSchedules = schedules.filter(s =>
-    s.team_members?.some(tm => tm.role === "som" || tm.role === "midia")
+    s.team_members?.some(tm => ["som", "midia", "transmissao", "camera"].includes(tm.role))
   );
 
   const scheduleTypes = ["Culto Domingo", "Culto Quarta", "Culto de Oração", "Evento Especial"];
 
   const somMembers = techMembers.filter(m =>
     m.primary_function?.name.toLowerCase().includes("som") ||
-    m.secondary_functions?.some(sf => sf.function?.name.toLowerCase().includes("som"))
+    m.primary_function?.name.toLowerCase().includes("mesa") ||
+    m.secondary_functions?.some(sf => sf.function?.name.toLowerCase().includes("som") || sf.function?.name.toLowerCase().includes("mesa"))
   );
 
   const midiaMembers = techMembers.filter(m =>
     m.primary_function?.name.toLowerCase().includes("mídia") ||
     m.primary_function?.name.toLowerCase().includes("midia") ||
     m.secondary_functions?.some(sf => sf.function?.name.toLowerCase().includes("mídia") || sf.function?.name.toLowerCase().includes("midia"))
+  );
+
+  const transmissaoMembers = techMembers.filter(m =>
+    m.primary_function?.name.toLowerCase().includes("transmissão") ||
+    m.primary_function?.name.toLowerCase().includes("transmissao") ||
+    m.primary_function?.name.toLowerCase().includes("live") ||
+    m.secondary_functions?.some(sf =>
+      sf.function?.name.toLowerCase().includes("transmissão") ||
+      sf.function?.name.toLowerCase().includes("transmissao") ||
+      sf.function?.name.toLowerCase().includes("live")
+    )
+  );
+
+  const cameraMembers = techMembers.filter(m =>
+    m.primary_function?.name.toLowerCase().includes("câmera") ||
+    m.primary_function?.name.toLowerCase().includes("camera") ||
+    m.secondary_functions?.some(sf => sf.function?.name.toLowerCase().includes("câmera") || sf.function?.name.toLowerCase().includes("camera"))
   );
 
   // Calendar helpers
@@ -166,7 +188,8 @@ export default function TechPage() {
     f?.includes("transmissão") || f?.includes("transmissao") ||
     f?.includes("projeção") || f?.includes("projecao") ||
     f?.includes("câmera") || f?.includes("camera") ||
-    f?.includes("técnico") || f?.includes("tecnico")
+    f?.includes("técnico") || f?.includes("tecnico") ||
+    f?.includes("mesa") || f?.includes("live")
   );
 
   const hasTechAccess = isAdmin || isTechMember;
@@ -206,6 +229,8 @@ export default function TechPage() {
     setFormType("");
     setSelectedSom([]);
     setSelectedMidia([]);
+    setSelectedTransmissao([]);
+    setSelectedCamera([]);
     setSelectedSchedule(null);
     setIsEditing(false);
   };
@@ -216,6 +241,8 @@ export default function TechPage() {
 
     selectedSom.forEach(id => team_assignments.push({ member_id: id, role: "som" }));
     selectedMidia.forEach(id => team_assignments.push({ member_id: id, role: "midia" }));
+    selectedTransmissao.forEach(id => team_assignments.push({ member_id: id, role: "transmissao" }));
+    selectedCamera.forEach(id => team_assignments.push({ member_id: id, role: "camera" }));
 
     if (isEditing && selectedSchedule) {
       await updateGeneralSchedule.mutateAsync({
@@ -244,6 +271,8 @@ export default function TechPage() {
     const teamMembers = schedule.team_members || [];
     setSelectedSom(teamMembers.filter(tm => tm.role === "som").map(tm => tm.member_id));
     setSelectedMidia(teamMembers.filter(tm => tm.role === "midia").map(tm => tm.member_id));
+    setSelectedTransmissao(teamMembers.filter(tm => tm.role === "transmissao").map(tm => tm.member_id));
+    setSelectedCamera(teamMembers.filter(tm => tm.role === "camera").map(tm => tm.member_id));
 
     setIsEditing(true);
     setIsDialogOpen(true);
@@ -367,13 +396,21 @@ export default function TechPage() {
   const handleSendWhatsApp = (schedule: GeneralSchedule) => {
     const somMembers = schedule.team_members?.filter(tm => tm.role === "som") || [];
     const midiaMembers = schedule.team_members?.filter(tm => tm.role === "midia") || [];
+    const transmissaoMembers = schedule.team_members?.filter(tm => tm.role === "transmissao") || [];
+    const cameraMembers = schedule.team_members?.filter(tm => tm.role === "camera") || [];
 
     let assignments = "";
     if (somMembers.length > 0) {
       assignments += `🎛️ *Som:*\n${somMembers.map(tm => `• ${tm.member?.name || "N/A"}`).join("\n")}\n\n`;
     }
     if (midiaMembers.length > 0) {
-      assignments += `📺 *Mídia:*\n${midiaMembers.map(tm => `• ${tm.member?.name || "N/A"}`).join("\n")}`;
+      assignments += `📺 *Mídia:*\n${midiaMembers.map(tm => `• ${tm.member?.name || "N/A"}`).join("\n")}\n\n`;
+    }
+    if (transmissaoMembers.length > 0) {
+      assignments += `🎥 *Live:*\n${transmissaoMembers.map(tm => `• ${tm.member?.name || "N/A"}`).join("\n")}\n\n`;
+    }
+    if (cameraMembers.length > 0) {
+      assignments += `📸 *Câmera:*\n${cameraMembers.map(tm => `• ${tm.member?.name || "N/A"}`).join("\n")}`;
     }
 
     const message = `📅 *Escala Técnica*\n\n📆 Data: ${format(new Date(schedule.date), "EEEE, dd 'de' MMMM", { locale: pt })}\n🕐 Tipo: ${schedule.type}\n\n${assignments}\n\n🙏 Contamos com sua presença!`;
@@ -400,7 +437,8 @@ export default function TechPage() {
       f?.includes("transmissão") || f?.includes("transmissao") ||
       f?.includes("projeção") || f?.includes("projecao") ||
       f?.includes("câmera") || f?.includes("camera") ||
-      f?.includes("técnico") || f?.includes("tecnico")
+      f?.includes("técnico") || f?.includes("tecnico") ||
+      f?.includes("mesa") || f?.includes("live")
     );
 
     if (isTechMember && mIsTech) return matchesSearch;
@@ -635,6 +673,8 @@ export default function TechPage() {
                 .map((schedule) => {
                   const somAssignments = schedule.team_members?.filter(tm => tm.role === "som") || [];
                   const midiaAssignments = schedule.team_members?.filter(tm => tm.role === "midia") || [];
+                  const transmissaoAssignments = schedule.team_members?.filter(tm => tm.role === "transmissao") || [];
+                  const cameraAssignments = schedule.team_members?.filter(tm => tm.role === "camera") || [];
 
                   return (
                     <div
@@ -696,10 +736,36 @@ export default function TechPage() {
                         {midiaAssignments.length > 0 && (
                           <div className="space-y-2">
                             <span className="text-sm font-medium text-foreground flex items-center gap-2">
-                              <Tv className="w-4 h-4 text-purple-500" />
+                              <Monitor className="w-4 h-4 text-blue-500" />
                               Mídia
                             </span>
                             {midiaAssignments.map((tm) => (
+                              <div key={tm.id} className="flex items-center gap-3 p-2 rounded-lg bg-muted/50 ml-6">
+                                <span className="text-sm text-foreground">{tm.member?.name}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        {transmissaoAssignments.length > 0 && (
+                          <div className="space-y-2">
+                            <span className="text-sm font-medium text-foreground flex items-center gap-2">
+                              <Tv className="w-4 h-4 text-purple-500" />
+                              Transmissão/Live
+                            </span>
+                            {transmissaoAssignments.map((tm) => (
+                              <div key={tm.id} className="flex items-center gap-3 p-2 rounded-lg bg-muted/50 ml-6">
+                                <span className="text-sm text-foreground">{tm.member?.name}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        {cameraAssignments.length > 0 && (
+                          <div className="space-y-2">
+                            <span className="text-sm font-medium text-foreground flex items-center gap-2">
+                              <Camera className="w-4 h-4 text-green-500" />
+                              Câmera
+                            </span>
+                            {cameraAssignments.map((tm) => (
                               <div key={tm.id} className="flex items-center gap-3 p-2 rounded-lg bg-muted/50 ml-6">
                                 <span className="text-sm text-foreground">{tm.member?.name}</span>
                               </div>
@@ -894,6 +960,39 @@ export default function TechPage() {
                 placeholder="912 345 678"
               />
             </div>
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-foreground">Foto</label>
+              <Tabs defaultValue="upload" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 mb-2">
+                  <TabsTrigger value="upload" className="text-xs">Ficheiro</TabsTrigger>
+                  <TabsTrigger value="link" className="text-xs">Link da Foto</TabsTrigger>
+                </TabsList>
+                <TabsContent value="upload">
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    className="text-xs"
+                    disabled={isUploading}
+                  />
+                </TabsContent>
+                <TabsContent value="link">
+                  <Input
+                    type="url"
+                    placeholder="https://exemplo.com/foto.jpg"
+                    value={newMemberPhotoUrl}
+                    onChange={(e) => setNewMemberPhotoUrl(e.target.value)}
+                    className="text-xs"
+                  />
+                </TabsContent>
+              </Tabs>
+              {isUploading && <div className="text-xs text-muted-foreground animate-pulse">Carregando...</div>}
+              {newMemberPhotoUrl && (
+                <div className="mt-2 flex justify-center">
+                  <img src={newMemberPhotoUrl} alt="Preview" className="w-20 h-20 rounded-full object-cover border-2 border-primary/20" />
+                </div>
+              )}
+            </div>
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Função Principal *</label>
               <Select value={newMemberPrimaryFunctionId} onValueChange={setNewMemberPrimaryFunctionId}>
@@ -1056,7 +1155,7 @@ export default function TechPage() {
             {/* Mídia */}
             <div>
               <label className="block text-sm font-medium text-foreground mb-2 flex items-center gap-2">
-                <Tv className="w-4 h-4 text-purple-500" />
+                <Monitor className="w-4 h-4 text-blue-500" />
                 Mídia
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-32 overflow-y-auto border rounded-md p-2">
@@ -1068,6 +1167,46 @@ export default function TechPage() {
                       onCheckedChange={() => toggleTechMember(selectedMidia, setSelectedMidia, member.id)}
                     />
                     <label htmlFor={`midia-${member.id}`} className="text-sm">{member.name}</label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Transmissão */}
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2 flex items-center gap-2">
+                <Tv className="w-4 h-4 text-purple-500" />
+                Transmissão/Live
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-32 overflow-y-auto border rounded-md p-2">
+                {transmissaoMembers.map((member) => (
+                  <div key={member.id} className="flex items-center gap-2">
+                    <Checkbox
+                      id={`transmissao-${member.id}`}
+                      checked={selectedTransmissao.includes(member.id)}
+                      onCheckedChange={() => toggleTechMember(selectedTransmissao, setSelectedTransmissao, member.id)}
+                    />
+                    <label htmlFor={`transmissao-${member.id}`} className="text-sm">{member.name}</label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Câmera */}
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2 flex items-center gap-2">
+                <Camera className="w-4 h-4 text-green-500" />
+                Câmera
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-32 overflow-y-auto border rounded-md p-2">
+                {cameraMembers.map((member) => (
+                  <div key={member.id} className="flex items-center gap-2">
+                    <Checkbox
+                      id={`camera-${member.id}`}
+                      checked={selectedCamera.includes(member.id)}
+                      onCheckedChange={() => toggleTechMember(selectedCamera, setSelectedCamera, member.id)}
+                    />
+                    <label htmlFor={`camera-${member.id}`} className="text-sm">{member.name}</label>
                   </div>
                 ))}
               </div>

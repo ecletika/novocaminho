@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { Plus, Search, Calendar, MapPin, Clock, Edit, Trash2 } from "lucide-react";
+import { Plus, Search, Calendar, MapPin, Clock, Edit, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -9,6 +8,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -33,6 +33,7 @@ import {
   useCreateEvent,
   useUpdateEvent,
   useDeleteEvent,
+  uploadEventImage,
   Event,
 } from "@/hooks/useEvents";
 import { format } from "date-fns";
@@ -55,6 +56,7 @@ export default function AdminEventosPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -63,6 +65,7 @@ export default function AdminEventosPage() {
     time: "",
     location: "",
     category: "Culto",
+    image_url: "",
     is_active: true,
   });
 
@@ -79,6 +82,7 @@ export default function AdminEventosPage() {
       time: "",
       location: "",
       category: "Culto",
+      image_url: "",
       is_active: true,
     });
     setEditingEvent(null);
@@ -93,9 +97,25 @@ export default function AdminEventosPage() {
       time: event.time,
       location: event.location || "",
       category: event.category,
+      image_url: event.image_url || "",
       is_active: event.is_active,
     });
     setIsDialogOpen(true);
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setIsUploading(true);
+      try {
+        const url = await uploadEventImage(file);
+        setFormData({ ...formData, image_url: url });
+      } catch (error: any) {
+        console.error("Erro ao carregar imagem:", error);
+      } finally {
+        setIsUploading(false);
+      }
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -168,6 +188,48 @@ export default function AdminEventosPage() {
                   placeholder="Título do evento"
                   required
                 />
+              </div>
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-foreground">Imagem do Evento</label>
+                <Tabs defaultValue="upload" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2 mb-2">
+                    <TabsTrigger value="upload" className="text-xs">Ficheiro</TabsTrigger>
+                    <TabsTrigger value="link" className="text-xs">Link da Imagem</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="upload">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="text-xs"
+                      disabled={isUploading}
+                    />
+                  </TabsContent>
+                  <TabsContent value="link">
+                    <Input
+                      type="url"
+                      placeholder="https://exemplo.com/imagem.jpg"
+                      value={formData.image_url}
+                      onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                      className="text-xs"
+                    />
+                  </TabsContent>
+                </Tabs>
+                {isUploading && <div className="text-xs text-muted-foreground animate-pulse">Carregando imagem...</div>}
+                {formData.image_url && (
+                  <div className="mt-2 relative group">
+                    <img src={formData.image_url} alt="Preview" className="w-full h-32 object-cover rounded-md border" />
+                    <Button 
+                      type="button" 
+                      variant="destructive" 
+                      size="icon" 
+                      className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => setFormData({ ...formData, image_url: "" })}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-foreground mb-2">Descrição</label>

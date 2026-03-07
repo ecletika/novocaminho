@@ -7,7 +7,7 @@ export interface ScheduleTeamMember {
   id: string;
   schedule_id: string;
   member_id: string;
-  role: "ministrante" | "louvor" | "musicos" | "som" | "midia";
+  role: "ministrante" | "louvor" | "musicos" | "som" | "midia" | "transmissao" | "camera";
   instrument: string | null;
   member?: WorshipMember;
 }
@@ -30,12 +30,12 @@ export function useGeneralSchedules() {
         .select("*")
         .order("date", { ascending: false });
       if (error) throw error;
-      
+
       // If no schedules, return empty array
       if (!data || data.length === 0) {
         return [] as GeneralSchedule[];
       }
-      
+
       // Fetch team members
       const scheduleIds = data.map(s => s.id);
       const { data: teamMembers } = await supabase
@@ -45,7 +45,7 @@ export function useGeneralSchedules() {
           member:worship_members(*, primary_function:worship_functions(*))
         `)
         .in("schedule_id", scheduleIds);
-      
+
       return data.map(schedule => ({
         ...schedule,
         team_members: teamMembers?.filter(tm => tm.schedule_id === schedule.id) || []
@@ -59,20 +59,20 @@ export function useCreateGeneralSchedule() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async (schedule: { 
-      date: string; 
+    mutationFn: async (schedule: {
+      date: string;
       type: string;
       team_assignments: { member_id: string; role: string; instrument?: string }[];
     }) => {
       const { team_assignments, ...scheduleData } = schedule;
-      
+
       const { data, error } = await supabase
         .from("general_schedules")
         .insert(scheduleData)
         .select()
         .single();
       if (error) throw error;
-      
+
       // Add team members
       if (team_assignments.length > 0) {
         const { error: teamError } = await supabase
@@ -85,7 +85,7 @@ export function useCreateGeneralSchedule() {
           })));
         if (teamError) throw teamError;
       }
-      
+
       return data;
     },
     onSuccess: () => {
@@ -103,12 +103,12 @@ export function useUpdateGeneralSchedule() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ 
-      id, 
+    mutationFn: async ({
+      id,
       team_assignments,
-      ...updates 
-    }: { 
-      id: string; 
+      ...updates
+    }: {
+      id: string;
       date?: string;
       type?: string;
       team_assignments?: { member_id: string; role: string; instrument?: string }[];
@@ -120,12 +120,12 @@ export function useUpdateGeneralSchedule() {
         .select()
         .single();
       if (error) throw error;
-      
+
       // Update team members if provided
       if (team_assignments !== undefined) {
         // Delete existing
         await supabase.from("schedule_team_members").delete().eq("schedule_id", id);
-        
+
         // Add new
         if (team_assignments.length > 0) {
           const { error: teamError } = await supabase
@@ -139,7 +139,7 @@ export function useUpdateGeneralSchedule() {
           if (teamError) throw teamError;
         }
       }
-      
+
       return data;
     },
     onSuccess: () => {

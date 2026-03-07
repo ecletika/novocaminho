@@ -10,6 +10,7 @@ export interface Event {
   time: string;
   location: string | null;
   category: string;
+  image_url: string | null;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -22,6 +23,7 @@ export interface EventInsert {
   time: string;
   location?: string | null;
   category: string;
+  image_url?: string | null;
   is_active?: boolean;
 }
 
@@ -132,4 +134,22 @@ export function useDeleteEvent() {
       toast.error("Erro ao excluir evento: " + error.message);
     },
   });
+}
+
+// Upload event image
+export async function uploadEventImage(file: File) {
+  const fileExt = file.name.split(".").pop();
+  const filePath = `${Math.random()}.${fileExt}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from("event_images")
+    .upload(filePath, file);
+
+  if (uploadError) throw uploadError;
+
+  const { data: { publicUrl } } = supabase.storage
+    .from("event_images")
+    .getPublicUrl(filePath);
+
+  return publicUrl;
 }
