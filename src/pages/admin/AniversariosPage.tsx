@@ -40,6 +40,7 @@ import { useMinistries } from "@/hooks/useMinistries";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function AniversariosPage() {
   const [searchTerm, setSearchTerm] = useState("");

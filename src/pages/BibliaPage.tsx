@@ -1,105 +1,256 @@
 
 import React, { useState, useEffect } from 'react';
-import { getBibleChapter, BIBLE_BOOKS } from '@/integrations/supabase/bibleService';
-import { ChevronLeft, ChevronRight, BookOpen, Search, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { AppView, Verse, Devotional, DailyBread, CartItem, Product } from '@/types/bible';
+import Navbar from '@/components/bible/Navbar';
+import HomeView from '@/components/bible/Home';
+import BibleView from '@/components/bible/Bible';
+import DevotionalsView from '@/components/bible/Devotionals';
+import BreadView from '@/components/bible/Bread';
+import DictionaryView from '@/components/bible/Dictionary';
+import ReflectionsView from '@/components/bible/Reflections';
+import PrayerJournal from '@/components/bible/PrayerJournal';
+import ShopView from '@/components/bible/Shop';
+import CommunityView from '@/components/bible/Community';
+import LibraryView from '@/components/bible/Library';
+import CouplesStudyView from '@/components/bible/CouplesStudy';
+import PurposesView from '@/components/bible/Purposes';
+import ProfileView from '@/components/bible/Profile';
+import Auth from '@/components/bible/Auth';
+import { getRandomWisdomVerse, getDailyDevotional, getDailyBread, supabase, updateUserStreak } from '@/integrations/supabase/bibleDataService';
+import { User } from '@supabase/supabase-js';
+import { ArrowLeft } from 'lucide-react';
 
-export default function BibliaPage() {
-    const [book, setBook] = useState('Salmos');
-    const [chapter, setChapter] = useState(23);
-    const [verses, setVerses] = useState<{ number: number, text: string }[]>([]);
+const BibliaPage: React.FC = () => {
+    const [view, setView] = useState<AppView>(AppView.HOME);
+    const [history, setHistory] = useState<AppView[]>([]);
+    const [dailyVerse, setDailyVerse] = useState<Verse | null>(null);
+    const [dailyDevo, setDailyDevo] = useState<Devotional | null>(null);
+    const [dailyBread, setDailyBread] = useState<DailyBread | null>(null);
     const [loading, setLoading] = useState(true);
+    const [isRefreshingVerse, setIsRefreshingVerse] = useState(false);
+    const [user, setUser] = useState<User | null>(null);
+    const [showAuth, setShowAuth] = useState(false);
+    const [cart, setCart] = useState<CartItem[]>([]);
+    const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+        if (typeof window !== 'undefined' && document.documentElement) {
+            return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+        }
+        return 'light';
+    });
+
+    const [bibleNav, setBibleNav] = useState<{ book: string, chapter: number, verse?: number }>({ book: 'Salmos', chapter: 1 });
+    const [selectedDevoFromRef, setSelectedDevoFromRef] = useState<Devotional | null>(null);
+
+    // Efeito para rolar para o topo sempre que a visualização mudar
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, [view]);
 
     useEffect(() => {
-        const load = async () => {
-            setLoading(true);
-            try {
-                const data = await getBibleChapter(book, chapter);
-                setVerses(data);
-            } catch (err) {
-                console.error(err);
-            }
-            setLoading(false);
-        };
-        load();
-    }, [book, chapter]);
+        const initApp = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            const currentUser = session?.user ?? null;
+            setUser(currentUser);
 
-    const handlePrev = () => {
-        if (chapter > 1) setChapter(chapter - 1);
+            if (currentUser) {
+                updateUserStreak(currentUser.id);
+            }
+
+            const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+                const u = session?.user ?? null;
+                setUser(u);
+                if (u) updateUserStreak(u.id);
+            });
+
+            try {
+                const [verse, devo, bread] = await Promise.all([
+                    getRandomWisdomVerse(),
+                    getDailyDevotional(),
+                    getDailyBread()
+                ]);
+
+                setDailyVerse(verse);
+                setDailyDevo(devo);
+                setDailyBread(bread);
+            } catch (err) {
+                console.error("Erro ao carregar dados iniciais:", err);
+            } finally {
+                setLoading(false);
+            }
+
+            return () => {
+                subscription.unsubscribe();
+            };
+        };
+
+        initApp();
+    }, []);
+
+    const navigateTo = (newView: AppView) => {
+        if (newView !== view) {
+            setHistory(prev => [...prev, view]);
+            setView(newView);
+        }
     };
 
-    const handleNext = () => {
-        setChapter(chapter + 1);
+    const handleBack = () => {
+        if (history.length > 0) {
+            const prevView = history[history.length - 1];
+            setHistory(prev => prev.slice(0, -1));
+            setView(prevView);
+        } else {
+            setView(AppView.HOME);
+        }
+    };
+
+    const handleRefreshVerse = async () => {
+        setIsRefreshingVerse(true);
+        try {
+            const newVerse = await getRandomWisdomVerse();
+            if (newVerse) {
+                setDailyVerse(newVerse);
+            }
+        } catch (e) {
+            console.error("Erro ao trocar versículo:", e);
+        } finally {
+            setIsRefreshingVerse(false);
+        }
+    };
+
+    const addToCart = (product: Product) => {
+        setCart(prev => {
+            const existing = prev.find(item => item.product.id === product.id);
+            if (existing) {
+                return prev.map(item =>
+                    item.product.id === product.id
+                        ? { ...item, quantity: item.quantity + 1 }
+                        : item
+                );
+            }
+            return [...prev, { product, quantity: 1 }];
+        });
+    };
+
+    const toggleTheme = () => {
+        const newTheme = theme === 'light' ? 'dark' : 'light';
+        setTheme(newTheme);
+        if (newTheme === 'dark') {
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
+        }
+    };
+
+    const handleReadChapter = (book: string, chapter: number, verse?: number) => {
+        setBibleNav({ book, chapter, verse });
+        navigateTo(AppView.BIBLE);
+    };
+
+    const handleViewDevotional = (devo: Devotional) => {
+        setSelectedDevoFromRef(devo);
+        navigateTo(AppView.DEVOTIONALS);
+    };
+
+    const renderView = () => {
+        if (loading) {
+            return (
+                <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 animate-pulse">
+                    <div className="w-16 h-16 border-4 border-[#1E40AF] border-t-transparent rounded-full animate-spin"></div>
+                    <div className="text-center">
+                        <p className="text-[#1E40AF] font-serif italic text-xl dark:text-blue-400 mb-1">Invocando as Escrituras...</p>
+                        <p className="text-gray-400 text-xs uppercase tracking-widest font-bold">Biblia Diária está carregando</p>
+                    </div>
+                </div>
+            );
+        }
+
+        switch (view) {
+            case AppView.HOME:
+                return (
+                    <HomeView
+                        verse={dailyVerse}
+                        devotional={dailyDevo}
+                        bread={dailyBread}
+                        user={user}
+                        onReadChapter={handleReadChapter}
+                        onViewDevotional={handleViewDevotional}
+                        onAuthRequired={() => setShowAuth(true)}
+                        setView={navigateTo}
+                        onRefreshVerse={handleRefreshVerse}
+                        isRefreshingVerse={isRefreshingVerse}
+                    />
+                );
+            case AppView.BIBLE:
+                return (
+                    <BibleView
+                        user={user}
+                        initialBook={bibleNav.book}
+                        initialChapter={bibleNav.chapter}
+                        initialVerse={bibleNav.verse}
+                        onAuthRequired={() => setShowAuth(true)}
+                        globalTheme={theme}
+                        toggleGlobalTheme={toggleTheme}
+                    />
+                );
+            case AppView.PURPOSES:
+                return <PurposesView onReadChapter={handleReadChapter} />;
+            case AppView.DEVOTIONALS:
+                return <DevotionalsView user={user} initialDevotional={selectedDevoFromRef || dailyDevo} onAuthRequired={() => setShowAuth(true)} />;
+            case AppView.BREAD:
+                return <BreadView dailyBread={dailyBread} />;
+            case AppView.DICTIONARY:
+                return <DictionaryView />;
+            case AppView.REFLECTIONS:
+                return <ReflectionsView user={user} onAuthRequired={() => setShowAuth(true)} onReadChapter={handleReadChapter} onViewDevotional={handleViewDevotional} />;
+            case AppView.PRAYER:
+                return <PrayerJournal user={user} onAuthRequired={() => setShowAuth(true)} />;
+            case AppView.SHOP:
+                return <ShopView user={user} cart={cart} setCart={setCart} addToCart={addToCart} />;
+            case AppView.COMMUNITY:
+                return <CommunityView user={user} onAuthRequired={() => setShowAuth(true)} />;
+            case AppView.LIVRARIA:
+                return <LibraryView user={user} />;
+            case AppView.COUPLES:
+                return <CouplesStudyView user={user} onAuthRequired={() => setShowAuth(true)} />;
+            case AppView.PROFILE:
+                return <ProfileView user={user} onAuthRequired={() => setShowAuth(true)} setView={navigateTo} onReadChapter={handleReadChapter} onViewDevotional={handleViewDevotional} />;
+            default:
+                return null;
+        }
     };
 
     return (
-        <div className="min-h-screen bg-background pt-32 pb-20">
-            <div className="container-church max-w-4xl">
-                <header className="flex flex-col md:flex-row items-center justify-between gap-6 mb-12">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-secondary/20 flex items-center justify-center">
-                            <BookOpen className="text-secondary" />
-                        </div>
-                        <div>
-                            <h1 className="font-display text-3xl font-bold">Escrituras Sagradas</h1>
-                            <p className="text-foreground/60 text-sm uppercase tracking-widest font-bold">Almeida Corrigida e Fiel</p>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 bg-muted/50 p-2 rounded-2xl border border-border">
-                        <select
-                            value={book}
-                            onChange={(e) => { setBook(e.target.value); setChapter(1); }}
-                            className="bg-transparent border-none text-sm font-bold px-4 py-2 outline-none cursor-pointer text-foreground"
+        <div className="min-h-screen bg-[#F0F4FD] dark:bg-gray-950 transition-colors duration-300 pt-0">
+            <Navbar
+                currentView={view}
+                setView={navigateTo}
+                user={user}
+                onAuthClick={() => setShowAuth(true)}
+                theme={theme}
+                toggleTheme={toggleTheme}
+            />
+            <main className={`${view === AppView.BIBLE || view === AppView.COUPLES || view === AppView.PROFILE ? 'max-w-none px-6' : 'max-w-5xl px-4'} mx-auto pt-24 md:pt-32 pb-20 transition-all duration-500`}>
+                {view !== AppView.HOME && (
+                    <div className="mb-6 flex animate-in slide-in-from-left-4 duration-300">
+                        <button
+                            onClick={handleBack}
+                            className="flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-gray-900 text-[#1E40AF] rounded-full shadow-md hover:shadow-lg transition-all border border-beige-200 dark:border-gray-800 font-bold text-sm uppercase tracking-widest active:scale-95 group"
                         >
-                            {BIBLE_BOOKS.map(b => <option key={b} value={b}>{b}</option>)}
-                        </select>
-                        <div className="w-px h-6 bg-border mx-2"></div>
-                        <input
-                            type="number"
-                            value={chapter}
-                            onChange={(e) => setChapter(parseInt(e.target.value))}
-                            className="bg-transparent border-none text-sm font-bold w-12 text-center outline-none text-foreground"
-                        />
+                            <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
+                            Voltar
+                        </button>
                     </div>
-                </header>
-
-                <main className="bg-card rounded-3xl p-8 md:p-12 border border-border shadow-card relative overflow-hidden min-h-[500px]">
-                    {loading ? (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-card/50 backdrop-blur-sm z-10">
-                            <Loader2 className="animate-spin text-secondary" size={40} />
-                            <p className="font-serif italic text-foreground">Buscando na Palavra...</p>
-                        </div>
-                    ) : (
-                        <div className="animate-in fade-in duration-700">
-                            <div className="text-center mb-10">
-                                <span className="text-secondary font-black text-xs uppercase tracking-[0.3em] mb-2 block">Capítulo {chapter}</span>
-                                <h2 className="font-display text-4xl font-bold">{book}</h2>
-                            </div>
-
-                            <div className="space-y-6">
-                                {verses.map(v => (
-                                    <div key={v.number} className="flex gap-4 group">
-                                        <span className="text-secondary font-black text-[10px] mt-1.5 opacity-40 group-hover:opacity-100 transition-opacity shrink-0">{v.number}</span>
-                                        <p className="text-lg md:text-xl leading-relaxed text-foreground font-serif">
-                                            {v.text}
-                                        </p>
-                                    </div>
-                                ))}
-                            </div>
-
-                            <div className="mt-16 pt-8 border-t border-border flex items-center justify-between">
-                                <Button variant="outline" onClick={handlePrev} disabled={chapter <= 1}>
-                                    <ChevronLeft className="mr-2 h-4 w-4" /> Anterior
-                                </Button>
-                                <Button variant="outline" onClick={handleNext}>
-                                    Próximo <ChevronRight className="ml-2 h-4 w-4" />
-                                </Button>
-                            </div>
-                        </div>
-                    )}
-                </main>
-            </div>
+                )}
+                {renderView()}
+            </main>
+            {showAuth && <Auth onClose={() => setShowAuth(false)} onSuccess={() => setShowAuth(false)} />}
+            <footer className="mt-20 border-t border-gray-200 dark:border-gray-800 py-10 text-center text-gray-500 dark:text-gray-400 text-sm">
+                <p className="font-serif italic">&copy; 2024 Biblia Diária - Espalhando a Palavra</p>
+            </footer>
         </div>
     );
-}
+};
+
+export default BibliaPage;
