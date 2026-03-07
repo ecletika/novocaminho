@@ -133,6 +133,11 @@ export function useDeleteWorshipFunction() {
 
   return useMutation({
     mutationFn: async (id: string) => {
+      // First, clear references in worship_members
+      await supabase.from("worship_members").update({ primary_function_id: null }).eq("primary_function_id", id);
+      // Then, delete references in member_functions
+      await supabase.from("member_functions").delete().eq("function_id", id);
+      // Now delete the function
       const { error } = await supabase.from("worship_functions").delete().eq("id", id);
       if (error) throw error;
     },
