@@ -161,7 +161,7 @@ export default function LouvorPage() {
   const vocalFunctionId = functions.find(f => f.name?.toLowerCase()?.includes("vocal") || f.name?.toLowerCase()?.includes("back"))?.id;
 
   const ministers = members.filter(m =>
-    m.primary_function_id === ministranteFunctionId ||
+    (ministranteFunctionId && m.primary_function_id === ministranteFunctionId) ||
     m.secondary_functions?.some(sf => sf.function_id === ministranteFunctionId)
   );
 
@@ -213,9 +213,9 @@ export default function LouvorPage() {
     ...(myMemberProfile?.secondary_functions?.map(sf => sf.function?.name?.toLowerCase()) || [])
   ].filter(Boolean);
 
-  const isMusician = myFunctions.some(f => ["teclado", "violão", "violao", "bateria", "baixo", "guitarra"].some(instr => f?.includes(instr)));
-  const isMinister = myFunctions.some(f => f?.includes("ministrante"));
-  const isVocal = myFunctions.some(f => f?.includes("vocal") || f?.includes("back"));
+  const isMusician = myFunctions.some(f => ["teclado", "violão", "violao", "bateria", "baixo", "guitarra"].some(instr => f?.toLowerCase()?.includes(instr)));
+  const isMinister = myFunctions.some(f => f?.toLowerCase()?.includes("ministrante"));
+  const isVocal = myFunctions.some(f => f?.toLowerCase()?.includes("vocal") || f?.toLowerCase()?.includes("back"));
   const hasLouvorAccess = isAdmin || isMusician || isMinister || isVocal;
 
   // Handlers
@@ -583,8 +583,8 @@ export default function LouvorPage() {
 
     const mFunctions = [
       m.primary_function?.name?.toLowerCase(),
-      ...(m.secondary_functions?.map(sf => sf.function?.name?.toLowerCase()) || [])
-    ].filter(Boolean);
+      ...(m.secondary_functions?.map(sf => sf.function?.name?.toLowerCase()).filter(Boolean) || [])
+    ].filter(Boolean) as string[];
 
     const mIsMusician = mFunctions.some(f => ["teclado", "violão", "violao", "bateria", "baixo", "guitarra"].some(instr => f?.includes(instr)));
     const mIsMinister = mFunctions.some(f => f?.includes("ministrante"));
@@ -703,119 +703,10 @@ export default function LouvorPage() {
               />
             </div>
             {isAdmin && (
-              <Dialog open={isNewMemberDialogOpen} onOpenChange={setIsNewMemberDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Novo Integrante
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-md">
-                  <DialogHeader>
-                    <DialogTitle className="font-display text-xl">Adicionar Integrante</DialogTitle>
-                  </DialogHeader>
-                  <form onSubmit={handleAddMember} className="space-y-4 mt-4">
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-2">Foto do Integrante</label>
-                      <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-primary/20">
-                          {newMemberPhotoPreview ? (
-                            <img src={newMemberPhotoPreview} alt="Preview" className="w-full h-full object-cover" />
-                          ) : (
-                            <Upload className="w-6 h-6 text-muted-foreground" />
-                          )}
-                        </div>
-                        <Input
-                          type="file"
-                          accept="image/*"
-                          onChange={handlePhotoChange}
-                          ref={newMemberFileInputRef}
-                          className="hidden"
-                        />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => newMemberFileInputRef.current?.click()}
-                        >
-                          Selecionar Foto
-                        </Button>
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-2">Nome *</label>
-                      <Input
-                        placeholder="Nome completo"
-                        value={newMemberName}
-                        onChange={(e) => setNewMemberName(e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-2">Telefone</label>
-                      <Input
-                        placeholder="Ex: +5511999999999"
-                        value={newMemberPhone}
-                        onChange={(e) => setNewMemberPhone(e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-2">Função Principal *</label>
-                      <Select value={newMemberPrimaryFunctionId} onValueChange={setNewMemberPrimaryFunctionId}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione a função principal" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {functions.map((func) => (
-                            <SelectItem key={func.id} value={func.id}>{func.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    {isAdmin && (
-                      <div>
-                        <label className="block text-sm font-medium text-foreground mb-2">Usuário Vinculado (Opcional)</label>
-                        <Select value={newMemberUserId} onValueChange={setNewMemberUserId}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione um usuário" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="">Nenhum</SelectItem>
-                            {profiles.map((profile) => (
-                              <SelectItem key={profile.id} value={profile.user_id}>{profile.full_name || 'Sem nome'}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    )}
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-2">Funções Secundárias</label>
-                      <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto">
-                        {functions
-                          .filter(f => f.id !== newMemberPrimaryFunctionId)
-                          .map((func) => (
-                            <div key={func.id} className="flex items-center gap-2">
-                              <Checkbox
-                                id={`func-${func.id}`}
-                                checked={newMemberSecondaryFunctionIds.includes(func.id)}
-                                onCheckedChange={() => toggleSecondaryFunction(func.id)}
-                              />
-                              <label htmlFor={`func-${func.id}`} className="text-sm">{func.name}</label>
-                            </div>
-                          ))}
-                      </div>
-                    </div>
-                    <div className="flex gap-3 pt-4">
-                      <Button type="button" variant="outline" className="flex-1" onClick={() => setIsNewMemberDialogOpen(false)}>
-                        Cancelar
-                      </Button>
-                      <Button type="submit" className="flex-1" disabled={createMember.isPending}>
-                        {createMember.isPending ? "Adicionando..." : "Adicionar"}
-                      </Button>
-                    </div>
-                  </form>
-                </DialogContent>
-              </Dialog>
+              <Button onClick={() => setIsNewMemberDialogOpen(true)}>
+                <Plus className="w-4 h-4 mr-2" />
+                Novo Integrante
+              </Button>
             )}
           </div>
 
@@ -886,178 +777,20 @@ export default function LouvorPage() {
               />
             </div>
             <div className="flex gap-2">
-              {isAdmin && (
-                <Dialog open={isAssignSongDialogOpen} onOpenChange={setIsAssignSongDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="outline">
-                      <Mic className="w-4 h-4 mr-2" />
-                      Associar a Ministrante
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle className="font-display text-xl">Associar Música a Ministrante</DialogTitle>
-                    </DialogHeader>
-                    <form onSubmit={handleAssignSong} className="space-y-4 mt-4">
-                      <div>
-                        <label className="block text-sm font-medium text-foreground mb-2">Música *</label>
-                        <Select value={assignSongId} onValueChange={setAssignSongId}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione a música" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {songs.map((song) => (
-                              <SelectItem key={song.id} value={song.id}>{song.name}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-foreground mb-2">Ministrante *</label>
-                        <Select value={assignMinisterId} onValueChange={setAssignMinisterId}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione o ministrante" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {ministers.map((minister) => (
-                              <SelectItem key={minister.id} value={minister.id}>{minister.name}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-foreground mb-2">Tom *</label>
-                        <Select value={assignKey} onValueChange={setAssignKey}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione o tom" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {MUSICAL_KEYS.map((key) => (
-                              <SelectItem key={key} value={key}>{key}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="flex gap-3 pt-4">
-                        <Button type="button" variant="outline" className="flex-1" onClick={() => setIsAssignSongDialogOpen(false)}>
-                          Cancelar
-                        </Button>
-                        <Button type="submit" className="flex-1" disabled={createAssignment.isPending}>
-                          {createAssignment.isPending ? "Associando..." : "Associar"}
-                        </Button>
-                      </div>
-                    </form>
-                  </DialogContent>
-                </Dialog>
-              )}
-              {isAdmin && (
-                <Dialog open={isNewSongDialogOpen} onOpenChange={setIsNewSongDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button>
-                      <Plus className="w-4 h-4 mr-2" />
-                      Nova Música
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-2xl">
-                    <DialogHeader>
-                      <DialogTitle className="font-display text-xl">Adicionar Música</DialogTitle>
-                    </DialogHeader>
-                    <form onSubmit={handleAddSong} className="space-y-4 mt-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-foreground mb-2">Nome da Música *</label>
-                          <Input
-                            placeholder="Nome do hino"
-                            value={newSongName}
-                            onChange={(e) => setNewSongName(e.target.value)}
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-foreground mb-2">Tom Original *</label>
-                          <Select value={newSongKey} onValueChange={setNewSongKey}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {MUSICAL_KEYS.map((key) => (
-                                <SelectItem key={key} value={key}>{key}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-foreground mb-2">Tipo de Conteúdo *</label>
-                          <Select value={newSongContentType} onValueChange={(v) => setNewSongContentType(v as "cifra" | "letra")}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="cifra">Cifra</SelectItem>
-                              <SelectItem value="letra">Letra</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-foreground mb-2">Ministrante (opcional)</label>
-                          <Select value={newSongMinisterId} onValueChange={setNewSongMinisterId}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {ministers.map((minister) => (
-                                <SelectItem key={minister.id} value={minister.id}>{minister.name}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                      {newSongMinisterId && (
-                        <div>
-                          <label className="block text-sm font-medium text-foreground mb-2">Tom para o Ministrante</label>
-                          <Select value={newSongMinisterKey} onValueChange={setNewSongMinisterKey}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {MUSICAL_KEYS.map((key) => (
-                                <SelectItem key={key} value={key}>{key}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      )}
-                      <div>
-                        <label className="block text-sm font-medium text-foreground mb-2">Link do YouTube (opcional)</label>
-                        <Input
-                          placeholder="https://youtube.com/watch?v=..."
-                          value={newSongYoutubeUrl}
-                          onChange={(e) => setNewSongYoutubeUrl(e.target.value)}
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-foreground mb-2">Cifra / Letra</label>
-                        <Textarea
-                          placeholder="Cole aqui a cifra ou letra..."
-                          rows={8}
-                          value={newSongLyrics}
-                          onChange={(e) => setNewSongLyrics(e.target.value)}
-                        />
-                      </div>
-                      <div className="flex gap-3 pt-4">
-                        <Button type="button" variant="outline" className="flex-1" onClick={() => setIsNewSongDialogOpen(false)}>
-                          Cancelar
-                        </Button>
-                        <Button type="submit" className="flex-1" disabled={createSong.isPending}>
-                          {createSong.isPending ? "Adicionando..." : "Adicionar"}
-                        </Button>
-                      </div>
-                    </form>
-                  </DialogContent>
-                </Dialog>
-              )}
+              <div className="flex gap-2">
+                {isAdmin && (
+                  <Button variant="outline" onClick={() => setIsAssignSongDialogOpen(true)}>
+                    <Mic className="w-4 h-4 mr-2" />
+                    Associar a Ministrante
+                  </Button>
+                )}
+                {isAdmin && (
+                  <Button onClick={() => setIsNewSongDialogOpen(true)}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Nova Música
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
 
@@ -1318,38 +1051,10 @@ export default function LouvorPage() {
         <TabsContent value="functions" className="space-y-6">
           <div className="flex flex-col sm:flex-row gap-4 justify-between">
             <h2 className="font-display text-xl font-semibold text-foreground">Funções</h2>
-            <Dialog open={isNewFunctionDialogOpen} onOpenChange={setIsNewFunctionDialogOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Nova Função
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle className="font-display text-xl">Adicionar Função</DialogTitle>
-                </DialogHeader>
-                <form onSubmit={handleAddFunction} className="space-y-4 mt-4">
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">Nome da Função *</label>
-                    <Input
-                      placeholder="Ex: Vocal, Guitarra, Teclado"
-                      value={newFunctionName}
-                      onChange={(e) => setNewFunctionName(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="flex gap-3 pt-4">
-                    <Button type="button" variant="outline" className="flex-1" onClick={() => setIsNewFunctionDialogOpen(false)}>
-                      Cancelar
-                    </Button>
-                    <Button type="submit" className="flex-1" disabled={createFunction.isPending}>
-                      {createFunction.isPending ? "Adicionando..." : "Adicionar"}
-                    </Button>
-                  </div>
-                </form>
-              </DialogContent>
-            </Dialog>
+            <Button onClick={() => setIsNewFunctionDialogOpen(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Nova Função
+            </Button>
           </div>
 
           {functionsLoading ? (
@@ -1809,6 +1514,115 @@ export default function LouvorPage() {
         </DialogContent>
       </Dialog>
 
+      {/* New Member Dialog */}
+      <Dialog open={isNewMemberDialogOpen} onOpenChange={setIsNewMemberDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display text-xl">Adicionar Integrante</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleAddMember} className="space-y-4 mt-4">
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Foto do Integrante</label>
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-primary/20">
+                  {newMemberPhotoPreview ? (
+                    <img src={newMemberPhotoPreview} alt="Preview" className="w-full h-full object-cover" />
+                  ) : (
+                    <Upload className="w-6 h-6 text-muted-foreground" />
+                  )}
+                </div>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePhotoChange}
+                  ref={newMemberFileInputRef}
+                  className="hidden"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => newMemberFileInputRef.current?.click()}
+                >
+                  Selecionar Foto
+                </Button>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Nome *</label>
+              <Input
+                placeholder="Nome completo"
+                value={newMemberName}
+                onChange={(e) => setNewMemberName(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Telefone</label>
+              <Input
+                placeholder="Ex: +5511999999999"
+                value={newMemberPhone}
+                onChange={(e) => setNewMemberPhone(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Função Principal *</label>
+              <Select value={newMemberPrimaryFunctionId} onValueChange={setNewMemberPrimaryFunctionId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a função principal" />
+                </SelectTrigger>
+                <SelectContent>
+                  {functions.filter(f => f.id).map((func) => (
+                    <SelectItem key={`new-func-${func.id}`} value={func.id}>{func.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {isAdmin && (
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">Usuário Vinculado (Opcional)</label>
+                <Select value={newMemberUserId} onValueChange={setNewMemberUserId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um usuário" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Nenhum</SelectItem>
+                    {profiles.filter(p => p.user_id && p.id).map((profile) => (
+                      <SelectItem key={`new-user-${profile.id}`} value={profile.user_id as string}>{profile.full_name || 'Sem nome'}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Funções Secundárias</label>
+              <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto">
+                {functions
+                  .filter(f => f.id !== newMemberPrimaryFunctionId && f.id)
+                  .map((func) => (
+                    <div key={`new-sec-func-${func.id}`} className="flex items-center gap-2">
+                      <Checkbox
+                        id={`new-func-${func.id}`}
+                        checked={newMemberSecondaryFunctionIds.includes(func.id)}
+                        onCheckedChange={() => toggleSecondaryFunction(func.id)}
+                      />
+                      <label htmlFor={`new-func-${func.id}`} className="text-sm">{func.name}</label>
+                    </div>
+                  ))}
+              </div>
+            </div>
+            <div className="flex gap-3 pt-4">
+              <Button type="button" variant="outline" className="flex-1" onClick={() => setIsNewMemberDialogOpen(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit" className="flex-1" disabled={createMember.isPending}>
+                {createMember.isPending ? "Adicionando..." : "Adicionar"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
       {/* Edit Member Dialog */}
       <Dialog open={isEditMemberDialogOpen} onOpenChange={(open) => { setIsEditMemberDialogOpen(open); if (!open) resetMemberForm(); }}>
         <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
@@ -1867,8 +1681,8 @@ export default function LouvorPage() {
                   <SelectValue placeholder="Selecione a função principal" />
                 </SelectTrigger>
                 <SelectContent>
-                  {functions.map((func) => (
-                    <SelectItem key={func.id} value={func.id}>{func.name}</SelectItem>
+                  {functions.filter(f => f.id).map((func) => (
+                    <SelectItem key={`edit-func-${func.id}`} value={func.id}>{func.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -1882,8 +1696,8 @@ export default function LouvorPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="">Nenhum</SelectItem>
-                    {profiles.map((profile) => (
-                      <SelectItem key={profile.id} value={profile.user_id}>{profile.full_name || 'Sem nome'}</SelectItem>
+                    {profiles.filter(p => p.user_id && p.id).map((profile) => (
+                      <SelectItem key={`edit-user-${profile.id}`} value={profile.user_id as string}>{profile.full_name || 'Sem nome'}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -1935,6 +1749,193 @@ export default function LouvorPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      {/* Assign Song Dialog */}
+      <Dialog open={isAssignSongDialogOpen} onOpenChange={setIsAssignSongDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="font-display text-xl">Associar Música a Ministrante</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleAssignSong} className="space-y-4 mt-4">
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Música *</label>
+              <Select value={assignSongId} onValueChange={setAssignSongId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a música" />
+                </SelectTrigger>
+                <SelectContent>
+                  {songs.filter(s => s.id).map((song) => (
+                    <SelectItem key={`assign-song-${song.id}`} value={song.id}>{song.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Ministrante *</label>
+              <Select value={assignMinisterId} onValueChange={setAssignMinisterId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o ministrante" />
+                </SelectTrigger>
+                <SelectContent>
+                  {ministers.filter(m => m.id).map((minister) => (
+                    <SelectItem key={`assign-minister-${minister.id}`} value={minister.id}>{minister.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Tom *</label>
+              <Select value={assignKey} onValueChange={setAssignKey}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o tom" />
+                </SelectTrigger>
+                <SelectContent>
+                  {MUSICAL_KEYS.map((key) => (
+                    <SelectItem key={`assign-key-${key}`} value={key}>{key}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex gap-3 pt-4">
+              <Button type="button" variant="outline" className="flex-1" onClick={() => setIsAssignSongDialogOpen(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit" className="flex-1" disabled={createAssignment.isPending}>
+                {createAssignment.isPending ? "Associando..." : "Associar"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Song Dialog */}
+      <Dialog open={isNewSongDialogOpen} onOpenChange={setIsNewSongDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="font-display text-xl">Adicionar Música</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleAddSong} className="space-y-4 mt-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">Nome da Música *</label>
+                <Input
+                  placeholder="Nome do hino"
+                  value={newSongName}
+                  onChange={(e) => setNewSongName(e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">Tom Original *</label>
+                <Select value={newSongKey} onValueChange={setNewSongKey}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {MUSICAL_KEYS.map((key) => (
+                      <SelectItem key={`new-song-key-${key}`} value={key}>{key}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">Tipo de Conteúdo *</label>
+                <Select value={newSongContentType} onValueChange={(v) => setNewSongContentType(v as "cifra" | "letra")}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="cifra">Cifra</SelectItem>
+                    <SelectItem value="letra">Letra</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">Ministrante (opcional)</label>
+                <Select value={newSongMinisterId} onValueChange={setNewSongMinisterId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Nenhum</SelectItem>
+                    {ministers.filter(m => m.id).map((minister) => (
+                      <SelectItem key={`new-song-minister-${minister.id}`} value={minister.id}>{minister.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            {newSongMinisterId && (
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">Tom para o Ministrante</label>
+                <Select value={newSongMinisterKey} onValueChange={setNewSongMinisterKey}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {MUSICAL_KEYS.map((key) => (
+                      <SelectItem key={`new-song-min-key-${key}`} value={key}>{key}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Link do YouTube (opcional)</label>
+              <Input
+                placeholder="https://youtube.com/watch?v=..."
+                value={newSongYoutubeUrl}
+                onChange={(e) => setNewSongYoutubeUrl(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Cifra / Letra</label>
+              <Textarea
+                placeholder="Cole aqui a cifra ou letra..."
+                rows={8}
+                value={newSongLyrics}
+                onChange={(e) => setNewSongLyrics(e.target.value)}
+              />
+            </div>
+            <div className="flex gap-3 pt-4">
+              <Button type="button" variant="outline" className="flex-1" onClick={() => setIsNewSongDialogOpen(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit" className="flex-1" disabled={createSong.isPending}>
+                {createSong.isPending ? "Adicionando..." : "Adicionar"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+      {/* New Function Dialog */}
+      <Dialog open={isNewFunctionDialogOpen} onOpenChange={setIsNewFunctionDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="font-display text-xl">Adicionar Função</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleAddFunction} className="space-y-4 mt-4">
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Nome da Função *</label>
+              <Input
+                placeholder="Ex: Vocal, Guitarra, Teclado"
+                value={newFunctionName}
+                onChange={(e) => setNewFunctionName(e.target.value)}
+                required
+              />
+            </div>
+            <div className="flex gap-3 pt-4">
+              <Button type="button" variant="outline" className="flex-1" onClick={() => setIsNewFunctionDialogOpen(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit" className="flex-1" disabled={createFunction.isPending}>
+                {createFunction.isPending ? "Adicionando..." : "Adicionar"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
