@@ -149,12 +149,6 @@ export default function Header() {
                 <span>Rádio</span>
               </Button>
 
-              <Link to="/auth">
-                <Button variant={isScrolled ? "default" : "hero"} size="sm">
-                  Painel Admin
-                </Button>
-              </Link>
-
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className={`lg:hidden p-2 rounded-lg transition-colors ${isScrolled
