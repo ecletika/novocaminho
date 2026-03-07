@@ -32,6 +32,7 @@ import AniversariosPage from "./pages/admin/AniversariosPage";
 import ConfigPage from "./pages/admin/ConfigPage";
 import AdminCasadosPage from "./pages/admin/AdminCasadosPage";
 import AdminLiderancaPage from "./pages/admin/AdminLiderancaPage";
+import AdminEscalasPage from "./pages/admin/AdminEscalasPage";
 import UsersPage from "./pages/admin/UsersPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -66,6 +67,7 @@ const App = () => (
               <Route path="docs" element={<DocsPage />} />
               <Route path="ministerios" element={<AdminMinisteriosPage />} />
               <Route path="eventos" element={<AdminEventosPage />} />
+              <Route path="escalas" element={<AdminEscalasPage />} />
               <Route path="aniversarios" element={<AniversariosPage />} />
               <Route path="casados" element={<AdminCasadosPage />} />
               <Route path="users" element={<UsersPage />} />

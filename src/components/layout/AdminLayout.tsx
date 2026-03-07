@@ -34,6 +34,7 @@ const navigation = [
   { name: "Mesa & Mídia", href: "/admin/tech", icon: Tv, perm: "tech" },
   { name: "Ministérios", href: "/admin/ministerios", icon: Users, perm: "ministerios" },
   { name: "Eventos", href: "/admin/eventos", icon: Calendar, perm: "eventos" },
+  { name: "Escalas", href: "/admin/escalas", icon: Calendar, perm: "escalas" },
   { name: "Casados Para Sempre", href: "/admin/casados", icon: Heart, perm: "casados" },
   { name: "Aniversários", href: "/admin/aniversarios", icon: Cake, perm: "aniversarios" },
   { name: "Lideranças", href: "/admin/lideranca", icon: Layers, perm: "ministerios" },
