@@ -11,6 +11,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import {
   useAllUserPermissions,
@@ -38,10 +45,12 @@ export default function UsersPage() {
   const [editingUser, setEditingUser] = useState<string | null>(null);
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
   const [selectedMinistries, setSelectedMinistries] = useState<string[]>([]);
+  const [editingRole, setEditingRole] = useState<string>("member");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [newEmail, setNewEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [newName, setNewName] = useState("");
+  const [newRole, setNewRole] = useState<string>("member");
   const [newMinistries, setNewMinistries] = useState<string[]>([]);
   const [showPassword, setShowPassword] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
@@ -59,21 +68,31 @@ export default function UsersPage() {
   const loadUsers = async () => {
     setIsLoading(true);
     try {
-      const { data: profiles, error } = await supabase
-        .from("profiles")
-        .select("user_id, full_name");
-      if (error) throw error;
-
       const { data: roles, error: rolesError } = await supabase
         .from("user_roles")
         .select("user_id, role");
       if (rolesError) throw rolesError;
 
-      const userList: UserWithRole[] = (profiles || []).map((p) => {
-        const role = roles?.find((r) => r.user_id === p.user_id);
+      const { data: profiles, error } = await supabase
+        .from("profiles")
+        .select("user_id, full_name");
+      if (error) throw error;
+
+      // Also get distinct user_ids from permissions to be sure we see everyone
+      const { data: permsData } = await supabase.from("user_permissions").select("user_id");
+
+      const allUserIds = Array.from(new Set([
+        ...(roles?.map(r => r.user_id) || []),
+        ...(profiles?.map(p => p.user_id) || []),
+        ...(permsData?.map(pd => pd.user_id) || [])
+      ]));
+
+      const userList: UserWithRole[] = allUserIds.map((uid) => {
+        const role = roles?.find((r) => r.user_id === uid);
+        const profile = profiles?.find((p) => p.user_id === uid);
         return {
-          id: p.user_id,
-          email: p.full_name || p.user_id.substring(0, 8),
+          id: uid,
+          email: profile?.full_name || `Utilizador ${uid.substring(0, 5)}`,
           role: role?.role || "member",
         };
       });
@@ -103,16 +122,23 @@ export default function UsersPage() {
     return userMinistries.filter((m) => m.user_id === userId).map((m) => m.ministry_id);
   };
 
-  const startEditing = (userId: string) => {
-    setEditingUser(userId);
-    setSelectedPermissions(getUserPermissions(userId));
-    setSelectedMinistries(getUserMinistryIds(userId));
+  const startEditing = (user: UserWithRole) => {
+    setEditingUser(user.id);
+    setEditingRole(user.role || "member");
+    setSelectedPermissions(getUserPermissions(user.id));
+    setSelectedMinistries(getUserMinistryIds(user.id));
   };
 
   const handleSave = async () => {
     if (!editingUser) return;
     try {
       await setPerms.mutateAsync({ userId: editingUser, permissions: selectedPermissions });
+
+      // Save role
+      await supabase.from("user_roles").upsert({
+        user_id: editingUser,
+        role: editingRole as any
+      }, { onConflict: "user_id,role" });
 
       // Save ministries
       await supabase.from("user_ministries").delete().eq("user_id", editingUser);
@@ -122,8 +148,9 @@ export default function UsersPage() {
         );
       }
 
+      loadUsers();
       loadUserMinistries();
-      toast.success("Permissões e ministérios atualizados!");
+      toast.success("Permissões, cargo e ministérios atualizados!");
       setEditingUser(null);
     } catch (err) {
       toast.error("Erro ao atualizar");
@@ -135,7 +162,7 @@ export default function UsersPage() {
     setIsCreating(true);
     try {
       const { data, error } = await supabase.functions.invoke("create-user", {
-        body: { email: newEmail, password: newPassword, full_name: newName, ministry_ids: newMinistries },
+        body: { email: newEmail, password: newPassword, full_name: newName, ministry_ids: newMinistries, role: newRole },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
@@ -228,25 +255,40 @@ export default function UsersPage() {
                     </div>
                   </div>
                 </div>
-                {!isAdmin && (
-                  <div className="flex gap-2">
-                    {isEditing ? (
+                <div className="flex gap-2">
+                  {isEditing ? (
+                    <div className="flex items-center gap-2">
+                      <Select value={editingRole} onValueChange={setEditingRole}>
+                        <SelectTrigger className="w-32 h-9">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="member">Membro</SelectItem>
+                          <SelectItem value="admin">Admin</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <Button size="sm" onClick={handleSave} disabled={setPerms.isPending}>
                         {setPerms.isPending ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Save className="w-4 h-4 mr-1" />}
                         Salvar
                       </Button>
-                    ) : (
-                      <Button size="sm" variant="outline" onClick={() => startEditing(user.id)}>
-                        Editar
-                      </Button>
-                    )}
-                  </div>
-                )}
+                    </div>
+                  ) : (
+                    <Button size="sm" variant="outline" onClick={() => startEditing(user)}>
+                      Editar
+                    </Button>
+                  )}
+                </div>
               </div>
 
-              {isAdmin ? (
-                <p className="text-sm text-muted-foreground">Administrador — acesso total a todas as áreas.</p>
-              ) : (
+              <div className="space-y-4">
+                {isAdmin && !isEditing && (
+                  <div className="bg-primary/5 p-3 rounded-lg border border-primary/20 mb-2">
+                    <p className="text-sm text-primary font-medium flex items-center gap-2">
+                      <Shield className="w-4 h-4" /> Administrador — acesso total a todas as áreas.
+                    </p>
+                  </div>
+                )}
+
                 <div className="space-y-4">
                   {/* Ministries */}
                   <div>
@@ -302,7 +344,7 @@ export default function UsersPage() {
                     </div>
                   </div>
                 </div>
-              )}
+              </div>
             </div>
           );
         })}
@@ -339,6 +381,18 @@ export default function UsersPage() {
                 placeholder="email@exemplo.com"
                 required
               />
+            </div>
+            <div className="space-y-2">
+              <Label>Cargo</Label>
+              <Select value={newRole} onValueChange={setNewRole}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="member">Membro</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label>Senha *</Label>
@@ -383,7 +437,7 @@ export default function UsersPage() {
             </div>
 
             <div className="flex gap-3 pt-4">
-              <Button type="button" variant="outline" className="flex-1" onClick={() => setIsCreateOpen(false)}>
+              <Button type="button" variant="outline" className="flex-1" onClick={() => { setIsCreateOpen(false); }}>
                 Cancelar
               </Button>
               <Button type="submit" className="flex-1" disabled={isCreating}>

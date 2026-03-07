@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { email, password, full_name, ministry_ids } = await req.json();
+    const { email, password, full_name, ministry_ids, role = "member" } = await req.json();
 
     if (!email || !password) {
       return new Response(JSON.stringify({ error: "Email e senha são obrigatórios" }), {
@@ -68,10 +68,16 @@ Deno.serve(async (req) => {
 
     if (error) throw error;
 
-    // Add member role
+    // Add role
     await supabase.from("user_roles").insert({
       user_id: data.user.id,
-      role: "member",
+      role: role,
+    });
+
+    // Add profile
+    await supabase.from("profiles").insert({
+      user_id: data.user.id,
+      full_name: full_name || email,
     });
 
     // Add ministry associations
