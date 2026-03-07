@@ -517,14 +517,21 @@ CREATE POLICY "Users can insert own progress" ON couples_progress FOR INSERT WIT
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-black uppercase text-gray-400 px-2">Texto da Aula</label>
-                <textarea value={editingLesson?.content || ''} onChange={e => setEditingLesson({ ...editingLesson, content: e.target.value })} className="w-full bg-gray-50 dark:bg-gray-800 rounded-2xl p-4 min-h-[200px] outline-none font-serif text-lg border border-transparent focus:border-[#1E40AF]" />
+                <label className="text-[10px] font-black uppercase text-gray-400 px-2 font-display">Texto da Aula</label>
+                <textarea
+                  value={editingLesson?.content || ''}
+                  onChange={e => setEditingLesson({ ...editingLesson, content: e.target.value })}
+                  className="w-full bg-gray-50 dark:bg-gray-800 rounded-2xl p-5 min-h-[350px] outline-none font-serif text-lg border-2 border-transparent focus:border-[#1E40AF] transition-all resize-none"
+                  placeholder="Escreva o conteúdo da aula aqui..."
+                />
               </div>
 
-              <button type="submit" disabled={isSaving} className="w-full bg-[#1E40AF] text-white py-5 rounded-2xl font-bold shadow-xl flex items-center justify-center gap-2 transition-all">
-                {isSaving ? <Loader2 className="animate-spin" /> : <Save size={20} />}
-                {isSaving ? 'Salvando...' : 'Publicar Aula'}
-              </button>
+              <div className="sticky bottom-0 pt-6 pb-2 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 mt-8">
+                <button type="submit" disabled={isSaving} className="w-full bg-[#1E40AF] text-white py-6 rounded-2xl font-bold font-display shadow-2xl flex items-center justify-center gap-3 transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50">
+                  {isSaving ? <Loader2 className="animate-spin" size={24} /> : <Save size={24} />}
+                  {isSaving ? 'Processando...' : 'Publicar Alterações na Aula'}
+                </button>
+              </div>
             </form>
           </div>
         </div>

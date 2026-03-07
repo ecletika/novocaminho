@@ -41,19 +41,19 @@ const upcomingEvents = [
   {
     title: "Culto de Domingo",
     date: "22 Dez",
-    time: "10:00",
+    time: "10:30",
     description: "Venha adorar conosco e receber a palavra de Deus.",
   },
   {
-    title: "Reunião de Casais",
+    title: "Culto de Oração",
     date: "24 Dez",
     time: "19:30",
-    description: "Momento especial para casais fortalecerem seus laços.",
+    description: "Momento especial de oração e busca a Deus em família.",
   },
   {
-    title: "Celebração de Natal",
+    title: "Celebração Especial",
     date: "25 Dez",
-    time: "18:00",
+    time: "10:30",
     description: "Grande celebração em família, comemorando o nascimento de Jesus.",
   },
 ];
@@ -143,7 +143,7 @@ export default function HomePage() {
       </section>
 
       {/* Quick Info Bar + Radio Player */}
-      <section className="relative mt-8 z-20">
+      <section className="relative mt-20 z-20">
         <div className="container-church space-y-6">
           <div className="bg-card rounded-2xl shadow-card p-6 md:p-8 grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="flex items-center gap-4">
@@ -152,7 +152,7 @@ export default function HomePage() {
               </div>
               <div>
                 <h3 className="font-semibold text-foreground">Culto aos Domingos</h3>
-                <p className="text-muted-foreground text-sm">10:30</p>
+                <p className="text-muted-foreground text-sm">Apenas às 10:30</p>
               </div>
             </div>
             <div className="flex items-center gap-4">

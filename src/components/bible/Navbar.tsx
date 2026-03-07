@@ -82,7 +82,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, setView, user, onAuthClick
 
               <a
                 href="/"
-                className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-[#1E40AF] hover:text-white transition-all border border-gray-200 dark:border-gray-700"
+                className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-[#1E40AF] hover:text-white transition-all border border-gray-200 dark:border-gray-700"
               >
                 <ChevronDown size={14} className="rotate-90" />
                 Sair da Bíblia
@@ -96,8 +96,8 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, setView, user, onAuthClick
                   key={item.id}
                   onClick={() => setView(item.id)}
                   className={`px-2 py-2 rounded-xl text-[9px] lg:text-[10px] font-black uppercase tracking-tighter transition-all duration-200 flex flex-col items-center gap-1 group/item ${currentView === item.id
-                      ? 'text-[#1E40AF] dark:text-blue-400'
-                      : 'text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-200'
+                    ? 'text-[#1E40AF] dark:text-blue-400'
+                    : 'text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-200'
                     }`}
                 >
                   <item.icon size={18} className={currentView === item.id ? 'scale-110' : 'group-hover/item:scale-110 transition-transform'} />

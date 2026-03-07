@@ -733,13 +733,13 @@ export function useUserWorshipSkills(userId?: string) {
   if (!member) return { skills: [], isMusician: false, isTech: false, isMinister: false, isVocal: false };
 
   const skills = [
-    member.primary_function?.name.toLowerCase(),
-    ...(member.secondary_functions?.map(sf => sf.function?.name.toLowerCase()) || [])
+    member.primary_function?.name?.toLowerCase(),
+    ...(member.secondary_functions?.map(sf => sf.function?.name?.toLowerCase()) || [])
   ].filter(Boolean) as string[];
 
-  const isMusician = skills.some(s => ["teclado", "violão", "violao", "bateria", "baixo", "guitarra"].some(instr => s.includes(instr)));
-  const isVocal = skills.some(s => s.includes("vocal") || s.includes("back"));
-  const isMinister = skills.some(s => s.includes("ministrante"));
+  const isMusician = skills.some(s => ["teclado", "violão", "violao", "bateria", "baixo", "guitarra"].some(instr => s?.includes(instr)));
+  const isVocal = skills.some(s => s?.includes("vocal") || s?.includes("back"));
+  const isMinister = skills.some(s => s?.includes("ministrante"));
   const isTech = skills.some(s =>
     s.includes("som") || s.includes("mídia") || s.includes("midia") ||
     s.includes("transmissão") || s.includes("transmissao") ||

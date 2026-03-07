@@ -64,6 +64,7 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMont
 import { ptBR } from "date-fns/locale";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfiles } from "@/hooks/useUserPermissions";
+import logoImage from "@/assets/logo-igreja.jpeg";
 
 const MUSICAL_KEYS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 const scheduleTypes = ["Culto Domingo", "Culto Quarta", "Culto de Oração", "Evento Especial"];
@@ -102,9 +103,9 @@ export default function LouvorPage() {
   const [newMemberPrimaryFunctionId, setNewMemberPrimaryFunctionId] = useState("");
   const [newMemberSecondaryFunctionIds, setNewMemberSecondaryFunctionIds] = useState<string[]>([]);
   const [newMemberUserId, setNewMemberUserId] = useState<string>("");
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const newMemberFileInputRef = useRef<HTMLInputElement>(null);
+  const editMemberFileInputRef = useRef<HTMLInputElement>(null);
 
-  // Form states - Song
   const [newSongName, setNewSongName] = useState("");
   const [newSongKey, setNewSongKey] = useState("");
   const [newSongLyrics, setNewSongLyrics] = useState("");
@@ -152,12 +153,12 @@ export default function LouvorPage() {
   const { data: generalSchedules = [], isLoading: schedulesLoading } = useGeneralSchedules();
   const { data: functions = [], isLoading: functionsLoading } = useWorshipFunctions();
 
-  // Form states - Minister (using members with Ministrante function)
-  const ministranteFunctionId = functions.find(f => f.name.toLowerCase().includes("ministrante"))?.id;
-  const tecladoFunctionId = functions.find(f => f.name.toLowerCase().includes("teclado"))?.id;
-  const violaoFunctionId = functions.find(f => f.name.toLowerCase().includes("violão") || f.name.toLowerCase().includes("violao"))?.id;
-  const bateriaFunctionId = functions.find(f => f.name.toLowerCase().includes("bateria"))?.id;
-  const vocalFunctionId = functions.find(f => f.name.toLowerCase().includes("vocal") || f.name.toLowerCase().includes("back"))?.id;
+  // Derived variables
+  const ministranteFunctionId = functions.find(f => f.name?.toLowerCase()?.includes("ministrante"))?.id;
+  const tecladoFunctionId = functions.find(f => f.name?.toLowerCase()?.includes("teclado"))?.id;
+  const violaoFunctionId = functions.find(f => f.name?.toLowerCase()?.includes("violão") || f.name?.toLowerCase()?.includes("violao"))?.id;
+  const bateriaFunctionId = functions.find(f => f.name?.toLowerCase()?.includes("bateria"))?.id;
+  const vocalFunctionId = functions.find(f => f.name?.toLowerCase()?.includes("vocal") || f.name?.toLowerCase()?.includes("back"))?.id;
 
   const ministers = members.filter(m =>
     m.primary_function_id === ministranteFunctionId ||
@@ -204,11 +205,12 @@ export default function LouvorPage() {
   const createFunction = useCreateWorshipFunction();
   const deleteFunction = useDeleteWorshipFunction();
 
-  // Get current user's member profile and skills
+
+  // User logic
   const myMemberProfile = members.find(m => m.user_id === currentUser?.id);
   const myFunctions = [
-    myMemberProfile?.primary_function?.name.toLowerCase(),
-    ...(myMemberProfile?.secondary_functions?.map(sf => sf.function?.name.toLowerCase()) || [])
+    myMemberProfile?.primary_function?.name?.toLowerCase(),
+    ...(myMemberProfile?.secondary_functions?.map(sf => sf.function?.name?.toLowerCase()) || [])
   ].filter(Boolean);
 
   const isMusician = myFunctions.some(f => ["teclado", "violão", "violao", "bateria", "baixo", "guitarra"].some(instr => f?.includes(instr)));
@@ -328,6 +330,14 @@ export default function LouvorPage() {
     }
   };
 
+  const toggleSecondaryFunction = (functionId: string) => {
+    if (newMemberSecondaryFunctionIds.includes(functionId)) {
+      setNewMemberSecondaryFunctionIds(newMemberSecondaryFunctionIds.filter(id => id !== functionId));
+    } else {
+      setNewMemberSecondaryFunctionIds([...newMemberSecondaryFunctionIds, functionId]);
+    }
+  };
+
   const toggleLouvorMusician = (memberId: string, instrument: string) => {
     const existing = selectedMusicos.find(m => m.member_id === memberId);
     if (existing) {
@@ -337,16 +347,6 @@ export default function LouvorPage() {
     }
   };
 
-  const openEditMemberDialog = (member: WorshipMember) => {
-    setSelectedMember(member);
-    setNewMemberName(member.name);
-    setNewMemberPhone(member.phone || "");
-    setNewMemberPhotoPreview(member.photo_url);
-    setNewMemberPrimaryFunctionId(member.primary_function_id || "");
-    setNewMemberSecondaryFunctionIds(member.secondary_functions?.map(sf => sf.function_id) || []);
-    setNewMemberUserId(member.user_id || "");
-    setIsEditMemberDialogOpen(true);
-  };
 
   const resetMemberForm = () => {
     setNewMemberName("");
@@ -357,6 +357,18 @@ export default function LouvorPage() {
     setNewMemberSecondaryFunctionIds([]);
     setNewMemberUserId("");
     setSelectedMember(null);
+  };
+
+  const openEditMemberDialog = (member: WorshipMember) => {
+    setSelectedMember(member);
+    setNewMemberName(member.name || "");
+    setNewMemberPhone(member.phone || "");
+    setNewMemberPrimaryFunctionId(member.primary_function_id || "");
+    setNewMemberSecondaryFunctionIds(member.secondary_functions?.map(sf => sf.function_id).filter(Boolean) as string[] || []);
+    setNewMemberUserId(member.user_id || "");
+    setNewMemberPhoto(null); // Reset file to prevent accidental reuse
+    setNewMemberPhotoPreview(member.photo_url || null);
+    setIsEditMemberDialogOpen(true);
   };
 
   const handleAddSong = async (e: React.FormEvent) => {
@@ -551,13 +563,6 @@ export default function LouvorPage() {
     setDeleteType(type);
   };
 
-  const toggleSecondaryFunction = (functionId: string) => {
-    setNewMemberSecondaryFunctionIds(prev =>
-      prev.includes(functionId)
-        ? prev.filter(id => id !== functionId)
-        : [...prev, functionId]
-    );
-  };
 
   const toggleVocalist = (memberId: string) => {
     setNewScheduleVocalistIds(prev =>
@@ -573,13 +578,12 @@ export default function LouvorPage() {
     : [];
 
   const filteredMembers = members.filter(m => {
-    const matchesSearch = m.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = (m.name || "").toLowerCase().includes(searchTerm.toLowerCase());
     if (isAdmin) return matchesSearch;
 
-    // For non-admins, show members who share at least one function type (Musician, Minister, Vocal)
     const mFunctions = [
-      m.primary_function?.name.toLowerCase(),
-      ...(m.secondary_functions?.map(sf => sf.function?.name.toLowerCase()) || [])
+      m.primary_function?.name?.toLowerCase(),
+      ...(m.secondary_functions?.map(sf => sf.function?.name?.toLowerCase()) || [])
     ].filter(Boolean);
 
     const mIsMusician = mFunctions.some(f => ["teclado", "violão", "violao", "bateria", "baixo", "guitarra"].some(instr => f?.includes(instr)));
@@ -597,7 +601,7 @@ export default function LouvorPage() {
   });
 
   const filteredSongs = songs.filter(s =>
-    s.name.toLowerCase().includes(searchTerm.toLowerCase())
+    (s.name || "").toLowerCase().includes((searchTerm || "").toLowerCase())
   );
 
   // Calendar helpers
@@ -711,27 +715,32 @@ export default function LouvorPage() {
                     <DialogTitle className="font-display text-xl">Adicionar Integrante</DialogTitle>
                   </DialogHeader>
                   <form onSubmit={handleAddMember} className="space-y-4 mt-4">
-                    <div className="flex flex-col items-center gap-4">
-                      <div
-                        className="w-24 h-24 rounded-full bg-muted flex items-center justify-center cursor-pointer hover:bg-muted/80 transition-colors overflow-hidden"
-                        onClick={() => fileInputRef.current?.click()}
-                      >
-                        {newMemberPhotoPreview ? (
-                          <img src={newMemberPhotoPreview} alt="Preview" className="w-full h-full object-cover" />
-                        ) : (
-                          <Upload className="w-8 h-8 text-muted-foreground" />
-                        )}
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-2">Foto do Integrante</label>
+                      <div className="flex items-center gap-4">
+                        <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-primary/20">
+                          {newMemberPhotoPreview ? (
+                            <img src={newMemberPhotoPreview} alt="Preview" className="w-full h-full object-cover" />
+                          ) : (
+                            <Upload className="w-6 h-6 text-muted-foreground" />
+                          )}
+                        </div>
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          onChange={handlePhotoChange}
+                          ref={newMemberFileInputRef}
+                          className="hidden"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => newMemberFileInputRef.current?.click()}
+                        >
+                          Selecionar Foto
+                        </Button>
                       </div>
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handlePhotoChange}
-                      />
-                      <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
-                        Escolher Foto
-                      </Button>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-foreground mb-2">Nome *</label>
@@ -825,7 +834,7 @@ export default function LouvorPage() {
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8"
-                          onClick={() => openEditMemberDialog(member)}
+                          onClick={(e) => { e.stopPropagation(); openEditMemberDialog(member); }}
                         >
                           <Edit className="w-4 h-4 text-muted-foreground" />
                         </Button>
@@ -833,20 +842,18 @@ export default function LouvorPage() {
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8"
-                          onClick={() => openDeleteDialog(member.id, "member")}
+                          onClick={(e) => { e.stopPropagation(); openDeleteDialog(member.id, "member"); }}
                         >
                           <Trash2 className="w-4 h-4 text-destructive" />
                         </Button>
                       </>
                     )}
                   </div>
-                  <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3 overflow-hidden">
+                  <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3 overflow-hidden border-2 border-primary/20">
                     {member.photo_url ? (
                       <img src={member.photo_url} alt={member.name} className="w-full h-full object-cover" />
                     ) : (
-                      <span className="font-semibold text-primary text-lg">
-                        {member.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                      </span>
+                      <img src={logoImage} alt="Logo" className="w-full h-full object-cover opacity-50" />
                     )}
                   </div>
                   <h3 className="font-semibold text-foreground text-sm truncate">{member.name}</h3>
@@ -1721,22 +1728,21 @@ export default function LouvorPage() {
 
             {/* Músicos */}
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2 flex items-center gap-2">
-                <Music className="w-4 h-4 text-accent" />
-                Músicos
-              </label>
-              <div className="space-y-2 max-h-40 overflow-y-auto border rounded-md p-2">
-                {members.filter(m =>
-                  ["teclado", "violão", "violao", "bateria", "baixo", "guitarra"].some(instr =>
-                    m.primary_function?.name.toLowerCase().includes(instr) ||
-                    m.secondary_functions?.some(sf => sf.function?.name.toLowerCase().includes(instr))
-                  )
-                ).map((member) => {
-                  const selected = selectedMusicos.find(m => m.member_id === member.id);
-                  const hasSkill = (instr: string) => {
-                    return member.primary_function?.name.toLowerCase().includes(instr) ||
-                      member.secondary_functions?.some(sf => sf.function?.name.toLowerCase().includes(instr));
-                  };
+              <div className="space-y-2 max-h-48 overflow-y-auto border rounded-md p-2">
+                {members.filter(m => {
+                  const skills = [
+                    m.primary_function?.name?.toLowerCase(),
+                    ...(m.secondary_functions?.map(sf => sf.function?.name?.toLowerCase()) || [])
+                  ].filter(Boolean);
+                  return skills.some(s => ["teclado", "violão", "violao", "bateria", "baixo", "guitarra"].some(instr => s?.includes(instr)));
+                }).map((member) => {
+                  const selected = selectedMusicos.find(sm => sm.member_id === member.id);
+                  const skills = [
+                    member.primary_function?.name?.toLowerCase(),
+                    ...(member.secondary_functions?.map(sf => sf.function?.name?.toLowerCase()) || [])
+                  ].filter(Boolean);
+
+                  const hasSkill = (name: string) => skills.some(s => s?.includes(name));
 
                   return (
                     <div key={member.id} className="flex items-center gap-4">
@@ -1810,27 +1816,32 @@ export default function LouvorPage() {
             <DialogTitle className="font-display text-xl">Editar Integrante</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleEditMember} className="space-y-4 mt-4">
-            <div className="flex flex-col items-center gap-4">
-              <div
-                className="w-24 h-24 rounded-full bg-muted flex items-center justify-center cursor-pointer hover:bg-muted/80 transition-colors overflow-hidden"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                {newMemberPhotoPreview ? (
-                  <img src={newMemberPhotoPreview} alt="Preview" className="w-full h-full object-cover" />
-                ) : (
-                  <Upload className="w-8 h-8 text-muted-foreground" />
-                )}
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Foto do Integrante</label>
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-primary/20">
+                  {newMemberPhotoPreview ? (
+                    <img src={newMemberPhotoPreview} alt="Preview" className="w-full h-full object-cover" />
+                  ) : (
+                    <Upload className="w-6 h-6 text-muted-foreground" />
+                  )}
+                </div>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePhotoChange}
+                  ref={editMemberFileInputRef}
+                  className="hidden"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => editMemberFileInputRef.current?.click()}
+                >
+                  Alterar Foto
+                </Button>
               </div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handlePhotoChange}
-              />
-              <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
-                Alterar Foto
-              </Button>
             </div>
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Nome *</label>
