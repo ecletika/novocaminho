@@ -390,20 +390,16 @@ export default function CasadosOnlineMaterial() {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                                     <div className="space-y-2">
                                         <label className="text-sm font-bold text-foreground">Assinatura do Marido <span className="text-red-500">*</span></label>
-                                        <textarea
-                                            rows={3}
-                                            className="w-full p-4 rounded-xl border-2 border-border bg-background focus:border-secondary transition-all"
-                                            value={compromissoForm.assinatura_marido}
-                                            onChange={e => setCompromissoForm({ ...compromissoForm, assinatura_marido: e.target.value })}
+                                        <SignaturePad
+                                            onSave={(data) => setCompromissoForm({ ...compromissoForm, assinatura_marido: data })}
+                                            onClear={() => setCompromissoForm({ ...compromissoForm, assinatura_marido: '' })}
                                         />
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-sm font-bold text-foreground">Assinatura da Esposa <span className="text-red-500">*</span></label>
-                                        <textarea
-                                            rows={3}
-                                            className="w-full p-4 rounded-xl border-2 border-border bg-background focus:border-secondary transition-all"
-                                            value={compromissoForm.assinatura_esposa}
-                                            onChange={e => setCompromissoForm({ ...compromissoForm, assinatura_esposa: e.target.value })}
+                                        <SignaturePad
+                                            onSave={(data) => setCompromissoForm({ ...compromissoForm, assinatura_esposa: data })}
+                                            onClear={() => setCompromissoForm({ ...compromissoForm, assinatura_esposa: '' })}
                                         />
                                     </div>
                                 </div>
@@ -539,5 +535,99 @@ export default function CasadosOnlineMaterial() {
         </div>
     );
 }
+
+const SignaturePad = ({ onSave, onClear }: { onSave: (data: string) => void, onClear: () => void }) => {
+    const canvasRef = React.useRef<HTMLCanvasElement>(null);
+    const [isDrawing, setIsDrawing] = React.useState(false);
+
+    React.useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        ctx.strokeStyle = '#222';
+        ctx.lineWidth = 2.5;
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+    }, []);
+
+    const getPos = (e: React.MouseEvent | React.TouchEvent | MouseEvent | TouchEvent) => {
+        const canvas = canvasRef.current;
+        if (!canvas) return { x: 0, y: 0 };
+        const rect = canvas.getBoundingClientRect();
+        const clientX = 'touches' in e ? e.touches[0].clientX : (e as MouseEvent).clientX;
+        const clientY = 'touches' in e ? e.touches[0].clientY : (e as MouseEvent).clientY;
+        return {
+            x: clientX - rect.left,
+            y: clientY - rect.top
+        };
+    };
+
+    const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
+        setIsDrawing(true);
+        const ctx = canvasRef.current?.getContext('2d');
+        if (ctx) {
+            const { x, y } = getPos(e);
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+        }
+    };
+
+    const draw = (e: React.MouseEvent | React.TouchEvent) => {
+        if (!isDrawing) return;
+        const ctx = canvasRef.current?.getContext('2d');
+        if (ctx) {
+            const { x, y } = getPos(e);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+        }
+    };
+
+    const stopDrawing = () => {
+        if (isDrawing) {
+            setIsDrawing(false);
+            const canvas = canvasRef.current;
+            if (canvas) {
+                onSave(canvas.toDataURL());
+            }
+        }
+    };
+
+    const clear = () => {
+        const canvas = canvasRef.current;
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+            onClear();
+        }
+    };
+
+    return (
+        <div className="space-y-3">
+            <div className="border-2 border-dashed border-secondary/30 rounded-2xl overflow-hidden bg-white shadow-inner">
+                <canvas
+                    ref={canvasRef}
+                    width={450}
+                    height={160}
+                    className="w-full h-32 cursor-crosshair touch-none"
+                    onMouseDown={startDrawing}
+                    onMouseMove={draw}
+                    onMouseUp={stopDrawing}
+                    onMouseOut={stopDrawing}
+                    onTouchStart={startDrawing}
+                    onTouchMove={draw}
+                    onTouchEnd={stopDrawing}
+                ></canvas>
+            </div>
+            <button
+                type="button"
+                onClick={clear}
+                className="text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-secondary flex items-center gap-1 transition-colors"
+            >
+                <X size={14} /> Limpar Assinatura
+            </button>
+        </div>
+    );
+};
 
 const ListOrdered = ({ size, className }: { size: number, className: string }) => <BookOpen size={size} className={className} />;
