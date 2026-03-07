@@ -27,6 +27,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useSearchParams } from "react-router-dom";
+import { toast } from "sonner";
 import {
   useInventoryItems,
   useCreateInventoryItem,
@@ -126,36 +127,41 @@ export default function InventarioPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (isEditing && selectedItem) {
-      let imageUrl = selectedItem.image_url;
-      if (itemPhoto) {
-        imageUrl = await uploadInventoryPhoto(itemPhoto);
+    try {
+      if (isEditing && selectedItem) {
+        let imageUrl = selectedItem.image_url;
+        if (itemPhoto) {
+          imageUrl = await uploadInventoryPhoto(itemPhoto);
+        }
+
+        await updateItem.mutateAsync({
+          id: selectedItem.id,
+          ...formData,
+          image_url: imageUrl,
+        });
+      } else {
+        let imageUrl = null;
+        if (itemPhoto) {
+          imageUrl = await uploadInventoryPhoto(itemPhoto);
+        }
+
+        await createItem.mutateAsync({
+          name: formData.name,
+          category: formData.category,
+          location: formData.location,
+          purpose: formData.purpose || null,
+          condition: formData.condition,
+          notes: formData.notes || null,
+          image_url: imageUrl,
+        });
       }
 
-      await updateItem.mutateAsync({
-        id: selectedItem.id,
-        ...formData,
-        image_url: imageUrl,
-      });
-    } else {
-      let imageUrl = null;
-      if (itemPhoto) {
-        imageUrl = await uploadInventoryPhoto(itemPhoto);
-      }
-
-      await createItem.mutateAsync({
-        name: formData.name,
-        category: formData.category,
-        location: formData.location,
-        purpose: formData.purpose || null,
-        condition: formData.condition,
-        notes: formData.notes || null,
-        image_url: imageUrl,
-      });
+      setIsDialogOpen(false);
+      resetForm();
+    } catch (error: any) {
+      console.error("Erro ao salvar item:", error);
+      toast.error("Erro ao salvar item: " + (error.message || "Tente novamente"));
     }
-
-    setIsDialogOpen(false);
-    resetForm();
   };
 
   const handleEdit = (item: InventoryItem) => {
