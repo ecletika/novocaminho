@@ -805,7 +805,7 @@ const BibleView: React.FC<BibleViewProps> = ({ user, initialBook, initialChapter
                   >
                     <div className="flex items-center gap-3">
                       <span className="text-lg font-bold">{book}</span>
-                      {isOffline && <CheckCircle2 size={14} className="text-green-500" title="Disponível Offline" />}
+                      {isOffline && <CheckCircle2 size={14} className="text-green-500" />}
                     </div>
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-2 text-gray-500">

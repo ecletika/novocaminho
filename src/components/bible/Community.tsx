@@ -59,7 +59,7 @@ const CommunityView: React.FC<CommunityViewProps> = ({ user, onAuthRequired }) =
     try {
       setLoading(true);
       const data = await getCommunityPosts();
-      if (data !== "__TABLE_MISSING__") setPosts(data as Post[]);
+      if (data as any !== "__TABLE_MISSING__") setPosts(data as Post[]);
     } catch (err) {
       console.error(err);
     } finally {
