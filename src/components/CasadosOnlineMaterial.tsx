@@ -19,6 +19,7 @@ import {
     uploadCasadosFile,
     saveCompromissoCasal
 } from '@/integrations/supabase/casadosService';
+import RichTextEditor from './editor/RichTextEditor';
 import { Button } from '@/components/ui/button';
 
 export default function CasadosOnlineMaterial() {
@@ -48,6 +49,9 @@ export default function CasadosOnlineMaterial() {
     });
     const [isSubmittingCompromisso, setIsSubmittingCompromisso] = useState(false);
     const [hasSubmittedCompromisso, setHasSubmittedCompromisso] = useState(false);
+
+    // HTML Mode state
+    const [isHtmlMode, setIsHtmlMode] = useState(false);
 
     // Permitir edição apenas se explicitamente for admin e não estiver carregando auth
     const canEdit = !authLoading && user && isAdmin;
@@ -357,9 +361,10 @@ export default function CasadosOnlineMaterial() {
                         )}
 
                         <div className="prose prose-stone dark:prose-invert max-w-none text-left mb-12">
-                            <div className="font-serif text-xl leading-relaxed text-foreground whitespace-pre-wrap first-letter:text-5xl first-letter:font-bold first-letter:text-secondary first-letter:mr-2">
-                                {selectedLesson.content}
-                            </div>
+                            <div
+                                className="font-serif text-xl leading-relaxed text-foreground [&>p]:mb-4 [&>h1]:text-4xl [&>h1]:font-bold [&>h1]:mb-4 [&>h2]:text-3xl [&>h2]:font-bold [&>h2]:mb-3 [&>h3]:text-2xl [&>h3]:font-bold [&>h3]:mb-2 [&>ul]:list-disc [&>ul]:ml-6 [&>ol]:list-decimal [&>ol]:ml-6"
+                                dangerouslySetInnerHTML={{ __html: selectedLesson.content }}
+                            />
                         </div>
 
                         {selectedLesson.title === "Compromisso" && (
@@ -521,8 +526,31 @@ export default function CasadosOnlineMaterial() {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-xs font-bold uppercase text-muted-foreground">Conteúdo da Aula</label>
-                                <textarea placeholder="Conteúdo da Aula" value={editingLesson?.content || ''} onChange={e => setEditingLesson({ ...editingLesson, content: e.target.value })} className="w-full p-4 rounded-xl border bg-muted/20 min-h-[300px]" />
+                                <div className="flex items-center justify-between">
+                                    <label className="text-xs font-bold uppercase text-muted-foreground">Conteúdo da Aula</label>
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsHtmlMode(!isHtmlMode)}
+                                        className="text-[10px] font-bold uppercase tracking-widest bg-muted px-2 py-1 rounded hover:bg-secondary hover:text-primary transition-all"
+                                    >
+                                        {isHtmlMode ? "Usar Editor Visual" : "Editar Código HTML"}
+                                    </button>
+                                </div>
+
+                                {isHtmlMode ? (
+                                    <textarea
+                                        placeholder="Código HTML aqui..."
+                                        value={editingLesson?.content || ''}
+                                        onChange={e => setEditingLesson({ ...editingLesson, content: e.target.value })}
+                                        className="w-full p-4 rounded-xl border bg-muted/20 min-h-[400px] font-mono text-sm"
+                                    />
+                                ) : (
+                                    <RichTextEditor
+                                        key={editingLesson?.id || 'new'}
+                                        content={editingLesson?.content || ''}
+                                        onChange={(content) => setEditingLesson({ ...editingLesson, content })}
+                                    />
+                                )}
                             </div>
 
                             <Button className="w-full h-14 font-bold text-lg" disabled={isSaving || isUploading} onClick={() => handleSaveLesson(editingLesson)}>
