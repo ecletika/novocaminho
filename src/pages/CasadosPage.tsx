@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CASADOS_COURSES, CASADOS_RESOURCES } from "@/constants/casadosData";
 import { FileText, GraduationCap, ClipboardList, BookOpen, UserPlus, Link as LinkIcon } from "lucide-react";
 import CouplesStudy from "@/components/CouplesStudy";
+import CasadosOnlineMaterial from "@/components/CasadosOnlineMaterial";
 
 const resourceIconMap: Record<string, React.ElementType> = {
   FileText,
@@ -274,6 +275,7 @@ export default function CasadosPage() {
             <div className="flex justify-center mb-8">
               <TabsList className="bg-muted/50 p-1">
                 <TabsTrigger value="cursos" className="px-4 md:px-8">Cursos</TabsTrigger>
+                <TabsTrigger value="online" className="px-4 md:px-8">Material Online</TabsTrigger>
                 <TabsTrigger value="estudos" className="px-4 md:px-8">Estudos Bíblicos</TabsTrigger>
                 <TabsTrigger value="recursos" className="px-4 md:px-8">Recursos</TabsTrigger>
               </TabsList>
@@ -281,6 +283,10 @@ export default function CasadosPage() {
 
             <TabsContent value="estudos" className="animate-in fade-in duration-500">
               <CouplesStudy />
+            </TabsContent>
+
+            <TabsContent value="online" className="animate-in fade-in duration-500">
+              <CasadosOnlineMaterial />
             </TabsContent>
 
             <TabsContent value="cursos" className="space-y-6">

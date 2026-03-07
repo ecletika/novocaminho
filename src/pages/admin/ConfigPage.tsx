@@ -160,13 +160,13 @@ export default function ConfigPage() {
             <Video className="w-6 h-6 text-blue-600" />
           </div>
           <div>
-            <h2 className="font-display text-xl font-semibold text-foreground">Transmissão ao Vivo</h2>
-            <p className="text-sm text-muted-foreground">Configure o ID da página do Facebook para o player ao vivo</p>
+            <h2 className="font-display text-xl font-semibold text-foreground">Integração Facebook</h2>
+            <p className="text-sm text-muted-foreground">Configure o ID da página para o player ao vivo e galeria de fotos</p>
           </div>
         </div>
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="fb-page-id">ID ou nome da página do Facebook</Label>
+            <Label htmlFor="fb-page-id">ID ou Nome de utilizador da Página (URL)</Label>
             <Input
               id="fb-page-id"
               value={fbPageId}

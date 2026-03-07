@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
@@ -11,12 +12,28 @@ serve(async (req) => {
     }
 
     try {
-        const pageId = Deno.env.get('FACEBOOK_PAGE_ID')
+        const supabase = createClient(
+            Deno.env.get('SUPABASE_URL')!,
+            Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+        )
+
+        // Try to get Page ID from DB first
+        let pageId = Deno.env.get('FACEBOOK_PAGE_ID')
+        const { data: configData } = await supabase
+            .from('site_config')
+            .select('value')
+            .eq('key', 'facebook_page_id')
+            .maybeSingle()
+
+        if (configData?.value) {
+            pageId = configData.value
+        }
+
         const accessToken = Deno.env.get('FACEBOOK_ACCESS_TOKEN')
 
-        // If variables aren't configured in Supabase Secrets, return placeholder data
+        // If variables aren't configured, return placeholder data
         if (!pageId || !accessToken) {
-            console.log('Using placeholder data (missing FACEBOOK_PAGE_ID or FACEBOOK_ACCESS_TOKEN secrets)')
+            console.log('Using placeholder data (missing config in DB/Env or FACEBOOK_ACCESS_TOKEN secret)')
             return new Response(
                 JSON.stringify({
                     data: [
@@ -34,13 +51,13 @@ serve(async (req) => {
         }
 
         // Fetch from Facebook Graph API
-        const response = await fetch(
-            `https://graph.facebook.com/v19.0/${pageId}/photos?type=uploaded&fields=images,link,name,created_time&limit=6&access_token=${accessToken}`
-        );
+        // fields: images contains the different sizes, link is the post link
+        const fbUrl = `https://graph.facebook.com/v19.0/${pageId}/photos?type=uploaded&fields=images,link,name,created_time&limit=8&access_token=${accessToken}`
+        const response = await fetch(fbUrl);
 
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData.error?.message || 'Failed to fetch Facebook API');
+            throw new Error(errorData.error?.message || 'Facebook API Error');
         }
 
         const data = await response.json();
