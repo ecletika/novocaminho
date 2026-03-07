@@ -39,6 +39,7 @@ import AdminLiderancaPage from "./pages/admin/AdminLiderancaPage";
 import AdminEscalasPage from "./pages/admin/AdminEscalasPage";
 import UsersPage from "./pages/admin/UsersPage";
 import ProtectedRoute from "./components/ProtectedRoute";
+import CasadosProtectedRoute from "./components/CasadosProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -57,8 +58,8 @@ const App = () => (
             <Route element={<PublicLayout><EventosPage /></PublicLayout>} path="/eventos" />
             <Route element={<PublicLayout><ContatoPage /></PublicLayout>} path="/contato" />
             <Route element={<PublicLayout><CasadosPage /></PublicLayout>} path="/casados" />
-            <Route element={<PublicLayout><CasadosCursosPage /></PublicLayout>} path="/casados/cursos" />
-            <Route element={<PublicLayout><CasadosMaterialPage /></PublicLayout>} path="/casados/material" />
+            <Route element={<PublicLayout><CasadosProtectedRoute><CasadosCursosPage /></CasadosProtectedRoute></PublicLayout>} path="/casados/cursos" />
+            <Route element={<PublicLayout><CasadosProtectedRoute><CasadosMaterialPage /></CasadosProtectedRoute></PublicLayout>} path="/casados/material" />
             <Route element={<PublicLayout><CasadosEstudosPage /></PublicLayout>} path="/casados/estudos" />
             <Route element={<PublicLayout><CasadosRecursosPage /></PublicLayout>} path="/casados/recursos" />
             <Route element={<PublicLayout><BelievePage /></PublicLayout>} path="/no-que-cremos" />

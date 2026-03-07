@@ -371,6 +371,7 @@ export default function UsersPage() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="member">Membro</SelectItem>
+                          <SelectItem value="material_online">Material Online</SelectItem>
                           <SelectItem value="admin">Admin</SelectItem>
                         </SelectContent>
                       </Select>
@@ -507,6 +508,7 @@ export default function UsersPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="member">Membro / Utilizador Comum</SelectItem>
+                  <SelectItem value="material_online">Acesso Material Online Only</SelectItem>
                   <SelectItem value="admin">Administrador Geral</SelectItem>
                 </SelectContent>
               </Select>
