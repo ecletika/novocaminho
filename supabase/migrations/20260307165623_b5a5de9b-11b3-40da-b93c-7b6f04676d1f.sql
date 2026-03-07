@@ -1,0 +1,1 @@
+ALTER TABLE public.birthday_ministries ADD COLUMN IF NOT EXISTS is_leader boolean DEFAULT false;

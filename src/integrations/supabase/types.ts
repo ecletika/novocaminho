@@ -18,16 +18,19 @@ export type Database = {
         Row: {
           birthday_id: string
           id: string
+          is_leader: boolean | null
           ministry_id: string
         }
         Insert: {
           birthday_id: string
           id?: string
+          is_leader?: boolean | null
           ministry_id: string
         }
         Update: {
           birthday_id?: string
           id?: string
+          is_leader?: boolean | null
           ministry_id?: string
         }
         Relationships: [
