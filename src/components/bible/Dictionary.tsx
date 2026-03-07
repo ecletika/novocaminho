@@ -126,7 +126,7 @@ const DictionaryView: React.FC = () => {
         }
       } catch (e) {
         console.error("Erro ao parsear JSON do Grok:", e);
-        throw new Error("Resposta da IA inválida.", { cause: e });
+        throw new Error("Resposta da IA inválida.");
       }
 
       setAiAnalysisResults(parsed);
