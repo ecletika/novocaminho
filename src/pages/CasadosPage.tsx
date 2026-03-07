@@ -271,7 +271,7 @@ export default function CasadosPage() {
             </p>
           </div>
 
-          <Tabs defaultValue="cursos" className="max-w-5xl mx-auto">
+          <Tabs defaultValue="online" className="max-w-7xl mx-auto">
             <div className="flex justify-center mb-8">
               <TabsList className="bg-muted/50 p-1">
                 <TabsTrigger value="cursos" className="px-4 md:px-8">Cursos</TabsTrigger>

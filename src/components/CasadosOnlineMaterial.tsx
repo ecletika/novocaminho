@@ -20,7 +20,7 @@ import {
 import { Button } from '@/components/ui/button';
 
 export default function CasadosOnlineMaterial() {
-    const { user, isAdmin } = useAuth();
+    const { user, isAdmin, isLoading: authLoading } = useAuth();
     const [topics, setTopics] = useState<any[]>([]);
     const [lessons, setLessons] = useState<Record<string, any[]>>({});
     const [completedLessons, setCompletedLessons] = useState<string[]>([]);
@@ -34,6 +34,9 @@ export default function CasadosOnlineMaterial() {
     const [editingTopic, setEditingTopic] = useState<any>(null);
     const [editingLesson, setEditingLesson] = useState<any>(null);
     const [isSaving, setIsSaving] = useState(false);
+
+    // Permitir edição apenas se explicitamente for admin e não estiver carregando auth
+    const canEdit = !authLoading && user && isAdmin;
 
     const loadData = async () => {
         setLoading(true);
@@ -124,7 +127,7 @@ export default function CasadosOnlineMaterial() {
         }
     };
 
-    if (loading) {
+    if (loading || authLoading) {
         return (
             <div className="flex flex-col items-center justify-center py-20 gap-4">
                 <Loader2 className="animate-spin text-secondary" size={32} />
@@ -151,22 +154,22 @@ export default function CasadosOnlineMaterial() {
     }
 
     return (
-        <div className="flex flex-col lg:flex-row gap-8 text-left">
+        <div className="flex flex-col lg:flex-row gap-8 text-left max-w-full overflow-visible">
             {/* Sidebar */}
-            <aside className="w-full lg:w-80 shrink-0 space-y-4">
+            <aside className="w-full lg:w-72 shrink-0 space-y-4">
                 <div className="bg-muted/30 rounded-2xl p-6 border border-border sticky top-24">
                     <div className="flex items-center justify-between mb-6">
                         <h3 className="font-display font-bold text-lg flex items-center gap-2">
                             <BookOpen size={20} className="text-secondary" /> Módulos
                         </h3>
-                        {isAdmin && (
+                        {canEdit && (
                             <Button size="icon" variant="ghost" onClick={() => { setEditingTopic({ position: topics.length + 1 }); setIsTopicModalOpen(true); }}>
                                 <Plus size={18} />
                             </Button>
                         )}
                     </div>
 
-                    <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+                    <div className="space-y-3">
                         {topics.map(topic => (
                             <div key={topic.id} className="space-y-2">
                                 <div className="flex items-center group">
@@ -183,7 +186,7 @@ export default function CasadosOnlineMaterial() {
                                         <ChevronDown size={14} className={`transition-transform ${expandedTopics[topic.id] ? 'rotate-180' : ''}`} />
                                     </button>
 
-                                    {isAdmin && (
+                                    {canEdit && (
                                         <div className="hidden group-hover:flex items-center gap-1 pl-2">
                                             <button onClick={() => { setEditingLesson({ topic_id: topic.id, position: (lessons[topic.id]?.length || 0) + 1 }); setIsLessonModalOpen(true); }} className="p-1.5 text-green-500 hover:bg-green-100 rounded-lg"><Plus size={14} /></button>
                                             <button onClick={() => { setEditingTopic(topic); setIsTopicModalOpen(true); }} className="p-1.5 text-blue-500 hover:bg-blue-100 rounded-lg"><Edit size={14} /></button>
@@ -207,7 +210,7 @@ export default function CasadosOnlineMaterial() {
                                                         {lesson.video_url && <PlayCircle size={12} className="text-secondary" />}
                                                         {isCompleted && <CheckCircle2 size={12} className="text-green-500" />}
                                                     </button>
-                                                    {isAdmin && (
+                                                    {canEdit && (
                                                         <div className="hidden group-hover/lesson:flex items-center gap-1 pl-1">
                                                             <button onClick={() => { setEditingLesson(lesson); setIsLessonModalOpen(true); }} className="p-1 text-blue-500 hover:bg-blue-100 rounded"><Edit size={12} /></button>
                                                             <button onClick={() => handleDeleteLesson(lesson.id)} className="p-1 text-red-500 hover:bg-red-100 rounded"><Trash2 size={12} /></button>
