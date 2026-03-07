@@ -49,50 +49,92 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { email, password, full_name, ministry_ids, role = "member" } = await req.json();
+    const body = await req.json();
+    const { action = "create", user_id, email, password, full_name, role, ministry_ids } = body;
 
-    if (!email || !password) {
-      return new Response(JSON.stringify({ error: "Email e senha são obrigatórios" }), {
-        status: 400,
+    if (action === "create") {
+      if (!email || !password) {
+        return new Response(JSON.stringify({ error: "Email e senha são obrigatórios para criação" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Create user
+      const { data, error } = await supabase.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: { full_name: full_name || email },
+      });
+
+      if (error) throw error;
+
+      const newUserId = data.user.id;
+
+      // Add role
+      await supabase.from("user_roles").insert({
+        user_id: newUserId,
+        role: role || "member",
+      });
+
+      // Add profile
+      await supabase.from("profiles").upsert({
+        user_id: newUserId,
+        full_name: full_name || email,
+        email: email,
+      }, { onConflict: "user_id" });
+
+      // Add ministry associations
+      if (ministry_ids && Array.isArray(ministry_ids) && ministry_ids.length > 0) {
+        const rows = ministry_ids.map((mid: string) => ({
+          user_id: newUserId,
+          ministry_id: mid,
+        }));
+        await supabase.from("user_ministries").insert(rows);
+      }
+
+      return new Response(JSON.stringify({ success: true, user_id: newUserId }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Create user with admin API
-    const { data, error } = await supabase.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-      user_metadata: { full_name: full_name || email },
-    });
+    if (action === "update") {
+      if (!user_id) {
+        return new Response(JSON.stringify({ error: "user_id é obrigatório para atualização" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
 
-    if (error) throw error;
+      const updateData: any = {};
+      if (email) updateData.email = email;
+      if (password) updateData.password = password;
+      if (full_name) updateData.user_metadata = { ...updateData.user_metadata, full_name };
 
-    // Add role
-    await supabase.from("user_roles").insert({
-      user_id: data.user.id,
-      role: role,
-    });
+      // Update Auth
+      const { error: authError } = await supabase.auth.admin.updateUserById(user_id, updateData);
+      if (authError) throw authError;
 
-    // Add profile
-    await supabase.from("profiles").insert({
-      user_id: data.user.id,
-      full_name: full_name || email,
-      email: email,
-    });
+      // Update Profile if name or email changed
+      if (full_name || email) {
+        const profileUpdate: any = {};
+        if (full_name) profileUpdate.full_name = full_name;
+        if (email) profileUpdate.email = email;
 
-    // Add ministry associations
-    if (ministry_ids && Array.isArray(ministry_ids) && ministry_ids.length > 0) {
-      const rows = ministry_ids.map((mid: string) => ({
-        user_id: data.user.id,
-        ministry_id: mid,
-      }));
-      await supabase.from("user_ministries").insert(rows);
+        await supabase.from("profiles").update(profileUpdate).eq("user_id", user_id);
+      }
+
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    return new Response(JSON.stringify({ success: true, user_id: data.user.id }), {
+    return new Response(JSON.stringify({ error: "Ação inválida" }), {
+      status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
+
   } catch (err: unknown) {
     return new Response(JSON.stringify({ error: (err as Error).message }), {
       status: 500,

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Users, Shield, Loader2, Save, Search, Plus, Eye, EyeOff, Church, Mail, User } from "lucide-react";
+import { Users, Shield, Loader2, Save, Search, Plus, Eye, EyeOff, Church, Mail, Key } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -45,9 +45,14 @@ export default function UsersPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [editingUser, setEditingUser] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
+  const [editingEmail, setEditingEmail] = useState("");
+  const [editingPassword, setEditingPassword] = useState("");
+  const [showEditPassword, setShowEditPassword] = useState(false);
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
   const [selectedMinistries, setSelectedMinistries] = useState<string[]>([]);
   const [editingRole, setEditingRole] = useState<string>("member");
+  const [isSaving, setIsSaving] = useState(false);
+
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [newEmail, setNewEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -77,10 +82,9 @@ export default function UsersPage() {
 
       const { data: profiles, error } = await supabase
         .from("profiles")
-        .select("user_id, full_name");
+        .select("user_id, full_name, email");
       if (error) throw error;
 
-      // Also get distinct user_ids from permissions to be sure we see everyone
       const { data: permsData } = await supabase.from("user_permissions").select("user_id");
 
       const allUserIds = Array.from(new Set([
@@ -95,7 +99,7 @@ export default function UsersPage() {
         return {
           id: uid,
           name: profile?.full_name || `Utilizador ${uid.substring(0, 5)}`,
-          email: (profile as any)?.email || null,
+          email: profile?.email || null,
           role: role?.role || "member",
         };
       });
@@ -128,6 +132,8 @@ export default function UsersPage() {
   const startEditing = (user: UserWithRole) => {
     setEditingUser(user.id);
     setEditingName(user.name);
+    setEditingEmail(user.email || "");
+    setEditingPassword("");
     setEditingRole(user.role || "member");
     setSelectedPermissions(getUserPermissions(user.id));
     setSelectedMinistries(getUserMinistryIds(user.id));
@@ -135,9 +141,19 @@ export default function UsersPage() {
 
   const handleSave = async () => {
     if (!editingUser) return;
+    setIsSaving(true);
     try {
-      // 1. Update Permissions
-      await setPerms.mutateAsync({ userId: editingUser, permissions: selectedPermissions });
+      // 1. Update Auth and Profile via Edge Function (for email/password/name)
+      const { data: authData, error: authError } = await supabase.functions.invoke("create-user", {
+        body: {
+          action: "update",
+          user_id: editingUser,
+          email: editingEmail,
+          password: editingPassword || undefined,
+          full_name: editingName
+        },
+      });
+      if (authError || authData?.error) throw new Error(authError?.message || authData?.error);
 
       // 2. Update Role
       await supabase.from("user_roles").upsert({
@@ -145,11 +161,8 @@ export default function UsersPage() {
         role: editingRole as any
       }, { onConflict: "user_id,role" });
 
-      // 3. Update Name in Profile
-      await supabase.from("profiles").upsert({
-        user_id: editingUser,
-        full_name: editingName,
-      }, { onConflict: "user_id" });
+      // 3. Update Permissions
+      await setPerms.mutateAsync({ userId: editingUser, permissions: selectedPermissions });
 
       // 4. Save ministries
       await supabase.from("user_ministries").delete().eq("user_id", editingUser);
@@ -159,13 +172,15 @@ export default function UsersPage() {
         );
       }
 
+      toast.success("Dados atualizados com sucesso!");
+      setEditingUser(null);
       loadUsers();
       loadUserMinistries();
-      toast.success("Dados do utilizador atualizados!");
-      setEditingUser(null);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      toast.error("Erro ao atualizar");
+      toast.error(err.message || "Erro ao atualizar");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -175,6 +190,7 @@ export default function UsersPage() {
     try {
       const { data, error } = await supabase.functions.invoke("create-user", {
         body: {
+          action: "create",
           email: newEmail,
           password: newPassword,
           full_name: newName,
@@ -214,14 +230,6 @@ export default function UsersPage() {
       u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (u.email?.toLowerCase().includes(searchTerm.toLowerCase()))
   );
-
-  if (isLoading || permsLoading || ministriesLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-8">
@@ -267,15 +275,44 @@ export default function UsersPage() {
                       {user.name.charAt(0).toUpperCase()}
                     </span>
                   </div>
-                  <div>
+                  <div className="flex-1">
                     {isEditing ? (
-                      <div className="space-y-1">
-                        <Label className="text-xs">Nome do Utilizador</Label>
-                        <Input
-                          value={editingName}
-                          onChange={(e) => setEditingName(e.target.value)}
-                          className="h-8 py-1"
-                        />
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <Label className="text-xs">Nome Completo</Label>
+                          <Input
+                            value={editingName}
+                            onChange={(e) => setEditingName(e.target.value)}
+                            className="h-9"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs">Email de Acesso</Label>
+                          <Input
+                            value={editingEmail}
+                            onChange={(e) => setEditingEmail(e.target.value)}
+                            className="h-9"
+                          />
+                        </div>
+                        <div className="space-y-1 md:col-span-2">
+                          <Label className="text-xs">Nova Senha (deixe em branco para não alterar)</Label>
+                          <div className="relative">
+                            <Input
+                              type={showEditPassword ? "text" : "password"}
+                              value={editingPassword}
+                              onChange={(e) => setEditingPassword(e.target.value)}
+                              className="h-9 pr-10"
+                              placeholder="••••••••"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowEditPassword(!showEditPassword)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                            >
+                              {showEditPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     ) : (
                       <>
@@ -294,7 +331,7 @@ export default function UsersPage() {
                     )}
                   </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 ml-4">
                   {isEditing ? (
                     <div className="flex items-center gap-2">
                       <Select value={editingRole} onValueChange={setEditingRole}>
@@ -306,14 +343,17 @@ export default function UsersPage() {
                           <SelectItem value="admin">Admin</SelectItem>
                         </SelectContent>
                       </Select>
-                      <Button size="sm" onClick={handleSave} disabled={setPerms.isPending}>
-                        {setPerms.isPending ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Save className="w-4 h-4 mr-1" />}
+                      <Button size="sm" onClick={handleSave} disabled={isSaving}>
+                        {isSaving ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Save className="w-4 h-4 mr-1" />}
                         Salvar
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => setEditingUser(null)} disabled={isSaving}>
+                        Cancelar
                       </Button>
                     </div>
                   ) : (
                     <Button size="sm" variant="outline" onClick={() => startEditing(user)}>
-                      Editar
+                      Editar Perfil
                     </Button>
                   )}
                 </div>

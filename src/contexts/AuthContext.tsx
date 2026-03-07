@@ -85,7 +85,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: error as Error | null };
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (identifier: string, password: string) => {
+    let email = identifier;
+
+    // Check if identifier is NOT an email (simple check)
+    if (!identifier.includes("@")) {
+      // Try to find email in profiles by full_name
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("email")
+        .ilike("full_name", identifier)
+        .maybeSingle();
+
+      if (profile?.email) {
+        email = profile.email;
+      }
+    }
+
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,

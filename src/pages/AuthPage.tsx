@@ -10,7 +10,7 @@ import { z } from "zod";
 import logoImage from "@/assets/logo-igreja.jpeg";
 
 const loginSchema = z.object({
-  email: z.string().trim().email({ message: "Email inválido" }),
+  email: z.string().trim().min(3, { message: "Identificador muito curto" }),
   password: z.string().min(6, { message: "Senha deve ter pelo menos 6 caracteres" }),
 });
 
@@ -151,9 +151,9 @@ export default function AuthPage() {
         <div className="bg-card rounded-2xl shadow-xl p-8">
           {/* Logo */}
           <div className="text-center mb-8">
-            <img 
-              src={logoImage} 
-              alt="Logo Igreja" 
+            <img
+              src={logoImage}
+              alt="Logo Igreja"
               className="w-16 h-16 rounded-full object-cover mx-auto mb-4"
             />
             <h1 className="font-display text-2xl font-bold text-foreground">
@@ -185,11 +185,11 @@ export default function AuthPage() {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{isLogin ? "Email ou Nome" : "Email"}</Label>
               <Input
                 id="email"
-                type="email"
-                placeholder="seu@email.com"
+                type={isLogin ? "text" : "email"}
+                placeholder={isLogin ? "seu@email.com ou Nome" : "seu@email.com"}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className={errors.email ? "border-destructive" : ""}
