@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Plus, Search, Calendar, MapPin, Clock, Edit, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
