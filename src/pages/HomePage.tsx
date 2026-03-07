@@ -143,7 +143,7 @@ export default function HomePage() {
       </section>
 
       {/* Quick Info Bar + Radio Player */}
-      <section className="relative -mt-4 z-20">
+      <section className="relative mt-8 z-20">
         <div className="container-church space-y-6">
           <div className="bg-card rounded-2xl shadow-card p-6 md:p-8 grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="flex items-center gap-4">
