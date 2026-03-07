@@ -115,7 +115,8 @@ export default function CasadosOnlineMaterial() {
         if (!file) return;
 
         setIsUploading(true);
-        const publicUrl = await uploadCasadosFile(file);
+        const { publicUrl, error } = await uploadCasadosFile(file);
+
         if (publicUrl) {
             setEditingLesson((prev: any) => ({
                 ...prev,
@@ -123,7 +124,12 @@ export default function CasadosOnlineMaterial() {
             }));
             toast.success(`${type.toUpperCase()} enviado com sucesso!`);
         } else {
-            toast.error("Erro ao enviar arquivo.");
+            console.error("Upload error details:", error);
+            const message = error?.message || "Erro desconhecido";
+            toast.error(`Erro ao enviar arquivo: ${message}`);
+            if (message.includes("bucket not found")) {
+                toast.info("O balde 'casados-material' não foi encontrado. Execute as novas migrações SQL.");
+            }
         }
         setIsUploading(false);
     };
@@ -202,7 +208,7 @@ export default function CasadosOnlineMaterial() {
                                             <span className={`text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-black ${expandedTopics[topic.id] ? 'bg-primary/20' : 'bg-muted'}`}>
                                                 {topic.position}
                                             </span>
-                                            {topic.title}
+                                            <span className="flex-1 break-words">{topic.title}</span>
                                         </span>
                                         <ChevronDown size={14} className={`transition-transform ${expandedTopics[topic.id] ? 'rotate-180' : ''}`} />
                                     </button>
@@ -227,7 +233,7 @@ export default function CasadosOnlineMaterial() {
                                                         className={`flex-1 p-3 rounded-lg text-xs text-left transition-all flex items-center gap-3 ${selectedLesson?.id === lesson.id ? 'text-secondary font-bold bg-secondary/10' : 'text-foreground/70 hover:bg-muted/50'}`}
                                                     >
                                                         <BookOpen size={14} className={selectedLesson?.id === lesson.id ? 'text-secondary' : 'opacity-30'} />
-                                                        <span className={`truncate flex-1 ${isCompleted ? 'line-through opacity-50' : ''}`}>{lesson.title}</span>
+                                                        <span className={`flex-1 break-words ${isCompleted ? 'line-through opacity-50' : ''}`}>{lesson.title}</span>
                                                         {lesson.video_url && <PlayCircle size={12} className="text-secondary" />}
                                                         {isCompleted && <CheckCircle2 size={12} className="text-green-500" />}
                                                     </button>
