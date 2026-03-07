@@ -258,7 +258,7 @@ export default function CasadosOnlineMaterial() {
             <main className="flex-1">
                 {selectedLesson ? (
                     <div className="bg-card rounded-3xl p-6 md:p-10 border border-border shadow-soft animate-in fade-in slide-in-from-bottom-4">
-                        <header className="mb-8 pb-8 border-b border-border">
+                        <header className="mb-8 pb-8 border-b border-border" style={{ wordWrap: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal', maxWidth: '100%', overflow: 'hidden' }}>
                             <div className="flex flex-wrap gap-2 mb-4">
                                 <span className="bg-secondary/10 text-secondary px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider">
                                     {topics.find(t => t.id === selectedLesson.topic_id)?.title}
@@ -272,7 +272,7 @@ export default function CasadosOnlineMaterial() {
                                     </span>
                                 )}
                             </div>
-                            <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground">
+                            <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground" style={{ wordWrap: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal', maxWidth: '100%' }}>
                                 {selectedLesson.title}
                             </h2>
                         </header>

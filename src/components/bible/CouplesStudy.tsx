@@ -376,7 +376,7 @@ CREATE POLICY "Users can insert own progress" ON couples_progress FOR INSERT WIT
               </div>
             )}
 
-            <header className="mb-8 md:mb-12 pb-8 md:pb-12 border-b-2 border-[#1E40AF]/10 relative z-10 shrink-0">
+            <header className="mb-8 md:mb-12 pb-8 md:pb-12 border-b-2 border-[#1E40AF]/10 relative z-10 shrink-0" style={{ wordWrap: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal', maxWidth: '100%', overflow: 'hidden' }}>
               <div className="flex flex-wrap items-center gap-3 mb-6">
                 <span className="bg-[#1E40AF]/10 text-[#1E40AF] px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-[0.2em]">
                   {topics.find(t => t.id === selectedLesson.topic_id)?.title}
@@ -390,7 +390,7 @@ CREATE POLICY "Users can insert own progress" ON couples_progress FOR INSERT WIT
                   </span>
                 )}
               </div>
-              <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif font-bold text-gray-900 dark:text-white leading-tight break-words">
+              <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif font-bold text-gray-900 dark:text-white leading-tight" style={{ wordWrap: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal', maxWidth: '100%' }}>
                 {selectedLesson.title}
               </h1>
             </header>

@@ -64,7 +64,7 @@ export default function MinisterioDetailPage() {
           </svg>
         </div>
 
-        <div className="relative z-10 container-church text-center">
+        <div className="relative z-10 container-church text-center" style={{ wordWrap: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal', maxWidth: '100%', overflow: 'hidden' }}>
           <Link
             to="/ministerios"
             className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-12 transition-colors border-b border-white/20 pb-1"
@@ -77,7 +77,7 @@ export default function MinisterioDetailPage() {
             <IconComponent className="w-10 h-10 text-white" />
           </div>
 
-          <h1 className="font-display text-4xl md:text-6xl font-extrabold mb-8 uppercase tracking-tighter">
+          <h1 className="font-display text-4xl md:text-6xl font-extrabold mb-8 uppercase tracking-tighter" style={{ wordWrap: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal', maxWidth: '100%' }}>
             {ministry.title}
           </h1>
 
