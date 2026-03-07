@@ -231,7 +231,7 @@ export default function LouvorPage() {
         setNewMemberPhotoUrl(url);
         setNewMemberPhotoPreview(url);
       } catch (error: any) {
-        toast({ title: "Erro ao carregar foto", description: error.message, variant: "destructive" });
+        toast.error("Erro ao carregar foto: " + error.message);
       } finally {
         setIsUploadingPhoto(false);
       }
