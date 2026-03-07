@@ -2,12 +2,12 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
@@ -78,12 +78,16 @@ Deno.serve(async (req) => {
         role: role || "member",
       });
 
-      // Add profile
-      await supabase.from("profiles").upsert({
+      // Add profile - use insert with on conflict since trigger may have already created it
+      const { error: profileError } = await supabase.from("profiles").upsert({
         user_id: newUserId,
         full_name: full_name || email,
         email: email,
       }, { onConflict: "user_id" });
+      
+      if (profileError) {
+        console.error("Profile upsert error:", profileError);
+      }
 
       // Add ministry associations
       if (ministry_ids && Array.isArray(ministry_ids) && ministry_ids.length > 0) {
@@ -110,11 +114,13 @@ Deno.serve(async (req) => {
       const updateData: any = {};
       if (email) updateData.email = email;
       if (password) updateData.password = password;
-      if (full_name) updateData.user_metadata = { ...updateData.user_metadata, full_name };
+      if (full_name) updateData.user_metadata = { full_name };
 
       // Update Auth
-      const { error: authError } = await supabase.auth.admin.updateUserById(user_id, updateData);
-      if (authError) throw authError;
+      if (Object.keys(updateData).length > 0) {
+        const { error: authError } = await supabase.auth.admin.updateUserById(user_id, updateData);
+        if (authError) throw authError;
+      }
 
       // Update Profile if name or email changed
       if (full_name || email) {
@@ -122,7 +128,10 @@ Deno.serve(async (req) => {
         if (full_name) profileUpdate.full_name = full_name;
         if (email) profileUpdate.email = email;
 
-        await supabase.from("profiles").update(profileUpdate).eq("user_id", user_id);
+        const { error: profileError } = await supabase.from("profiles").update(profileUpdate).eq("user_id", user_id);
+        if (profileError) {
+          console.error("Profile update error:", profileError);
+        }
       }
 
       return new Response(JSON.stringify({ success: true }), {
@@ -136,6 +145,7 @@ Deno.serve(async (req) => {
     });
 
   } catch (err: unknown) {
+    console.error("Edge function error:", err);
     return new Response(JSON.stringify({ error: (err as Error).message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
