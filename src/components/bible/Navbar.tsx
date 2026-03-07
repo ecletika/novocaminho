@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { 
+import {
   Home, Book, BookOpen, Coffee, Search, NotebookPen, ShoppingBag, Users, User, LogOut, ChevronDown, Sun, Moon, Flame, Heart, Library as LibraryIcon,
   HeartHandshake, Compass, UserCircle
 } from 'lucide-react';
@@ -59,24 +59,34 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, setView, user, onAuthClick
       <nav className="fixed top-0 left-0 right-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md z-50 border-b border-beige-200 dark:border-gray-800 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between h-16 md:h-20">
-            <div 
-              className="flex flex-col items-start cursor-pointer group shrink-0"
-              onClick={() => setView(AppView.HOME)}
-            >
-              <div className="flex items-center">
-                <div className="w-10 h-10 bg-[#1E40AF] rounded-xl flex items-center justify-center text-white shadow-lg group-hover:scale-105 transition-transform">
-                  <span className="font-serif text-2xl font-bold italic">B</span>
-                </div>
-                <div className="ml-3 flex flex-col items-start leading-none">
-                  <span className="font-serif text-lg font-bold text-[#1E40AF] dark:text-blue-400">Biblia Diária</span>
-                  {user && streak > 0 && (
-                    <div className="flex items-center gap-0.5 text-[8px] font-black text-amber-600/80 dark:text-amber-500/80 uppercase tracking-tighter mt-0.5">
-                      <Flame size={8} fill="currentColor" className="animate-pulse" />
-                      {streak} {streak === 1 ? 'dia' : 'dias'}
-                    </div>
-                  )}
+            <div className="flex items-center gap-4">
+              <div
+                className="flex flex-col items-start cursor-pointer group shrink-0"
+                onClick={() => setView(AppView.HOME)}
+              >
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-[#1E40AF] rounded-xl flex items-center justify-center text-white shadow-lg group-hover:scale-105 transition-transform">
+                    <span className="font-serif text-2xl font-bold italic">B</span>
+                  </div>
+                  <div className="ml-3 flex flex-col items-start leading-none">
+                    <span className="font-serif text-lg font-bold text-[#1E40AF] dark:text-blue-400">Biblia Diária</span>
+                    {user && streak > 0 && (
+                      <div className="flex items-center gap-0.5 text-[8px] font-black text-amber-600/80 dark:text-amber-500/80 uppercase tracking-tighter mt-0.5">
+                        <Flame size={8} fill="currentColor" className="animate-pulse" />
+                        {streak} {streak === 1 ? 'dia' : 'dias'}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
+
+              <a
+                href="/"
+                className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-[#1E40AF] hover:text-white transition-all border border-gray-200 dark:border-gray-700"
+              >
+                <ChevronDown size={14} className="rotate-90" />
+                Sair da Bíblia
+              </a>
             </div>
 
             {/* Menu Desktop - Visível a partir de md para não sumir em telas médias */}
@@ -85,11 +95,10 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, setView, user, onAuthClick
                 <button
                   key={item.id}
                   onClick={() => setView(item.id)}
-                  className={`px-2 py-2 rounded-xl text-[9px] lg:text-[10px] font-black uppercase tracking-tighter transition-all duration-200 flex flex-col items-center gap-1 group/item ${
-                    currentView === item.id 
-                      ? 'text-[#1E40AF] dark:text-blue-400' 
+                  className={`px-2 py-2 rounded-xl text-[9px] lg:text-[10px] font-black uppercase tracking-tighter transition-all duration-200 flex flex-col items-center gap-1 group/item ${currentView === item.id
+                      ? 'text-[#1E40AF] dark:text-blue-400'
                       : 'text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-200'
-                  }`}
+                    }`}
                 >
                   <item.icon size={18} className={currentView === item.id ? 'scale-110' : 'group-hover/item:scale-110 transition-transform'} />
                   <span className="opacity-0 group-hover/item:opacity-100 transition-opacity whitespace-nowrap">{item.label}</span>
@@ -108,12 +117,12 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, setView, user, onAuthClick
 
               {user ? (
                 <div className="relative">
-                  <button 
+                  <button
                     onClick={() => setShowUserMenu(!showUserMenu)}
                     className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 p-1.5 pr-3 rounded-full transition-all border border-gray-100 dark:border-gray-700"
                   >
                     <div className="w-8 h-8 bg-[#1E40AF]/10 text-[#1E40AF] dark:text-blue-400 rounded-full flex items-center justify-center overflow-hidden">
-                       <img src={userAvatarUrl} className="w-full h-full object-cover" alt="Perfil" />
+                      <img src={userAvatarUrl} className="w-full h-full object-cover" alt="Perfil" />
                     </div>
                     <span className="text-[10px] font-black uppercase text-gray-700 dark:text-gray-200 hidden sm:block">
                       {user.user_metadata.full_name?.split(' ')[0] || user.email?.split('@')[0]}
@@ -127,14 +136,14 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, setView, user, onAuthClick
                         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Sua Conta</p>
                         <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{user.email}</p>
                       </div>
-                      <button 
+                      <button
                         onClick={() => { setView(AppView.PROFILE); setShowUserMenu(false); }}
                         className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-left"
                       >
                         <UserCircle size={16} />
                         Meu Perfil
                       </button>
-                      <button 
+                      <button
                         onClick={handleSignOut}
                         className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-left"
                       >
@@ -145,7 +154,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, setView, user, onAuthClick
                   )}
                 </div>
               ) : (
-                <button 
+                <button
                   onClick={onAuthClick}
                   className="bg-[#1E40AF] text-white px-5 py-2.5 rounded-full font-bold text-sm shadow-md hover:bg-[#1e3a8a] transition-all flex items-center gap-2"
                 >
