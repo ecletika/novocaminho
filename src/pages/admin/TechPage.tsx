@@ -40,7 +40,7 @@ import {
 } from "@/hooks/useWorship";
 import { useGeneralSchedules, useCreateGeneralSchedule, useUpdateGeneralSchedule, useDeleteGeneralSchedule, GeneralSchedule } from "@/hooks/useGeneralSchedules";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths, isSameMonth } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { pt } from "date-fns/locale";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfiles } from "@/hooks/useUserPermissions";
 
@@ -340,7 +340,7 @@ export default function TechPage() {
       assignments += `📺 *Mídia:*\n${midiaMembers.map(tm => `• ${tm.member?.name || "N/A"}`).join("\n")}`;
     }
 
-    const message = `📅 *Escala Técnica*\n\n📆 Data: ${format(new Date(schedule.date), "EEEE, dd 'de' MMMM", { locale: ptBR })}\n🕐 Tipo: ${schedule.type}\n\n${assignments}\n\n🙏 Contamos com sua presença!`;
+    const message = `📅 *Escala Técnica*\n\n📆 Data: ${format(new Date(schedule.date), "EEEE, dd 'de' MMMM", { locale: pt })}\n🕐 Tipo: ${schedule.type}\n\n${assignments}\n\n🙏 Contamos com sua presença!`;
     const encoded = encodeURIComponent(message);
     window.open(`https://wa.me/?text=${encoded}`, "_blank");
     toast({
@@ -532,7 +532,7 @@ export default function TechPage() {
               <ChevronLeft className="w-4 h-4" />
             </Button>
             <h2 className="font-display text-xl font-semibold text-foreground min-w-[200px] text-center">
-              {format(currentMonth, "MMMM yyyy", { locale: ptBR })}
+              {format(currentMonth, "MMMM yyyy", { locale: pt })}
             </h2>
             <Button variant="outline" size="icon" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>
               <ChevronRight className="w-4 h-4" />
@@ -604,7 +604,7 @@ export default function TechPage() {
                       <div className="flex items-start justify-between mb-4">
                         <div>
                           <h3 className="font-semibold text-foreground text-lg">
-                            {format(new Date(schedule.date), "EEEE, dd 'de' MMMM", { locale: ptBR })}
+                            {format(new Date(schedule.date), "EEEE, dd 'de' MMMM", { locale: pt })}
                           </h3>
                           <span className="text-muted-foreground">{schedule.type}</span>
                         </div>

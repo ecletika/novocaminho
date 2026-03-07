@@ -38,8 +38,9 @@ import {
 } from "@/hooks/useBirthdays";
 import { useMinistries } from "@/hooks/useMinistries";
 import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { pt } from "date-fns/locale";
 import { toast } from "sonner";
+
 
 export default function AniversariosPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -60,6 +61,7 @@ export default function AniversariosPage() {
     woman_birthday: "",
     man_birthday: "",
     leader_name: "",
+    photo_url: "",
     ministry_selections: [] as { ministry_id: string; is_leader: boolean; leader_id?: string | null }[],
   });
 
@@ -81,6 +83,7 @@ export default function AniversariosPage() {
       woman_birthday: "",
       man_birthday: "",
       leader_name: "",
+      photo_url: "",
       ministry_selections: [],
     });
     setSelectedBirthday(null);
@@ -99,6 +102,7 @@ export default function AniversariosPage() {
       leader_name: birthday.leader_name || "",
       woman_birthday: birthday.woman_birthday || "",
       man_birthday: birthday.man_birthday || "",
+      photo_url: birthday.photo_url || "",
       ministry_selections: birthday.ministries?.map((m) => ({
         ministry_id: m.ministry_id,
         is_leader: false,
@@ -145,6 +149,7 @@ export default function AniversariosPage() {
         woman_birthday: formData.woman_birthday || null,
         man_birthday: formData.man_birthday || null,
         leader_name: formData.leader_name || null,
+        photo_url: (formData as any).photo_url || null,
         ministry_selections: formData.ministry_selections,
       };
 
@@ -222,7 +227,7 @@ export default function AniversariosPage() {
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr + "T00:00:00");
-    return format(date, "dd 'de' MMMM", { locale: ptBR });
+    return format(date, "dd 'de' MMMM", { locale: pt });
   };
 
   const getName = (birthday: BirthdayWithMinistries) => {
@@ -252,17 +257,17 @@ export default function AniversariosPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="font-display text-3xl font-bold text-foreground">Aniversários</h1>
-          <p className="text-muted-foreground mt-1">Gerencie os aniversários e bodas da igreja</p>
+          <h1 className="font-display text-3xl font-bold text-foreground">Registos de Aniversário</h1>
+          <p className="text-muted-foreground mt-1">Gerencie os registos de aniversários e bodas da igreja</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={copyRegistrationLink}>
             <Link2 className="w-4 h-4 mr-2" />
-            Copiar Link de Cadastro
+            Copiar Link de Registo
           </Button>
           <Button onClick={() => { resetForm(); setIsDialogOpen(true); }}>
             <Plus className="w-4 h-4 mr-2" />
-            Novo Aniversário
+            Novo Registo
           </Button>
         </div>
       </div>
@@ -296,8 +301,10 @@ export default function AniversariosPage() {
           <div className="grid gap-4">
             {filteredBirthdays.map((birthday) => (
               <div key={birthday.id} className="bg-card rounded-xl p-5 shadow-soft flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                  {birthday.birthday_type === "wedding" ? (
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 overflow-hidden">
+                  {birthday.photo_url ? (
+                    <img src={birthday.photo_url} alt={getName(birthday)} className="w-full h-full object-cover" />
+                  ) : birthday.birthday_type === "wedding" ? (
                     <Heart className="w-6 h-6 text-primary" />
                   ) : (
                     <Cake className="w-6 h-6 text-primary" />
@@ -455,7 +462,7 @@ export default function AniversariosPage() {
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-display text-xl">
-              {selectedBirthday ? "Editar Aniversário" : "Novo Aniversário"}
+              {selectedBirthday ? "Editar Registo" : "Novo Registo"}
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4 mt-4">
@@ -502,6 +509,44 @@ export default function AniversariosPage() {
                 <Input value={formData.woman_name || formData.man_name} onChange={(e) => setFormData({ ...formData, woman_name: e.target.value, man_name: "" })} placeholder="Nome da pessoa" required />
               </div>
             )}
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Foto</Label>
+                <Tabs defaultValue="upload" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2 mb-2">
+                    <TabsTrigger value="upload" className="text-xs">Ficheiro</TabsTrigger>
+                    <TabsTrigger value="link" className="text-xs">Link da Foto</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="upload">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileUpload}
+                      className="text-xs"
+                    />
+                  </TabsContent>
+                  <TabsContent value="link">
+                    <Input
+                      type="url"
+                      placeholder="https://exemplo.com/foto.jpg"
+                      value={(formData as any).photo_url || ""}
+                      onChange={(e) => setFormData({ ...formData, ['photo_url' as any]: e.target.value })}
+                      className="text-xs"
+                    />
+                  </TabsContent>
+                </Tabs>
+                {(formData as any).photo_url && (
+                  <div className="mt-2 flex justify-center">
+                    <img
+                      src={(formData as any).photo_url}
+                      alt="Preview"
+                      className="w-20 h-20 rounded-full object-cover border-2 border-primary/20"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
 
             <div className="space-y-2">
               <Label>

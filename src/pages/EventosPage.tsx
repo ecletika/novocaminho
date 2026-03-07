@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Calendar, MapPin, Clock, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { useUpcomingEvents } from "@/hooks/useEvents";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { pt } from "date-fns/locale";
 
 const categoryColors: Record<string, string> = {
   "Culto": "bg-primary/10 text-primary",
@@ -72,7 +72,7 @@ export default function EventosPage() {
                     <ChevronLeft className="w-5 h-5" />
                   </button>
                   <h2 className="font-display text-2xl font-semibold text-foreground capitalize">
-                    {format(currentMonth, "MMMM yyyy", { locale: ptBR })}
+                    {format(currentMonth, "MMMM yyyy", { locale: pt })}
                   </h2>
                   <button
                     onClick={nextMonth}
@@ -109,13 +109,12 @@ export default function EventosPage() {
                     return (
                       <div
                         key={day.toISOString()}
-                        className={`aspect-square rounded-xl p-1 transition-colors ${
-                          isToday
+                        className={`aspect-square rounded-xl p-1 transition-colors ${isToday
                             ? "bg-primary text-primary-foreground"
                             : dayEvents.length > 0
-                            ? "bg-secondary/10 hover:bg-secondary/20"
-                            : "hover:bg-muted"
-                        }`}
+                              ? "bg-secondary/10 hover:bg-secondary/20"
+                              : "hover:bg-muted"
+                          }`}
                       >
                         <div className="h-full flex flex-col">
                           <span className={`text-sm font-medium ${isToday ? "" : "text-foreground"}`}>
@@ -127,9 +126,8 @@ export default function EventosPage() {
                                 {dayEvents.slice(0, 3).map((_, idx) => (
                                   <div
                                     key={idx}
-                                    className={`w-1.5 h-1.5 rounded-full ${
-                                      isToday ? "bg-secondary" : "bg-secondary"
-                                    }`}
+                                    className={`w-1.5 h-1.5 rounded-full ${isToday ? "bg-secondary" : "bg-secondary"
+                                      }`}
                                   />
                                 ))}
                               </div>
@@ -169,7 +167,7 @@ export default function EventosPage() {
                       <div className="space-y-2 text-sm">
                         <div className="flex items-center gap-2 text-muted-foreground">
                           <Calendar className="w-4 h-4" />
-                          <span>{format(new Date(event.date), "dd 'de' MMMM", { locale: ptBR })}</span>
+                          <span>{format(new Date(event.date), "dd 'de' MMMM", { locale: pt })}</span>
                         </div>
                         <div className="flex items-center gap-2 text-muted-foreground">
                           <Clock className="w-4 h-4" />

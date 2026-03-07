@@ -61,7 +61,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths, isSameMonth } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { pt } from "date-fns/locale";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfiles } from "@/hooks/useUserPermissions";
 import logoImage from "@/assets/logo-igreja.jpeg";
@@ -618,7 +618,7 @@ export default function LouvorPage() {
   };
 
   const shareScheduleWhatsApp = (schedule: GeneralSchedule) => {
-    const dateStr = format(new Date(schedule.date), "EEEE, d 'de' MMMM", { locale: ptBR });
+    const dateStr = format(new Date(schedule.date), "EEEE, d 'de' MMMM", { locale: pt });
     let msg = `🎵 *Escala de Louvor*\n📅 ${dateStr}\n📍 ${schedule.type}\n`;
 
     const ministrantes = schedule.team_members?.filter(tm => tm.role === "ministrante") || [];
@@ -1101,7 +1101,7 @@ export default function LouvorPage() {
               <ChevronLeft className="w-4 h-4" />
             </Button>
             <h2 className="font-display text-xl font-semibold text-foreground min-w-[200px] text-center">
-              {format(currentMonth, "MMMM yyyy", { locale: ptBR })}
+              {format(currentMonth, "MMMM yyyy", { locale: pt })}
             </h2>
             <Button variant="outline" size="icon" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>
               <ChevronRight className="w-4 h-4" />
@@ -1174,7 +1174,7 @@ export default function LouvorPage() {
                           <div>
                             <h3 className="font-semibold text-foreground text-lg">{schedule.type}</h3>
                             <div className="flex items-center gap-2 text-muted-foreground text-sm mt-1">
-                              <span>{format(new Date(schedule.date), "EEEE, dd 'de' MMMM", { locale: ptBR })}</span>
+                              <span>{format(new Date(schedule.date), "EEEE, dd 'de' MMMM", { locale: pt })}</span>
                             </div>
                           </div>
                         </div>
@@ -1560,7 +1560,7 @@ export default function LouvorPage() {
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Telefone</label>
               <Input
-                placeholder="Ex: +5511999999999"
+                placeholder="Ex: +351 912 345 678"
                 value={newMemberPhone}
                 onChange={(e) => setNewMemberPhone(e.target.value)}
               />
@@ -1669,7 +1669,7 @@ export default function LouvorPage() {
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Telefone</label>
               <Input
-                placeholder="Ex: +5511999999999"
+                placeholder="Ex: +351 912 345 678"
                 value={newMemberPhone}
                 onChange={(e) => setNewMemberPhone(e.target.value)}
               />

@@ -27,11 +27,11 @@ export default function MemberBadge({ name, photo_url, role, variant = "blue" }:
 
             {/* Top Logo Section */}
             <div className="flex flex-col items-center mt-12 relative z-10">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 mb-3 p-1 ${isBlue ? "border-white/30 bg-white/10" : "border-[#1FA6DE]/20 bg-[#1FA6DE]/5"
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 mb-3 p-1.5 ${isBlue ? "border-white/30 bg-white/10" : "border-[#1FA6DE]/20 bg-[#1FA6DE]/5"
                     }`}>
                     <img
                         src={logoImage}
-                        className={`w-full h-full object-contain ${isBlue ? "brightness-0 invert" : ""}`}
+                        className={`w-full h-full object-contain rounded-full ${isBlue ? "brightness-0 invert" : ""}`}
                         alt="Church Icon"
                     />
                 </div>
@@ -59,7 +59,7 @@ export default function MemberBadge({ name, photo_url, role, variant = "blue" }:
                             <AvatarFallback className={`bg-white text-primary flex items-center justify-center`}>
                                 <img
                                     src={logoImage}
-                                    className="w-24 h-24 object-contain opacity-20"
+                                    className="w-24 h-24 object-contain rounded-full opacity-20"
                                     alt="Church Fallback"
                                 />
                             </AvatarFallback>
@@ -84,8 +84,8 @@ export default function MemberBadge({ name, photo_url, role, variant = "blue" }:
                 {role && (
                     <div className="w-full">
                         <span className={`text-[10px] font-black uppercase tracking-[0.3em] py-3 px-8 rounded-full border backdrop-blur-sm ${isBlue
-                                ? "bg-white/10 text-white border-white/20"
-                                : "bg-[#1FA6DE]/5 text-[#16417A] border-[#16417A]/10"
+                            ? "bg-white/10 text-white border-white/20"
+                            : "bg-[#1FA6DE]/5 text-[#16417A] border-[#16417A]/10"
                             }`}>
                             {role}
                         </span>

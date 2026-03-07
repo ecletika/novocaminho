@@ -164,7 +164,7 @@ function CardContent({ ministry, IconComponent, imageUrl }: any) {
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/40 to-transparent p-6 flex flex-col justify-end">
-          <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white mb-3 shadow-lg">
+          <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white mb-3 shadow-lg">
             <IconComponent className="w-6 h-6" />
           </div>
         </div>
@@ -212,7 +212,7 @@ function MinistryDetailModal({ ministry, isOpen, onClose }: { ministry: Ministry
               />
               <div className="absolute inset-0 bg-gradient-to-t from-white to-transparent" />
               <div className="absolute bottom-6 left-6 sm:left-10 flex items-end gap-6">
-                <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-[2rem] bg-white border-4 border-white shadow-2xl flex items-center justify-center shrink-0">
+                <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-full bg-white border-4 border-white shadow-2xl flex items-center justify-center shrink-0">
                   <IconComponent className="w-10 h-10 sm:w-14 sm:h-14 text-primary" />
                 </div>
                 <div className="pb-4">

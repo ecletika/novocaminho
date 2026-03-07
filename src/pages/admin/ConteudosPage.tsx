@@ -38,7 +38,7 @@ import {
 } from "@/hooks/useMinistryPosts";
 import { useMinistries } from "@/hooks/useMinistries";
 import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { pt } from "date-fns/locale";
 
 export default function ConteudosPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -201,7 +201,7 @@ export default function ConteudosPage() {
               </p>
               <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
                 <Calendar className="w-4 h-4" />
-                {format(new Date(post.created_at), "dd/MM/yyyy", { locale: ptBR })}
+                {format(new Date(post.created_at), "dd/MM/yyyy", { locale: pt })}
               </p>
             </div>
             <div className="flex gap-2">

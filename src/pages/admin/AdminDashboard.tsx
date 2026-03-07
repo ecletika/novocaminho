@@ -22,39 +22,39 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { pt } from "date-fns/locale";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const { data: stats, isLoading: statsLoading } = useDashboardStats();
   const { data: nextSchedule } = useNextSchedule();
-  
+
   const [quickActionDialog, setQuickActionDialog] = useState<string | null>(null);
 
   const statsData = [
-    { 
-      name: "Itens no Inventário", 
-      value: statsLoading ? "-" : stats?.inventoryCount.toString() || "0", 
-      icon: Package, 
-      href: "/admin/inventario" 
+    {
+      name: "Itens no Inventário",
+      value: statsLoading ? "-" : stats?.inventoryCount.toString() || "0",
+      icon: Package,
+      href: "/admin/inventario"
     },
-    { 
-      name: "Músicas Cadastradas", 
-      value: statsLoading ? "-" : stats?.songsCount.toString() || "0", 
-      icon: Music, 
-      href: "/admin/louvor" 
+    {
+      name: "Músicas Cadastradas",
+      value: statsLoading ? "-" : stats?.songsCount.toString() || "0",
+      icon: Music,
+      href: "/admin/louvor"
     },
-    { 
-      name: "Integrantes Ativos", 
-      value: statsLoading ? "-" : stats?.membersCount.toString() || "0", 
-      icon: Users, 
-      href: "/admin/louvor" 
+    {
+      name: "Integrantes Ativos",
+      value: statsLoading ? "-" : stats?.membersCount.toString() || "0",
+      icon: Users,
+      href: "/admin/louvor"
     },
-    { 
-      name: "Escalas este Mês", 
-      value: statsLoading ? "-" : stats?.schedulesThisMonth.toString() || "0", 
-      icon: Calendar, 
-      href: "/admin/escalas" 
+    {
+      name: "Escalas este Mês",
+      value: statsLoading ? "-" : stats?.schedulesThisMonth.toString() || "0",
+      icon: Calendar,
+      href: "/admin/escalas"
     },
   ];
 
@@ -94,10 +94,10 @@ export default function AdminDashboard() {
         </div>
         <div className="flex gap-3">
           {quickActions.map((action) => (
-            <Button 
-              key={action.name} 
-              variant="outline" 
-              size="sm" 
+            <Button
+              key={action.name}
+              variant="outline"
+              size="sm"
               className="hidden sm:flex"
               onClick={() => handleQuickAction(action.name)}
             >
@@ -198,7 +198,7 @@ export default function AdminDashboard() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-foreground">
-                    {format(new Date(nextSchedule.date), "EEEE, dd/MM", { locale: ptBR })}
+                    {format(new Date(nextSchedule.date), "EEEE, dd/MM", { locale: pt })}
                   </span>
                 </div>
                 <div className="text-sm text-muted-foreground">

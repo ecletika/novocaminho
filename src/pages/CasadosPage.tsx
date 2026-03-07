@@ -8,7 +8,7 @@ import { usePublishedCasadosPosts } from "@/hooks/useCasadosPosts";
 import { useCasadosGallery } from "@/hooks/useCasadosGallery";
 import { useEvents } from "@/hooks/useEvents";
 import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { pt } from "date-fns/locale";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CASADOS_COURSES, CASADOS_RESOURCES } from "@/constants/casadosData";
 import { FileText, GraduationCap, ClipboardList, BookOpen, UserPlus, Link as LinkIcon } from "lucide-react";
@@ -129,7 +129,7 @@ export default function CasadosPage() {
               )}
               <div className="p-8">
                 <span className="text-sm text-muted-foreground">
-                  {format(new Date(latestPost.created_at), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                  {format(new Date(latestPost.created_at), "dd 'de' MMMM 'de' yyyy", { locale: pt })}
                 </span>
                 <h3 className="font-display text-2xl font-bold text-foreground mt-2 mb-4">{latestPost.title}</h3>
                 <div className="prose prose-sm max-w-none text-muted-foreground" dangerouslySetInnerHTML={{ __html: latestPost.content }} />
@@ -162,7 +162,7 @@ export default function CasadosPage() {
                           <div>
                             <h4 className="font-medium text-foreground">{post.title}</h4>
                             <span className="text-xs text-muted-foreground">
-                              {format(new Date(post.created_at), "dd/MM/yyyy", { locale: ptBR })}
+                              {format(new Date(post.created_at), "dd/MM/yyyy", { locale: pt })}
                             </span>
                           </div>
                         </div>
@@ -211,7 +211,7 @@ export default function CasadosPage() {
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <Calendar className="w-4 h-4" />
-                      <span>{format(new Date(event.date), "dd/MM/yyyy", { locale: ptBR })} às {event.time}</span>
+                      <span>{format(new Date(event.date), "dd/MM/yyyy", { locale: pt })} às {event.time}</span>
                     </div>
                     {event.location && (
                       <div className="flex items-center gap-2 text-muted-foreground">

@@ -43,7 +43,7 @@ import {
   uploadGalleryImage,
 } from "@/hooks/useCasadosGallery";
 import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { pt } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { CASADOS_COURSES, CASADOS_RESOURCES, CASADOS_PORTAL_LOGINS } from "@/constants/casadosData";
@@ -314,7 +314,7 @@ export default function AdminCasadosPage() {
                     )}
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">
-                    {format(new Date(post.created_at), "dd/MM/yyyy", { locale: ptBR })}
+                    {format(new Date(post.created_at), "dd/MM/yyyy", { locale: pt })}
                   </p>
                 </div>
                 <div className="flex gap-2">

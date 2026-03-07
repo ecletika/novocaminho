@@ -36,7 +36,7 @@ import {
   Event,
 } from "@/hooks/useEvents";
 import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { pt } from "date-fns/locale";
 
 const CATEGORIES = [
   "Culto",
@@ -274,7 +274,7 @@ export default function AdminEventosPage() {
                   <div className="flex flex-wrap gap-4 mt-3 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <Calendar className="w-4 h-4" />
-                      <span>{format(new Date(event.date), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}</span>
+                      <span>{format(new Date(event.date), "dd 'de' MMMM 'de' yyyy", { locale: pt })}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <Clock className="w-4 h-4" />

@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useMinistries } from "@/hooks/useMinistries";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -100,12 +101,13 @@ export default function PublicBirthdayRegister() {
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="bg-card rounded-2xl shadow-lg p-8 max-w-md w-full text-center space-y-4">
           <CheckCircle className="w-16 h-16 text-green-500 mx-auto" />
-          <h2 className="font-display text-2xl font-bold text-foreground">Cadastro realizado!</h2>
+          <h2 className="font-display text-2xl font-bold text-foreground">Registo realizado!
+          </h2>
           <p className="text-muted-foreground">
-            Obrigado por se cadastrar. Seus dados foram salvos com sucesso.
+            Obrigado por se registar. Seus dados foram salvos com sucesso.
           </p>
           <Button onClick={() => { setSubmitted(false); setFormData({ woman_name: "", man_name: "", photo_url: "", birthday_date: "", birthday_type: "personal", phone: "", email: "", address: "", woman_birthday: "", man_birthday: "", leader_name: "", ministry_ids: [] }); }}>
-            Fazer outro cadastro
+            Fazer outro registo
           </Button>
         </div>
       </div>
@@ -119,8 +121,8 @@ export default function PublicBirthdayRegister() {
           <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
             <Cake className="w-8 h-8 text-primary" />
           </div>
-          <h1 className="font-display text-2xl font-bold text-foreground">Cadastro de Aniversário</h1>
-          <p className="text-muted-foreground mt-1">Preencha seus dados para registrar seu aniversário</p>
+          <h1 className="font-display text-2xl font-bold text-foreground">Registo de Aniversário</h1>
+          <p className="text-muted-foreground mt-1">Preencha seus dados para registar seu aniversário</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -198,16 +200,54 @@ export default function PublicBirthdayRegister() {
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="photo">Sua Foto {uploading && <Loader2 className="w-4 h-4 inline animate-spin" />}</Label>
-              <Input
-                id="photo"
-                type="file"
-                accept="image/*"
-                onChange={handleFileUpload}
-                disabled={uploading}
-              />
+              <Label>Sua Foto</Label>
+              <div className="flex gap-2 mb-2">
+                <Button
+                  type="button"
+                  variant={!formData.photo_url || !formData.photo_url.startsWith('http') ? "default" : "outline"}
+                  size="sm"
+                  className="flex-1"
+                  onClick={() => {/* no-op just for UI state if we had a dedicated state, but let's use a simpler approach */ }}
+                >
+                  Ficheiro
+                </Button>
+                <Button
+                  type="button"
+                  variant={formData.photo_url && formData.photo_url.startsWith('http') ? "default" : "outline"}
+                  size="sm"
+                  className="flex-1"
+                  onClick={() => {/* no-op */ }}
+                >
+                  Link
+                </Button>
+              </div>
+
+              <Tabs defaultValue="upload" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 mb-2">
+                  <TabsTrigger value="upload" className="text-xs">Ficheiro</TabsTrigger>
+                  <TabsTrigger value="link" className="text-xs">Link da Foto</TabsTrigger>
+                </TabsList>
+                <TabsContent value="upload">
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    disabled={uploading}
+                  />
+                </TabsContent>
+                <TabsContent value="link">
+                  <Input
+                    type="url"
+                    placeholder="https://exemplo.com/foto.jpg"
+                    value={formData.photo_url}
+                    onChange={(e) => setFormData({ ...formData, photo_url: e.target.value })}
+                  />
+                </TabsContent>
+              </Tabs>
+
+              {uploading && <div className="flex items-center gap-2 text-xs text-muted-foreground"><Loader2 className="w-3 h-3 animate-spin" /> Carregando...</div>}
               {formData.photo_url && (
-                <div className="mt-2 text-xs text-green-600 font-medium">Foto enviada com sucesso!</div>
+                <div className="mt-2 text-xs text-green-600 font-medium">Foto selecionada/carregada!</div>
               )}
             </div>
           </div>
@@ -229,7 +269,7 @@ export default function PublicBirthdayRegister() {
             <Input
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              placeholder="(00) 00000-0000"
+              placeholder="912 345 678"
             />
           </div>
 
@@ -289,7 +329,7 @@ export default function PublicBirthdayRegister() {
 
           <Button type="submit" className="w-full" disabled={isSubmitting || uploading}>
             {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-            Cadastrar
+            Registar
           </Button>
         </form>
       </div>
