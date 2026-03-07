@@ -143,7 +143,7 @@ export default function HomePage() {
       </section>
 
       {/* Quick Info Bar + Radio Player */}
-      <section className="relative -mt-8 z-20">
+      <section className="relative -mt-4 z-20">
         <div className="container-church space-y-6">
           <div className="bg-card rounded-2xl shadow-card p-6 md:p-8 grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="flex items-center gap-4">
@@ -151,8 +151,8 @@ export default function HomePage() {
                 <Calendar className="w-7 h-7 text-primary" />
               </div>
               <div>
-                <h3 className="font-semibold text-foreground">Cultos aos Domingos</h3>
-                <p className="text-muted-foreground text-sm">10:00 e 18:00</p>
+                <h3 className="font-semibold text-foreground">Culto aos Domingos</h3>
+                <p className="text-muted-foreground text-sm">10:30</p>
               </div>
             </div>
             <div className="flex items-center gap-4">
@@ -160,8 +160,8 @@ export default function HomePage() {
                 <Users className="w-7 h-7 text-secondary" />
               </div>
               <div>
-                <h3 className="font-semibold text-foreground">Células às Quartas</h3>
-                <p className="text-muted-foreground text-sm">19:30</p>
+                <h3 className="font-semibold text-foreground">Culto de Oração</h3>
+                <p className="text-muted-foreground text-sm">Quartas às 19:30</p>
               </div>
             </div>
             <div className="flex items-center gap-4">
