@@ -16,7 +16,8 @@ import {
     saveCasadosLesson,
     deleteCasadosTopic,
     deleteCasadosLesson,
-    uploadCasadosFile
+    uploadCasadosFile,
+    saveCompromissoCasal
 } from '@/integrations/supabase/casadosService';
 import { Button } from '@/components/ui/button';
 
@@ -36,6 +37,17 @@ export default function CasadosOnlineMaterial() {
     const [editingLesson, setEditingLesson] = useState<any>(null);
     const [isSaving, setIsSaving] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
+
+    // Form Compromisso state
+    const [compromissoForm, setCompromissoForm] = useState({
+        nome_marido: '',
+        assinatura_marido: '',
+        nome_esposa: '',
+        assinatura_esposa: '',
+        data_compromisso: ''
+    });
+    const [isSubmittingCompromisso, setIsSubmittingCompromisso] = useState(false);
+    const [hasSubmittedCompromisso, setHasSubmittedCompromisso] = useState(false);
 
     // Permitir edição apenas se explicitamente for admin e não estiver carregando auth
     const canEdit = !authLoading && user && isAdmin;
@@ -172,6 +184,36 @@ export default function CasadosOnlineMaterial() {
             }
         }
         return null;
+    };
+
+    const handleCompromissoSubmit = async () => {
+        if (!user) {
+            toast.error("Você precisa estar logado");
+            return;
+        }
+
+        const { nome_marido, assinatura_marido, nome_esposa, assinatura_esposa, data_compromisso } = compromissoForm;
+        if (!nome_marido || !assinatura_marido || !nome_esposa || !assinatura_esposa || !data_compromisso) {
+            toast.error("Por favor, preencha todos os campos obrigatórios");
+            return;
+        }
+
+        setIsSubmittingCompromisso(true);
+        try {
+            const { success, error } = await saveCompromissoCasal({
+                ...compromissoForm,
+                user_id: user.id
+            });
+            if (success) {
+                toast.success("Compromisso firmado com sucesso! Que Deus abençoe vossa jornada.");
+                setHasSubmittedCompromisso(true);
+            } else {
+                toast.error("Erro ao salvar compromisso");
+            }
+        } catch (err) {
+            toast.error("Erro de conexão");
+        }
+        setIsSubmittingCompromisso(false);
     };
 
     if (loading || authLoading) {
@@ -319,6 +361,70 @@ export default function CasadosOnlineMaterial() {
                                 {selectedLesson.content}
                             </div>
                         </div>
+
+                        {selectedLesson.title === "Compromisso" && (
+                            <div className="bg-secondary/5 border-2 border-secondary/20 rounded-3xl p-8 mb-12 shadow-inner text-left">
+                                <h3 className="font-display text-2xl font-bold mb-6 text-secondary flex items-center gap-2">
+                                    <HeartHandshake className="w-6 h-6" /> Aliança de Compromisso
+                                </h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-bold text-foreground">Nome do Marido <span className="text-red-500">*</span></label>
+                                        <input
+                                            type="text"
+                                            className="w-full p-4 rounded-xl border-2 border-border bg-background focus:border-secondary transition-all"
+                                            value={compromissoForm.nome_marido}
+                                            onChange={e => setCompromissoForm({ ...compromissoForm, nome_marido: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-bold text-foreground">Nome da Esposa <span className="text-red-500">*</span></label>
+                                        <input
+                                            type="text"
+                                            className="w-full p-4 rounded-xl border-2 border-border bg-background focus:border-secondary transition-all"
+                                            value={compromissoForm.nome_esposa}
+                                            onChange={e => setCompromissoForm({ ...compromissoForm, nome_esposa: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-bold text-foreground">Assinatura do Marido <span className="text-red-500">*</span></label>
+                                        <textarea
+                                            rows={3}
+                                            className="w-full p-4 rounded-xl border-2 border-border bg-background focus:border-secondary transition-all"
+                                            value={compromissoForm.assinatura_marido}
+                                            onChange={e => setCompromissoForm({ ...compromissoForm, assinatura_marido: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-bold text-foreground">Assinatura da Esposa <span className="text-red-500">*</span></label>
+                                        <textarea
+                                            rows={3}
+                                            className="w-full p-4 rounded-xl border-2 border-border bg-background focus:border-secondary transition-all"
+                                            value={compromissoForm.assinatura_esposa}
+                                            onChange={e => setCompromissoForm({ ...compromissoForm, assinatura_esposa: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="space-y-2 mb-8 max-w-xs">
+                                    <label className="text-sm font-bold text-foreground">Data do Compromisso <span className="text-red-500">*</span></label>
+                                    <input
+                                        type="date"
+                                        className="w-full p-4 rounded-xl border-2 border-border bg-background focus:border-secondary transition-all"
+                                        value={compromissoForm.data_compromisso}
+                                        onChange={e => setCompromissoForm({ ...compromissoForm, data_compromisso: e.target.value })}
+                                    />
+                                </div>
+                                <Button
+                                    className="bg-secondary text-primary font-black py-6 px-12 rounded-2xl text-xl hover:scale-105 transition-all shadow-xl"
+                                    onClick={handleCompromissoSubmit}
+                                    disabled={isSubmittingCompromisso || hasSubmittedCompromisso}
+                                >
+                                    {isSubmittingCompromisso ? <Loader2 className="animate-spin" /> : hasSubmittedCompromisso ? "Compromisso Enviado" : "Eu Aceito"}
+                                </Button>
+                            </div>
+                        )}
 
                         <div className="pt-8 border-t border-border flex flex-wrap items-center gap-6">
                             {!completedLessons.includes(selectedLesson.id) ? (

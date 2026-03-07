@@ -66,3 +66,8 @@ export const uploadCasadosFile = async (file: File) => {
     const { data: { publicUrl } } = supabase.storage.from('casados-material').getPublicUrl(data.path);
     return { publicUrl, error: null };
 };
+
+export const saveCompromissoCasal = async (compromisso: any) => {
+    const { data, error } = await supabase.from('compromissos_casais').insert(compromisso).select().single();
+    return { success: !error, error };
+};
