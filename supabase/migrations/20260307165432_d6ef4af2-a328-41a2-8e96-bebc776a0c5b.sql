@@ -1,0 +1,1 @@
+ALTER TABLE public.ministries ADD COLUMN IF NOT EXISTS bible_verse text;

@@ -286,6 +286,7 @@ export type Database = {
       }
       ministries: {
         Row: {
+          bible_verse: string | null
           created_at: string
           description: string | null
           features: string[] | null
@@ -299,6 +300,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          bible_verse?: string | null
           created_at?: string
           description?: string | null
           features?: string[] | null
@@ -312,6 +314,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          bible_verse?: string | null
           created_at?: string
           description?: string | null
           features?: string[] | null
