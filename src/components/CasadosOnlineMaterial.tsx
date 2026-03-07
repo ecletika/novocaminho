@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import {
     HeartHandshake, ChevronRight, BookOpen, ChevronDown, CheckCircle2,
-    Loader2, PlayCircle, FileText, Video as VideoIcon, Plus, Edit, Trash2, Save, X, Lock
+    Loader2, PlayCircle, FileText, Video as VideoIcon, Plus, Edit, Trash2, Save, X, Lock, ArrowRight
 } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -152,6 +152,26 @@ export default function CasadosOnlineMaterial() {
                 loadData();
             }
         }
+    };
+
+    const getNextLesson = () => {
+        if (!selectedLesson) return null;
+        const currentTopicLessons = lessons[selectedLesson.topic_id] || [];
+        const currentIndex = currentTopicLessons.findIndex(l => l.id === selectedLesson.id);
+        if (currentIndex !== -1 && currentIndex < currentTopicLessons.length - 1) {
+            return currentTopicLessons[currentIndex + 1];
+        }
+        const currentTopicIndex = topics.findIndex(t => t.id === selectedLesson.topic_id);
+        if (currentTopicIndex !== -1 && currentTopicIndex < topics.length - 1) {
+            for (let i = currentTopicIndex + 1; i < topics.length; i++) {
+                const nextTopic = topics[i];
+                const nextTopicLessons = lessons[nextTopic.id] || [];
+                if (nextTopicLessons.length > 0) {
+                    return nextTopicLessons[0];
+                }
+            }
+        }
+        return null;
     };
 
     if (loading || authLoading) {
@@ -316,6 +336,24 @@ export default function CasadosOnlineMaterial() {
                                     <a href={selectedLesson.pdf_url} target="_blank" rel="noopener noreferrer">
                                         <FileText size={20} className="mr-2" /> Material de Apoio (PDF)
                                     </a>
+                                </Button>
+                            )}
+
+                            {getNextLesson() && (
+                                <Button
+                                    onClick={() => {
+                                        const next = getNextLesson();
+                                        if (next) {
+                                            setSelectedLesson(next);
+                                            if (!expandedTopics[next.topic_id]) {
+                                                setExpandedTopics(prev => ({ ...prev, [next.topic_id]: true }));
+                                            }
+                                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                                        }
+                                    }}
+                                    className="h-14 px-8 rounded-xl font-bold bg-secondary text-primary hover:bg-secondary/80 ml-auto flex items-center gap-2"
+                                >
+                                    Próxima Aula <ArrowRight size={20} />
                                 </Button>
                             )}
                         </div>

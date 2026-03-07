@@ -4,7 +4,7 @@ import {
   HeartHandshake, ChevronRight, BookOpen, Plus, Settings, Trash2, Edit, Save, X, Loader2,
   ChevronDown, Book, MessageCircle, Heart, Star, Layout, ListOrdered, Sparkles, Database,
   CloudDownload, Terminal, Quote, FileText, Upload, Globe, Maximize2, CheckCircle2, Maximize, Minimize,
-  ExternalLink, ImageIcon, Image as LucideImage, Hash, Lock, Video, PlayCircle, AlertTriangle, Check
+  ExternalLink, ImageIcon, Image as LucideImage, Hash, Lock, Video, PlayCircle, AlertTriangle, Check, ArrowRight
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { CouplesTopic, CouplesLesson } from '@/types/bible';
@@ -58,6 +58,26 @@ const CouplesStudyView: React.FC<CouplesStudyViewProps> = ({ user, onAuthRequire
     const ttMatch = url.match(/tiktok\.com\/.*video\/(\d+)/);
     if (ttMatch && ttMatch[1]) return `https://www.tiktok.com/embed/v2/${ttMatch[1]}`;
     return url;
+  };
+
+  const getNextLesson = () => {
+    if (!selectedLesson) return null;
+    const currentTopicLessons = lessons[selectedLesson.topic_id] || [];
+    const currentIndex = currentTopicLessons.findIndex(l => l.id === selectedLesson.id);
+    if (currentIndex !== -1 && currentIndex < currentTopicLessons.length - 1) {
+      return currentTopicLessons[currentIndex + 1];
+    }
+    const currentTopicIndex = topics.findIndex(t => t.id === selectedLesson.topic_id);
+    if (currentTopicIndex !== -1 && currentTopicIndex < topics.length - 1) {
+      for (let i = currentTopicIndex + 1; i < topics.length; i++) {
+        const nextTopic = topics[i];
+        const nextTopicLessons = lessons[nextTopic.id] || [];
+        if (nextTopicLessons.length > 0) {
+          return nextTopicLessons[0];
+        }
+      }
+    }
+    return null;
   };
 
   const loadData = async () => {
@@ -434,6 +454,26 @@ CREATE POLICY "Users can insert own progress" ON couples_progress FOR INSERT WIT
                   <a href={selectedLesson.pdf_url} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#1E40AF] text-white px-8 py-5 rounded-2xl font-bold hover:scale-105 transition-all shadow-lg">
                     <FileText size={20} /> Baixar PDF
                   </a>
+                )}
+
+                {getNextLesson() && (
+                  <button
+                    onClick={() => {
+                      const next = getNextLesson();
+                      if (next) {
+                        setSelectedLesson(next);
+                        if (!expandedTopics[next.topic_id]) {
+                          setExpandedTopics(prev => ({ ...prev, [next.topic_id]: true }));
+                        }
+                        if (mainContentRef.current) {
+                          mainContentRef.current.scrollIntoView({ behavior: 'smooth' });
+                        }
+                      }
+                    }}
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#1E40AF]/10 text-[#1E40AF] px-10 py-5 rounded-2xl font-bold hover:scale-105 transition-all ml-auto"
+                  >
+                    Próxima Aula <ArrowRight size={20} />
+                  </button>
                 )}
               </div>
             </div>

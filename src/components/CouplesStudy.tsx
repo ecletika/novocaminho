@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import {
     HeartHandshake, ChevronRight, BookOpen, ChevronDown, CheckCircle2,
-    Loader2, PlayCircle, FileText, Video
+    Loader2, PlayCircle, FileText, Video, ArrowRight
 } from 'lucide-react';
 import { CouplesTopic, CouplesLesson } from '@/types/bible';
 import { getCouplesTopics, getCouplesLessons } from '@/integrations/supabase/bibleService';
@@ -50,6 +50,26 @@ export default function CouplesStudy() {
 
     const toggleTopic = (id: string) => {
         setExpandedTopics(prev => ({ ...prev, [id]: !prev[id] }));
+    };
+
+    const getNextLesson = () => {
+        if (!selectedLesson) return null;
+        const currentTopicLessons = lessons[selectedLesson.topic_id] || [];
+        const currentIndex = currentTopicLessons.findIndex(l => l.id === selectedLesson.id);
+        if (currentIndex !== -1 && currentIndex < currentTopicLessons.length - 1) {
+            return currentTopicLessons[currentIndex + 1];
+        }
+        const currentTopicIndex = topics.findIndex(t => t.id === selectedLesson.topic_id);
+        if (currentTopicIndex !== -1 && currentTopicIndex < topics.length - 1) {
+            for (let i = currentTopicIndex + 1; i < topics.length; i++) {
+                const nextTopic = topics[i];
+                const nextTopicLessons = lessons[nextTopic.id] || [];
+                if (nextTopicLessons.length > 0) {
+                    return nextTopicLessons[0];
+                }
+            }
+        }
+        return null;
     };
 
     if (loading) {
@@ -147,12 +167,30 @@ export default function CouplesStudy() {
                             </div>
                         </div>
 
-                        <div className="mt-10 pt-8 border-t border-border flex flex-wrap gap-4">
+                        <div className="mt-10 pt-8 border-t border-border flex flex-wrap items-center gap-4">
                             {selectedLesson.pdf_url && (
                                 <Button asChild variant="secondary">
                                     <a href={selectedLesson.pdf_url} target="_blank" rel="noopener noreferrer">
                                         <FileText size={18} className="mr-2" /> Baixar Material PDF
                                     </a>
+                                </Button>
+                            )}
+
+                            {getNextLesson() && (
+                                <Button
+                                    onClick={() => {
+                                        const next = getNextLesson();
+                                        if (next) {
+                                            setSelectedLesson(next);
+                                            if (!expandedTopics[next.topic_id]) {
+                                                setExpandedTopics(prev => ({ ...prev, [next.topic_id]: true }));
+                                            }
+                                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                                        }
+                                    }}
+                                    className="bg-secondary text-primary hover:bg-secondary/80 ml-auto flex items-center gap-2"
+                                >
+                                    Próxima Aula <ArrowRight size={18} />
                                 </Button>
                             )}
                         </div>
