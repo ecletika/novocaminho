@@ -52,11 +52,11 @@ export default function Header() {
                 className="w-12 h-12 object-cover rounded-sm border border-white/10"
               />
               <div className="hidden sm:flex flex-col">
-                <span className={`font-display text-2xl font-bold uppercase tracking-[0.15em] transition-colors ${isScrolled ? "text-primary" : "text-white"
+                <span className={`font-display text-2xl font-black uppercase tracking-[0.2em] leading-none transition-colors ${isScrolled ? "text-primary" : "text-white"
                   }`}>
-                  Novo Caminho
+                  NOVO CAMINHO
                 </span>
-                <span className={`block text-[10px] uppercase tracking-[0.3em] font-medium transition-colors ${isScrolled ? "text-muted-foreground" : "text-white/50"
+                <span className={`block text-[10px] uppercase tracking-[0.5em] font-bold transition-colors ${isScrolled ? "text-muted-foreground" : "text-white/70"
                   }`}>
                   Portugal
                 </span>
