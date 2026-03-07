@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Plus, Search, Package, MapPin, Eye, Edit, Trash2, Camera, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,6 +32,7 @@ import {
   useCreateInventoryItem,
   useUpdateInventoryItem,
   useDeleteInventoryItem,
+  uploadInventoryPhoto,
   InventoryItem,
 } from "@/hooks/useInventory";
 
@@ -84,6 +85,9 @@ export default function InventarioPage() {
     condition: "",
     notes: "",
   });
+  const [itemPhoto, setItemPhoto] = useState<File | null>(null);
+  const [itemPhotoPreview, setItemPhotoPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: items = [], isLoading } = useInventoryItems();
   const createItem = useCreateInventoryItem();
@@ -115,17 +119,30 @@ export default function InventarioPage() {
     });
     setSelectedItem(null);
     setIsEditing(false);
+    setItemPhoto(null);
+    setItemPhotoPreview(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (isEditing && selectedItem) {
+      let imageUrl = selectedItem.image_url;
+      if (itemPhoto) {
+        imageUrl = await uploadInventoryPhoto(itemPhoto);
+      }
+
       await updateItem.mutateAsync({
         id: selectedItem.id,
         ...formData,
+        image_url: imageUrl,
       });
     } else {
+      let imageUrl = null;
+      if (itemPhoto) {
+        imageUrl = await uploadInventoryPhoto(itemPhoto);
+      }
+
       await createItem.mutateAsync({
         name: formData.name,
         category: formData.category,
@@ -133,10 +150,10 @@ export default function InventarioPage() {
         purpose: formData.purpose || null,
         condition: formData.condition,
         notes: formData.notes || null,
-        image_url: null,
+        image_url: imageUrl,
       });
     }
-    
+
     setIsDialogOpen(false);
     resetForm();
   };
@@ -151,6 +168,7 @@ export default function InventarioPage() {
       condition: item.condition,
       notes: item.notes || "",
     });
+    setItemPhotoPreview(item.image_url);
     setIsEditing(true);
     setIsDialogOpen(true);
   };
@@ -231,8 +249,12 @@ export default function InventarioPage() {
             key={item.id}
             className="bg-card rounded-xl shadow-soft hover:shadow-card transition-all duration-300 overflow-hidden"
           >
-            <div className="aspect-video bg-muted flex items-center justify-center">
-              <Package className="w-12 h-12 text-muted-foreground" />
+            <div className="aspect-video bg-muted flex items-center justify-center overflow-hidden">
+              {item.image_url ? (
+                <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
+              ) : (
+                <Package className="w-12 h-12 text-muted-foreground" />
+              )}
             </div>
             <div className="p-5">
               <div className="flex items-start justify-between mb-3">
@@ -263,9 +285,9 @@ export default function InventarioPage() {
                   <Edit className="w-4 h-4 mr-1" />
                   Editar
                 </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   className="text-destructive hover:text-destructive"
                   onClick={() => setDeleteItemId(item.id)}
                 >
@@ -289,22 +311,55 @@ export default function InventarioPage() {
 
       {/* Add/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if (!open) resetForm(); }}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-display text-xl">
               {isEditing ? "Editar Item" : "Adicionar Item ao Inventário"}
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+            <div className="flex flex-col items-center gap-4 mb-6">
+              <div
+                className="w-full aspect-video rounded-xl bg-muted flex items-center justify-center cursor-pointer hover:bg-muted/80 transition-colors overflow-hidden border-2 border-dashed border-muted-foreground/20"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                {itemPhotoPreview ? (
+                  <img src={itemPhotoPreview} alt="Preview" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="flex flex-col items-center gap-2">
+                    <Camera className="w-8 h-8 text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground">Clique para adicionar foto</span>
+                  </div>
+                )}
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    setItemPhoto(file);
+                    setItemPhotoPreview(URL.createObjectURL(file));
+                  }
+                }}
+              />
+              {itemPhotoPreview && (
+                <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+                  Alterar Foto
+                </Button>
+              )}
+            </div>
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">
                 Nome do Item *
               </label>
-              <Input 
+              <Input
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                required 
-                placeholder="Ex: Guitarra Fender" 
+                required
+                placeholder="Ex: Guitarra Fender"
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -343,10 +398,10 @@ export default function InventarioPage() {
               <label className="block text-sm font-medium text-foreground mb-2">
                 Finalidade
               </label>
-              <Input 
+              <Input
                 value={formData.purpose}
                 onChange={(e) => setFormData({ ...formData, purpose: e.target.value })}
-                placeholder="Para que está sendo utilizado" 
+                placeholder="Para que está sendo utilizado"
               />
             </div>
             <div>
@@ -368,11 +423,11 @@ export default function InventarioPage() {
               <label className="block text-sm font-medium text-foreground mb-2">
                 Observações
               </label>
-              <Textarea 
+              <Textarea
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                placeholder="Observações adicionais..." 
-                rows={3} 
+                placeholder="Observações adicionais..."
+                rows={3}
               />
             </div>
             <div className="flex gap-3 pt-4">
@@ -389,12 +444,17 @@ export default function InventarioPage() {
 
       {/* View Dialog */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-display text-xl">{selectedItem?.name}</DialogTitle>
           </DialogHeader>
           {selectedItem && (
             <div className="space-y-4 mt-4">
+              {selectedItem.image_url && (
+                <div className="aspect-video rounded-xl overflow-hidden mb-4">
+                  <img src={selectedItem.image_url} alt={selectedItem.name} className="w-full h-full object-cover" />
+                </div>
+              )}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <span className="text-sm text-muted-foreground">Categoria</span>
