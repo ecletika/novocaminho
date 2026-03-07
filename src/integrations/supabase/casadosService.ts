@@ -52,3 +52,15 @@ export const deleteCasadosLesson = async (id: string) => {
     const { error } = await supabase.from('casados_online_lessons').delete().eq('id', id);
     return !error;
 };
+
+export const uploadCasadosFile = async (file: File) => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
+    const { data, error } = await supabase.storage.from('casados-material').upload(fileName, file);
+    if (error) {
+        console.error("Erro no upload:", error);
+        return null;
+    }
+    const { data: { publicUrl } } = supabase.storage.from('casados-material').getPublicUrl(data.path);
+    return publicUrl;
+};

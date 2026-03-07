@@ -15,7 +15,8 @@ import {
     saveCasadosTopic,
     saveCasadosLesson,
     deleteCasadosTopic,
-    deleteCasadosLesson
+    deleteCasadosLesson,
+    uploadCasadosFile
 } from '@/integrations/supabase/casadosService';
 import { Button } from '@/components/ui/button';
 
@@ -34,6 +35,7 @@ export default function CasadosOnlineMaterial() {
     const [editingTopic, setEditingTopic] = useState<any>(null);
     const [editingLesson, setEditingLesson] = useState<any>(null);
     const [isSaving, setIsSaving] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
 
     // Permitir edição apenas se explicitamente for admin e não estiver carregando auth
     const canEdit = !authLoading && user && isAdmin;
@@ -97,6 +99,7 @@ export default function CasadosOnlineMaterial() {
     };
 
     const handleSaveLesson = async (lesson: any) => {
+        if (!canEdit) return;
         setIsSaving(true);
         const { success } = await saveCasadosLesson(lesson);
         if (success) {
@@ -105,6 +108,24 @@ export default function CasadosOnlineMaterial() {
             loadData();
         }
         setIsSaving(false);
+    };
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'pdf' | 'image') => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setIsUploading(true);
+        const publicUrl = await uploadCasadosFile(file);
+        if (publicUrl) {
+            setEditingLesson((prev: any) => ({
+                ...prev,
+                [type === 'pdf' ? 'pdf_url' : 'image_url']: publicUrl
+            }));
+            toast.success(`${type.toUpperCase()} enviado com sucesso!`);
+        } else {
+            toast.error("Erro ao enviar arquivo.");
+        }
+        setIsUploading(false);
     };
 
     const handleDeleteTopic = async (id: string) => {
@@ -334,10 +355,31 @@ export default function CasadosOnlineMaterial() {
                                 <input type="text" placeholder="Título da Aula" value={editingLesson?.title || ''} onChange={e => setEditingLesson({ ...editingLesson, title: e.target.value })} className="col-span-3 p-4 rounded-xl border bg-muted/20" />
                                 <input type="number" placeholder="Posição" value={editingLesson?.position || ''} onChange={e => setEditingLesson({ ...editingLesson, position: parseInt(e.target.value) })} className="p-4 rounded-xl border bg-muted/20" />
                             </div>
-                            <input type="text" placeholder="URL do Vídeo (Youtube)" value={editingLesson?.video_url || ''} onChange={e => setEditingLesson({ ...editingLesson, video_url: e.target.value })} className="w-full p-4 rounded-xl border bg-muted/20" />
-                            <input type="text" placeholder="URL do PDF" value={editingLesson?.pdf_url || ''} onChange={e => setEditingLesson({ ...editingLesson, pdf_url: e.target.value })} className="w-full p-4 rounded-xl border bg-muted/20" />
-                            <textarea placeholder="Conteúdo da Aula" value={editingLesson?.content || ''} onChange={e => setEditingLesson({ ...editingLesson, content: e.target.value })} className="w-full p-4 rounded-xl border bg-muted/20 min-h-[300px]" />
-                            <Button className="w-full h-14 font-bold text-lg" disabled={isSaving} onClick={() => handleSaveLesson(editingLesson)}>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold uppercase text-muted-foreground">Vídeo (URL)</label>
+                                    <input type="text" placeholder="URL do Vídeo (Youtube)" value={editingLesson?.video_url || ''} onChange={e => setEditingLesson({ ...editingLesson, video_url: e.target.value })} className="w-full p-4 rounded-xl border bg-muted/20" />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold uppercase text-muted-foreground">Arquivo PDF</label>
+                                    <div className="flex gap-2">
+                                        <input type="text" placeholder="URL do PDF" value={editingLesson?.pdf_url || ''} onChange={e => setEditingLesson({ ...editingLesson, pdf_url: e.target.value })} className="flex-1 p-4 rounded-xl border bg-muted/20" />
+                                        <div className="relative">
+                                            <input type="file" accept=".pdf" onChange={e => handleFileUpload(e, 'pdf')} className="absolute inset-0 opacity-0 cursor-pointer" disabled={isUploading} />
+                                            <Button variant="outline" className="h-full" disabled={isUploading}>
+                                                {isUploading ? <Loader2 className="animate-spin" size={18} /> : <FileText size={18} />}
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold uppercase text-muted-foreground">Conteúdo da Aula</label>
+                                <textarea placeholder="Conteúdo da Aula" value={editingLesson?.content || ''} onChange={e => setEditingLesson({ ...editingLesson, content: e.target.value })} className="w-full p-4 rounded-xl border bg-muted/20 min-h-[300px]" />
+                            </div>
+
+                            <Button className="w-full h-14 font-bold text-lg" disabled={isSaving || isUploading} onClick={() => handleSaveLesson(editingLesson)}>
                                 {isSaving ? <Loader2 className="animate-spin" /> : <Save className="mr-2" size={20} />} Publicar Aula
                             </Button>
                         </div>
