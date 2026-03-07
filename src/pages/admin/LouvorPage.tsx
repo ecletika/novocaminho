@@ -100,6 +100,8 @@ export default function LouvorPage() {
   const [newMemberPhone, setNewMemberPhone] = useState("");
   const [newMemberPhoto, setNewMemberPhoto] = useState<File | null>(null);
   const [newMemberPhotoPreview, setNewMemberPhotoPreview] = useState<string | null>(null);
+  const [newMemberPhotoUrl, setNewMemberPhotoUrl] = useState("");
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [newMemberPrimaryFunctionId, setNewMemberPrimaryFunctionId] = useState("");
   const [newMemberSecondaryFunctionIds, setNewMemberSecondaryFunctionIds] = useState<string[]>([]);
   const [newMemberUserId, setNewMemberUserId] = useState<string>("");
@@ -219,11 +221,19 @@ export default function LouvorPage() {
   const hasLouvorAccess = isAdmin || isMusician || isMinister || isVocal;
 
   // Handlers
-  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setNewMemberPhoto(file);
-      setNewMemberPhotoPreview(URL.createObjectURL(file));
+      setIsUploadingPhoto(true);
+      try {
+        const url = await uploadMemberPhoto(file);
+        setNewMemberPhotoUrl(url);
+        setNewMemberPhotoPreview(url);
+      } catch (error: any) {
+        toast({ title: "Erro ao carregar foto", description: error.message, variant: "destructive" });
+      } finally {
+        setIsUploadingPhoto(false);
+      }
     }
   };
 
@@ -231,15 +241,10 @@ export default function LouvorPage() {
     e.preventDefault();
     if (!newMemberName.trim() || !newMemberPrimaryFunctionId) return;
 
-    let photoUrl: string | undefined;
-    if (newMemberPhoto) {
-      photoUrl = await uploadMemberPhoto(newMemberPhoto);
-    }
-
     await createMember.mutateAsync({
       name: newMemberName.trim(),
       phone: newMemberPhone.trim() || undefined,
-      photo_url: photoUrl,
+      photo_url: newMemberPhotoUrl.trim() || undefined,
       primary_function_id: newMemberPrimaryFunctionId,
       user_id: newMemberUserId || undefined,
       secondary_function_ids: newMemberSecondaryFunctionIds
@@ -253,16 +258,11 @@ export default function LouvorPage() {
     e.preventDefault();
     if (!selectedMember || !newMemberName.trim() || !newMemberPrimaryFunctionId) return;
 
-    let photoUrl: string | undefined;
-    if (newMemberPhoto) {
-      photoUrl = await uploadMemberPhoto(newMemberPhoto);
-    }
-
     await updateMember.mutateAsync({
       id: selectedMember.id,
       name: newMemberName.trim(),
       phone: newMemberPhone.trim() || undefined,
-      photo_url: photoUrl || selectedMember.photo_url || undefined,
+      photo_url: newMemberPhotoUrl.trim() || selectedMember.photo_url || undefined,
       primary_function_id: newMemberPrimaryFunctionId,
       user_id: newMemberUserId || null,
       secondary_function_ids: newMemberSecondaryFunctionIds
@@ -353,6 +353,7 @@ export default function LouvorPage() {
     setNewMemberPhone("");
     setNewMemberPhoto(null);
     setNewMemberPhotoPreview(null);
+    setNewMemberPhotoUrl("");
     setNewMemberPrimaryFunctionId("");
     setNewMemberSecondaryFunctionIds([]);
     setNewMemberUserId("");
@@ -1523,29 +1524,59 @@ export default function LouvorPage() {
           <form onSubmit={handleAddMember} className="space-y-4 mt-4">
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Foto do Integrante</label>
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-primary/20">
-                  {newMemberPhotoPreview ? (
-                    <img src={newMemberPhotoPreview} alt="Preview" className="w-full h-full object-cover" />
-                  ) : (
-                    <Upload className="w-6 h-6 text-muted-foreground" />
-                  )}
-                </div>
-                <Input
-                  type="file"
-                  accept="image/*"
-                  onChange={handlePhotoChange}
-                  ref={newMemberFileInputRef}
-                  className="hidden"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => newMemberFileInputRef.current?.click()}
-                >
-                  Selecionar Foto
-                </Button>
+              <div className="space-y-4">
+                <Tabs defaultValue="upload" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2 mb-2">
+                    <TabsTrigger value="upload" className="text-xs">Ficheiro</TabsTrigger>
+                    <TabsTrigger value="link" className="text-xs">Link da Foto</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="upload">
+                    <div className="flex items-center gap-4">
+                      <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-primary/20">
+                        {newMemberPhotoPreview ? (
+                          <img src={newMemberPhotoPreview} alt="Preview" className="w-full h-full object-cover" />
+                        ) : (
+                          <Upload className="w-6 h-6 text-muted-foreground" />
+                        )}
+                      </div>
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={handlePhotoChange}
+                        ref={newMemberFileInputRef}
+                        className="hidden"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={isUploadingPhoto}
+                        onClick={() => newMemberFileInputRef.current?.click()}
+                      >
+                        {isUploadingPhoto ? "Carregando..." : "Selecionar Foto"}
+                      </Button>
+                    </div>
+                  </TabsContent>
+                  <TabsContent value="link">
+                    <div className="space-y-2">
+                      <Input
+                        type="url"
+                        placeholder="https://exemplo.com/foto.jpg"
+                        value={newMemberPhotoUrl}
+                        onChange={(e) => {
+                          setNewMemberPhotoUrl(e.target.value);
+                          setNewMemberPhotoPreview(e.target.value);
+                        }}
+                        className="text-xs"
+                      />
+                      {newMemberPhotoPreview && (
+                        <div className="flex justify-center">
+                          <img src={newMemberPhotoPreview} alt="Preview" className="w-16 h-16 rounded-full object-cover border-2 border-primary/20" />
+                        </div>
+                      )}
+                    </div>
+                  </TabsContent>
+                </Tabs>
               </div>
             </div>
             <div>
@@ -1632,29 +1663,59 @@ export default function LouvorPage() {
           <form onSubmit={handleEditMember} className="space-y-4 mt-4">
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Foto do Integrante</label>
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-primary/20">
-                  {newMemberPhotoPreview ? (
-                    <img src={newMemberPhotoPreview} alt="Preview" className="w-full h-full object-cover" />
-                  ) : (
-                    <Upload className="w-6 h-6 text-muted-foreground" />
-                  )}
-                </div>
-                <Input
-                  type="file"
-                  accept="image/*"
-                  onChange={handlePhotoChange}
-                  ref={editMemberFileInputRef}
-                  className="hidden"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => editMemberFileInputRef.current?.click()}
-                >
-                  Alterar Foto
-                </Button>
+              <div className="space-y-4">
+                <Tabs defaultValue="upload" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2 mb-2">
+                    <TabsTrigger value="upload" className="text-xs">Ficheiro</TabsTrigger>
+                    <TabsTrigger value="link" className="text-xs">Link da Foto</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="upload">
+                    <div className="flex items-center gap-4">
+                      <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-primary/20">
+                        {newMemberPhotoPreview ? (
+                          <img src={newMemberPhotoPreview} alt="Preview" className="w-full h-full object-cover" />
+                        ) : (
+                          <Upload className="w-6 h-6 text-muted-foreground" />
+                        )}
+                      </div>
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={handlePhotoChange}
+                        ref={editMemberFileInputRef}
+                        className="hidden"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={isUploadingPhoto}
+                        onClick={() => editMemberFileInputRef.current?.click()}
+                      >
+                        {isUploadingPhoto ? "Carregando..." : "Alterar Foto"}
+                      </Button>
+                    </div>
+                  </TabsContent>
+                  <TabsContent value="link">
+                    <div className="space-y-2">
+                      <Input
+                        type="url"
+                        placeholder="https://exemplo.com/foto.jpg"
+                        value={newMemberPhotoUrl}
+                        onChange={(e) => {
+                          setNewMemberPhotoUrl(e.target.value);
+                          setNewMemberPhotoPreview(e.target.value);
+                        }}
+                        className="text-xs"
+                      />
+                      {newMemberPhotoPreview && (
+                        <div className="flex justify-center">
+                          <img src={newMemberPhotoPreview} alt="Preview" className="w-16 h-16 rounded-full object-cover border-2 border-primary/20" />
+                        </div>
+                      )}
+                    </div>
+                  </TabsContent>
+                </Tabs>
               </div>
             </div>
             <div>
