@@ -58,7 +58,7 @@ serve(async (req) => {
 
         // Fetch from Facebook Graph API via /posts which is more reliable for most apps
         // using attachments to get images
-        const fbUrl = `https://graph.facebook.com/v19.0/${pageId}/feed?fields=full_picture,link,message,created_time&limit=12&access_token=${accessToken}`
+        const fbUrl = `https://graph.facebook.com/v19.0/${pageId}/photos?fields=images,link,name,created_time&type=uploaded&limit=12&access_token=${accessToken}`
         const response = await fetch(fbUrl);
 
         if (!response.ok) {
