@@ -583,7 +583,7 @@ export default function DiscipuladoPage() {
     const { data: sessions = [], isLoading: loadingSessions } = useQuery({
         queryKey: ["discipleship-sessions"],
         queryFn: async () => {
-            const { data, error } = await supabase
+            const { data, error } = await (supabase as any)
                 .from("discipleship_sessions")
                 .select("*")
                 .order("session_date", { ascending: false });
