@@ -56,20 +56,46 @@ serve(async (req) => {
             )
         }
 
-        // Fetch from Facebook Graph API via /posts which is more reliable for most apps
-        // using attachments to get images
-        const fbUrl = `https://graph.facebook.com/v19.0/${pageId}/photos?fields=images,link,name,created_time&type=uploaded&limit=12&access_token=${accessToken}`
-        const response = await fetch(fbUrl);
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error?.message || 'Facebook API Error');
+        const placeholderData = {
+            data: [
+                { id: "1", link: "#", images: [{ source: "https://images.unsplash.com/photo-1438232992991-995b7058bbb3?w=800" }] },
+                { id: "2", link: "#", images: [{ source: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=800" }] },
+                { id: "3", link: "#", images: [{ source: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800" }] },
+                { id: "4", link: "#", images: [{ source: "https://images.unsplash.com/photo-1473280025148-643f9b0cbac2?w=800" }] },
+                { id: "5", link: "#", images: [{ source: "https://images.unsplash.com/photo-1544062831-419b671a5ff6?w=800" }] },
+                { id: "6", link: "#", images: [{ source: "https://images.unsplash.com/photo-1540822607994-43632cf4b628?w=800" }] },
+            ],
+            placeholder: true
         }
 
-        const data = await response.json();
+        // Try /photos endpoint first, then /feed, then /posts
+        const endpoints = [
+            `https://graph.facebook.com/v19.0/${pageId}/photos?fields=images,link,name,created_time&type=uploaded&limit=12&access_token=${accessToken}`,
+            `https://graph.facebook.com/v19.0/${pageId}/feed?fields=full_picture,link,message,created_time&limit=12&access_token=${accessToken}`,
+            `https://graph.facebook.com/v19.0/${pageId}/posts?fields=attachments,link,message,created_time&limit=10&access_token=${accessToken}`,
+        ]
 
+        for (const fbUrl of endpoints) {
+            try {
+                const response = await fetch(fbUrl);
+                if (response.ok) {
+                    const data = await response.json();
+                    return new Response(
+                        JSON.stringify(data),
+                        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
+                    )
+                }
+                const errBody = await response.text();
+                console.log(`Endpoint failed: ${errBody}`);
+            } catch (e) {
+                console.log(`Fetch error: ${(e as Error).message}`);
+            }
+        }
+
+        // All endpoints failed — return placeholder
+        console.log('All Facebook API endpoints failed, returning placeholder data')
         return new Response(
-            JSON.stringify(data),
+            JSON.stringify(placeholderData),
             { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
         )
     } catch (error: unknown) {
