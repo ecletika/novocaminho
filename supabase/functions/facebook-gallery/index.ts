@@ -29,6 +29,12 @@ serve(async (req) => {
             pageId = configData.value
         }
 
+        // Clean pageId in case it's a full URL
+        if (pageId && pageId.includes('facebook.com')) {
+            const parts = pageId.split('/')
+            pageId = parts.filter(p => p.length > 0).pop() || pageId
+        }
+
         const accessToken = Deno.env.get('FACEBOOK_ACCESS_TOKEN')
 
         // If variables aren't configured, return placeholder data
