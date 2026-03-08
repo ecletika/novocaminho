@@ -39,6 +39,7 @@ import AdminLiderancaPage from "./pages/admin/AdminLiderancaPage";
 import AdminEscalasPage from "./pages/admin/AdminEscalasPage";
 import UsersPage from "./pages/admin/UsersPage";
 import ProtectedRoute from "./components/ProtectedRoute";
+import PermissionRoute from "./components/PermissionRoute";
 import CasadosProtectedRoute from "./components/CasadosProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -67,21 +68,26 @@ const App = () => (
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/registo-aniversario" element={<RegistoAniversarioPage />} />
 
-            {/* Admin Routes - Protected */}
+            {/* Admin Routes — ProtectedRoute garante autenticação, PermissionRoute garante permissão por área */}
             <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
-              <Route index element={<AdminDashboard />} />
-              <Route path="inventario" element={<InventarioPage />} />
-              <Route path="louvor" element={<LouvorPage />} />
-              <Route path="tech" element={<TechPage />} />
-              <Route path="docs" element={<DocsPage />} />
-              <Route path="ministerios" element={<AdminMinisteriosPage />} />
-              <Route path="eventos" element={<AdminEventosPage />} />
-              <Route path="escalas" element={<AdminEscalasPage />} />
-              <Route path="aniversarios" element={<AniversariosPage />} />
-              <Route path="casados" element={<AdminCasadosPage />} />
-              <Route path="users" element={<UsersPage />} />
-              <Route path="lideranca" element={<AdminLiderancaPage />} />
-              <Route path="config" element={<ConfigPage />} />
+              {/* Dashboard: acessível a todos os utilizadores autenticados */}
+              <Route index element={<PermissionRoute perm={null}><AdminDashboard /></PermissionRoute>} />
+
+              {/* Áreas com permissão específica */}
+              <Route path="inventario" element={<PermissionRoute perm="inventario"><InventarioPage /></PermissionRoute>} />
+              <Route path="louvor" element={<PermissionRoute perm="louvor"><LouvorPage /></PermissionRoute>} />
+              <Route path="tech" element={<PermissionRoute perm="tech"><TechPage /></PermissionRoute>} />
+              <Route path="docs" element={<PermissionRoute perm="docs"><DocsPage /></PermissionRoute>} />
+              <Route path="ministerios" element={<PermissionRoute perm="ministerios"><AdminMinisteriosPage /></PermissionRoute>} />
+              <Route path="eventos" element={<PermissionRoute perm="eventos"><AdminEventosPage /></PermissionRoute>} />
+              <Route path="escalas" element={<PermissionRoute perm="escalas"><AdminEscalasPage /></PermissionRoute>} />
+              <Route path="aniversarios" element={<PermissionRoute perm="aniversarios"><AniversariosPage /></PermissionRoute>} />
+              <Route path="casados" element={<PermissionRoute perm="casados"><AdminCasadosPage /></PermissionRoute>} />
+              <Route path="lideranca" element={<PermissionRoute perm="ministerios"><AdminLiderancaPage /></PermissionRoute>} />
+              <Route path="config" element={<PermissionRoute perm="config"><ConfigPage /></PermissionRoute>} />
+
+              {/* Gestão de utilizadores: exclusivo para admins */}
+              <Route path="users" element={<PermissionRoute perm="admin"><UsersPage /></PermissionRoute>} />
             </Route>
 
             {/* Catch all */}

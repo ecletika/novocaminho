@@ -103,9 +103,10 @@ export default function AniversariosPage() {
       woman_birthday: birthday.woman_birthday || "",
       man_birthday: birthday.man_birthday || "",
       photo_url: birthday.photo_url || "",
+      // ✅ Preserva o is_leader real vindo da BD
       ministry_selections: birthday.ministries?.map((m) => ({
         ministry_id: m.ministry_id,
-        is_leader: false,
+        is_leader: m.is_leader ?? false,
         leader_id: null,
       })) || [],
     });
@@ -561,28 +562,35 @@ export default function AniversariosPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Ministérios</Label>
+              <Label className="flex items-center gap-2 font-medium">Ministérios e Papéis</Label>
               <div className="space-y-2 max-h-48 overflow-y-auto p-2 border rounded-lg">
                 {ministries.filter((m) => m.is_active).map((ministry) => {
                   const selection = formData.ministry_selections.find(s => s.ministry_id === ministry.id);
                   return (
-                    <div key={ministry.id} className="flex items-center justify-between p-2 rounded hover:bg-muted/50">
+                    <div key={ministry.id} className={`flex items-center justify-between p-2 rounded transition-colors ${selection ? 'bg-primary/5 border border-primary/20' : 'hover:bg-muted/50'}`}>
                       <div className="flex items-center gap-2">
                         <Checkbox
                           id={`ministry-${ministry.id}`}
                           checked={!!selection}
                           onCheckedChange={() => toggleMinistry(ministry.id)}
                         />
-                        <label htmlFor={`ministry-${ministry.id}`} className="text-sm cursor-pointer">{ministry.title}</label>
+                        <label htmlFor={`ministry-${ministry.id}`} className={`text-sm cursor-pointer font-medium ${selection ? 'text-foreground' : 'text-muted-foreground'}`}>
+                          {ministry.title}
+                        </label>
                       </div>
                       {selection && (
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 ml-4">
                           <Checkbox
                             id={`leader-${ministry.id}`}
                             checked={selection.is_leader}
                             onCheckedChange={() => toggleLeader(ministry.id)}
                           />
-                          <label htmlFor={`leader-${ministry.id}`} className="text-xs cursor-pointer text-muted-foreground">Líder?</label>
+                          <label
+                            htmlFor={`leader-${ministry.id}`}
+                            className={`text-xs cursor-pointer font-semibold uppercase tracking-wide ${selection.is_leader ? 'text-primary' : 'text-muted-foreground'}`}
+                          >
+                            {selection.is_leader ? '★ Líder' : 'Líder?'}
+                          </label>
                         </div>
                       )}
                     </div>

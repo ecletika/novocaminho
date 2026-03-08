@@ -135,15 +135,18 @@ export default function MinisteriosPage() {
 function MinistryCard({ ministry, index, onClick }: { ministry: Ministry, index: number, onClick: () => void }) {
   const IconComponent = iconMap[ministry.icon] || Users;
   const imageUrl = ministry.image_url || defaultImages[ministry.slug] || worshipImage;
-  const isCasados = ministry.slug === "casados";
+
+  // Apenas o slug "casados-para-sempre" redireciona para a página dedicada /casados
+  // Todos os outros ministérios (incluindo o ministério de casais) abrem o modal normal
+  const isCasadosParaSempre = ministry.slug === "casados-para-sempre";
 
   return (
     <div
       className="group relative bg-card rounded-3xl overflow-hidden shadow-soft hover:shadow-2xl transition-all duration-500 animate-fade-up cursor-pointer border border-border/50"
       style={{ animationDelay: `${(index % 6) * 100}ms` }}
-      onClick={isCasados ? undefined : onClick}
+      onClick={isCasadosParaSempre ? undefined : onClick}
     >
-      {isCasados ? (
+      {isCasadosParaSempre ? (
         <Link to="/casados" className="block h-full">
           <CardContent ministry={ministry} IconComponent={IconComponent} imageUrl={imageUrl} />
         </Link>

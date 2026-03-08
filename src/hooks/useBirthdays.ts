@@ -19,7 +19,7 @@ export interface Birthday {
 }
 
 export interface BirthdayWithMinistries extends Birthday {
-  ministries: { ministry_id: string }[];
+  ministries: { ministry_id: string; is_leader: boolean }[];
 }
 
 export interface BirthdayInsert {
@@ -44,7 +44,7 @@ export function useBirthdays() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("birthdays")
-        .select("*, ministries:birthday_ministries(ministry_id)")
+        .select("*, ministries:birthday_ministries(ministry_id, is_leader)")
         .order("birthday_date", { ascending: true });
 
       if (error) throw error;
@@ -78,16 +78,14 @@ export function useMonthlyBirthdays() {
 
 // Fetch birthdays by ministry
 export function useBirthdaysByMinistry(ministryId: string | undefined) {
-  const currentMonth = new Date().getMonth() + 1;
-
   return useQuery({
-    queryKey: ["birthdays", "ministry", ministryId, currentMonth],
+    queryKey: ["birthdays", "ministry", ministryId],
     queryFn: async () => {
       if (!ministryId) return [];
 
       const { data, error } = await supabase
         .from("birthday_ministries")
-        .select("birthday_id, birthdays(*)")
+        .select("birthday_id, is_leader, birthdays(*)")
         .eq("ministry_id", ministryId);
 
       if (error) throw error;
@@ -96,11 +94,14 @@ export function useBirthdaysByMinistry(ministryId: string | undefined) {
         .map((item) => {
           const birthday = item.birthdays as unknown as Birthday;
           if (!birthday) return null;
-          return birthday;
+          return {
+            ...birthday,
+            is_leader: item.is_leader ?? false,
+          };
         })
         .filter(Boolean);
 
-      return members as Birthday[];
+      return members as (Birthday & { is_leader: boolean })[];
     },
     enabled: !!ministryId,
   });
