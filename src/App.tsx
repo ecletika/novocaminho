@@ -38,6 +38,7 @@ import AdminCasadosPage from "./pages/admin/AdminCasadosPage";
 import AdminLiderancaPage from "./pages/admin/AdminLiderancaPage";
 import AdminEscalasPage from "./pages/admin/AdminEscalasPage";
 import UsersPage from "./pages/admin/UsersPage";
+import DiscipuladoPage from "./pages/DiscipuladoPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PermissionRoute from "./components/PermissionRoute";
 import CasadosProtectedRoute from "./components/CasadosProtectedRoute";
@@ -67,6 +68,18 @@ const App = () => (
             <Route element={<PublicLayout><BibliaPage /></PublicLayout>} path="/biblia" />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/registo-aniversario" element={<RegistoAniversarioPage />} />
+
+            {/* Discipulado — rota isolada, acesso por permissão especial */}
+            <Route
+              path="/discipulado"
+              element={
+                <ProtectedRoute>
+                  <PermissionRoute perm="discipulado">
+                    <DiscipuladoPage />
+                  </PermissionRoute>
+                </ProtectedRoute>
+              }
+            />
 
             {/* Admin Routes — ProtectedRoute garante autenticação, PermissionRoute garante permissão por área */}
             <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
