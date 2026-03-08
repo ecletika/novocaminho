@@ -52,9 +52,9 @@ serve(async (req) => {
             { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
 
-    } catch (err) {
+    } catch (err: unknown) {
         return new Response(
-            JSON.stringify({ error: err.message || "Erro interno." }),
+            JSON.stringify({ error: (err as Error).message || "Erro interno." }),
             { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
     }
