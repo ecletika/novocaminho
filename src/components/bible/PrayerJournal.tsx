@@ -93,7 +93,7 @@ const PrayerJournal: React.FC<PrayerJournalProps> = ({ user, onAuthRequired }) =
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm("Deseja remover este registro permanentemente?")) return;
+    if (!window.confirm("Deseja remover este registo permanentemente?")) return;
     const success = await deletePrayer(id);
     if (success) {
       setPrayers(prev => prev.filter(p => p.id !== id));
@@ -113,7 +113,7 @@ const PrayerJournal: React.FC<PrayerJournalProps> = ({ user, onAuthRequired }) =
           <Lock size={64} className="text-[#1E40AF] mx-auto mb-6 opacity-20" />
           <h2 className="text-3xl font-serif font-bold text-gray-900 dark:text-gray-100 mb-4 text-center">Caderno de Oração</h2>
           <p className="text-gray-500 dark:text-gray-400 mb-8 leading-relaxed text-center">
-            Tenha um lugar sagrado para suas conversas com Deus. Faça login para gerenciar seus pedidos e agradecimentos.
+            Tenha um lugar sagrado para suas conversas com Deus. Faça login para gerir seus pedidos e agradecimentos.
           </p>
           <button 
             onClick={onAuthRequired}
@@ -169,7 +169,7 @@ const PrayerJournal: React.FC<PrayerJournalProps> = ({ user, onAuthRequired }) =
       ) : filteredPrayers.length === 0 ? (
         <div className="py-24 text-center bg-white dark:bg-gray-900 rounded-[3rem] border-4 border-dashed border-gray-100 dark:border-gray-800">
            {filter === 'answered' ? <Sparkles size={64} className="mx-auto mb-4 text-amber-200" /> : <Heart size={64} className="mx-auto mb-4 text-gray-100 dark:text-gray-800 opacity-30" />}
-           <p className="text-gray-400 font-serif italic text-xl">Nenhum registro encontrado.</p>
+           <p className="text-gray-400 font-serif italic text-xl">Nenhum registo encontrado.</p>
            <button onClick={handleOpenNew} className="mt-4 text-[#1E40AF] font-bold underline text-sm">Adicionar nova petição</button>
         </div>
       ) : (
@@ -297,7 +297,7 @@ const PrayerJournal: React.FC<PrayerJournalProps> = ({ user, onAuthRequired }) =
                         <div className="w-10 h-10 bg-[#1E40AF]/10 rounded-xl flex items-center justify-center text-[#1E40AF]"><Users size={20} /></div>
                         <div>
                             <p className="font-bold text-sm text-gray-900 dark:text-white">Compartilhar no Mural?</p>
-                            <p className="text-[10px] text-gray-400 uppercase font-black">Outros irmãos poderão orar por você</p>
+                            <p className="text-[10px] text-gray-400 uppercase font-black">Outros irmãos poderão orar por si</p>
                         </div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">

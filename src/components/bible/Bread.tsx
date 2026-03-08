@@ -215,7 +215,7 @@ CREATE POLICY "Select Public" ON daily_bread FOR SELECT USING (true);`}</pre>
                <textarea 
                  value={reflection} 
                  onChange={(e) => setReflection(e.target.value)} 
-                 placeholder="O que Deus falou com você hoje através desta palavra?" 
+                 placeholder="O que Deus falou consigo hoje através desta palavra?" 
                  className="w-full bg-gray-50 dark:bg-gray-900 border-none rounded-[2rem] p-8 min-h-[160px] outline-none font-serif text-xl italic text-gray-800 dark:text-gray-200 shadow-inner transition-all focus:ring-4 ring-[#1E40AF]/10" 
                />
                <div className="flex justify-end mt-6">
@@ -224,7 +224,7 @@ CREATE POLICY "Select Public" ON daily_bread FOR SELECT USING (true);`}</pre>
                     className={`flex items-center gap-3 px-12 py-5 rounded-full font-bold text-lg shadow-2xl transition-all active:scale-95 ${saveSuccess ? 'bg-green-500 text-white' : 'bg-[#1E40AF] text-white hover:bg-[#1e3a8a]'}`}
                   >
                     {saveSuccess ? <CheckCircle2 size={24} /> : <Save size={24} />}
-                    {saveSuccess ? 'Guardado!' : 'Salvar no Diário'}
+                    {saveSuccess ? 'Guardado!' : 'Guardar no Diário'}
                   </button>
                </div>
             </section>

@@ -31,7 +31,7 @@ const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard, perm: null },
   { name: "Inventário", href: "/admin/inventario", icon: Package, perm: "inventario" },
   { name: "Louvor", href: "/admin/louvor", icon: Music, perm: "louvor" },
-  { name: "Mesa & Mídia", href: "/admin/tech", icon: Tv, perm: "tech" },
+  { name: "Mesa & Media", href: "/admin/tech", icon: Tv, perm: "tech" },
   { name: "Ministérios", href: "/admin/ministerios", icon: Users, perm: "ministerios" },
   { name: "Eventos", href: "/admin/eventos", icon: Calendar, perm: "eventos" },
   { name: "Escalas", href: "/admin/escalas", icon: Calendar, perm: "escalas" },

@@ -89,7 +89,7 @@ export default function LeadershipPage() {
                             <div key={member.id} className="bg-card rounded-xl p-5 border border-border flex flex-col sm:flex-row sm:items-center gap-6 group hover:shadow-md transition-all">
                                 <div className="flex-1 space-y-1">
                                     <span className="font-bold text-lg">{getName(member)}</span>
-                                    <p className="text-xs text-muted-foreground">{member.email || "Sem email cadastrado"}</p>
+                                    <p className="text-xs text-muted-foreground">{member.email || "Sem email registado"}</p>
                                 </div>
                             </div>
                         ))}
@@ -97,7 +97,7 @@ export default function LeadershipPage() {
                         {ministryMembers.length === 0 && (
                             <div className="text-center py-20 bg-muted/20 rounded-2xl border-2 border-dashed border-border">
                                 <Users className="mx-auto text-muted-foreground mb-4 opacity-20" size={48} />
-                                <p className="text-muted-foreground">Nenhum membro vinculado a este ministério.</p>
+                                <p className="text-muted-foreground">Nenhum membro associado a este ministério.</p>
                             </div>
                         )}
                     </div>

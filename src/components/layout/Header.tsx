@@ -11,7 +11,7 @@ const baseNavigation = [
   { name: "Eventos", href: "/eventos" },
   { name: "Bíblia", href: "/biblia" },
   { name: "No que Cremos", href: "/no-que-cremos" },
-  { name: "Contato", href: "/contato" },
+  { name: "Contacto", href: "/contacto" },
 ];
 
 export default function Header() {

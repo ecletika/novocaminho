@@ -11,7 +11,7 @@ import HomePage from "./pages/HomePage";
 import MinisteriosPage from "./pages/MinisteriosPage";
 import MinisterioDetailPage from "./pages/MinisterioDetailPage";
 import EventosPage from "./pages/EventosPage";
-import ContatoPage from "./pages/ContatoPage";
+import ContactoPage from "./pages/ContactoPage";
 import CasadosPage from "./pages/CasadosPage";
 import CasadosCursosPage from "./pages/casados/CasadosCursosPage";
 import CasadosMaterialPage from "./pages/casados/CasadosMaterialPage";
@@ -56,7 +56,7 @@ const App = () => (
             <Route element={<PublicLayout><MinisteriosPage /></PublicLayout>} path="/ministerios" />
             <Route element={<PublicLayout><MinisterioDetailPage /></PublicLayout>} path="/ministerios/:slug" />
             <Route element={<PublicLayout><EventosPage /></PublicLayout>} path="/eventos" />
-            <Route element={<PublicLayout><ContatoPage /></PublicLayout>} path="/contato" />
+            <Route element={<PublicLayout><ContactoPage /></PublicLayout>} path="/contacto" />
             <Route element={<PublicLayout><CasadosPage /></PublicLayout>} path="/casados" />
             <Route element={<PublicLayout><CasadosProtectedRoute><CasadosCursosPage /></CasadosProtectedRoute></PublicLayout>} path="/casados/cursos" />
             <Route element={<PublicLayout><CasadosProtectedRoute><CasadosMaterialPage /></CasadosProtectedRoute></PublicLayout>} path="/casados/material" />
@@ -65,7 +65,7 @@ const App = () => (
             <Route element={<PublicLayout><BelievePage /></PublicLayout>} path="/no-que-cremos" />
             <Route element={<PublicLayout><BibliaPage /></PublicLayout>} path="/biblia" />
             <Route path="/auth" element={<AuthPage />} />
-            <Route path="/cadastro-aniversario" element={<PublicBirthdayRegister />} />
+            <Route path="/registo-aniversario" element={<PublicBirthdayRegister />} />
 
             {/* Admin Routes - Protected */}
             <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>

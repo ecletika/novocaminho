@@ -155,7 +155,7 @@ const LibraryView: React.FC<LibraryViewProps> = ({ user }) => {
       resetForm();
     } else {
       if (result.code === '42P01') setTableMissing(true);
-      setFormError(result.error || "Erro ao salvar livro.");
+      setFormError(result.error || "Erro ao guardar livro.");
     }
     setIsSaving(false);
   };
@@ -236,7 +236,7 @@ INSERT INTO storage.buckets (id, name, public) VALUES ('books', 'books', true) O
       ) : filteredBooks.length === 0 ? (
         <div className="py-20 text-center bg-white dark:bg-gray-900 rounded-[2.5rem] border border-dashed border-gray-100 dark:border-gray-800">
            <BookOpen size={48} className="mx-auto mb-4 text-gray-200" />
-           <p className="text-gray-500 font-serif italic">Nenhum livro cadastrado.</p>
+           <p className="text-gray-500 font-serif italic">Nenhum livro registado.</p>
         </div>
       ) : (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">

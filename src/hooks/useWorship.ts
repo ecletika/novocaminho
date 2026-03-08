@@ -746,7 +746,7 @@ export function useUserWorshipSkills(userId?: string) {
   const isVocal = skills.some(s => s?.includes("vocal") || s?.includes("back"));
   const isMinister = skills.some(s => s?.includes("ministrante"));
   const isTech = skills.some(s =>
-    s.includes("som") || s.includes("mídia") || s.includes("midia") ||
+    s.includes("som") || s.includes("media") || s.includes("midia") ||
     s.includes("transmissão") || s.includes("transmissao") ||
     s.includes("projeção") || s.includes("projecao") ||
     s.includes("câmera") || s.includes("camera") ||

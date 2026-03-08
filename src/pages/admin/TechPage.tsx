@@ -47,7 +47,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const techRoles = [
   { id: "som", name: "Mesa de Som", icon: Radio },
-  { id: "midia", name: "Mídia/Projeção", icon: Monitor },
+  { id: "midia", name: "Media/Projeção", icon: Monitor },
   { id: "transmissao", name: "Transmissão/Live", icon: Tv },
   { id: "camera", name: "Câmera", icon: Camera },
 ];
@@ -101,10 +101,10 @@ export default function TechPage() {
   const updateGeneralSchedule = useUpdateGeneralSchedule();
   const deleteGeneralSchedule = useDeleteGeneralSchedule();
 
-  // Filter tech-related functions (Som, Mídia, Transmissão, etc.)
+  // Filter tech-related functions (Som, Media, Transmissão, etc.)
   const techFunctions = functions.filter(f =>
     f.name.toLowerCase().includes("som") ||
-    f.name.toLowerCase().includes("mídia") ||
+    f.name.toLowerCase().includes("media") ||
     f.name.toLowerCase().includes("midia") ||
     f.name.toLowerCase().includes("transmissão") ||
     f.name.toLowerCase().includes("transmissao") ||
@@ -141,9 +141,9 @@ export default function TechPage() {
   );
 
   const midiaMembers = techMembers.filter(m =>
-    m.primary_function?.name.toLowerCase().includes("mídia") ||
+    m.primary_function?.name.toLowerCase().includes("media") ||
     m.primary_function?.name.toLowerCase().includes("midia") ||
-    m.secondary_functions?.some(sf => sf.function?.name.toLowerCase().includes("mídia") || sf.function?.name.toLowerCase().includes("midia"))
+    m.secondary_functions?.some(sf => sf.function?.name.toLowerCase().includes("media") || sf.function?.name.toLowerCase().includes("midia"))
   );
 
   const transmissaoMembers = techMembers.filter(m =>
@@ -184,7 +184,7 @@ export default function TechPage() {
   ].filter(Boolean);
 
   const isTechMember = myFunctions.some(f =>
-    f?.includes("som") || f?.includes("mídia") || f?.includes("midia") ||
+    f?.includes("som") || f?.includes("media") || f?.includes("midia") ||
     f?.includes("transmissão") || f?.includes("transmissao") ||
     f?.includes("projeção") || f?.includes("projecao") ||
     f?.includes("câmera") || f?.includes("camera") ||
@@ -207,7 +207,7 @@ export default function TechPage() {
   const getRoleName = (role: string) => {
     switch (role) {
       case "som": return "Mesa de Som";
-      case "midia": return "Mídia/Projeção";
+      case "midia": return "Media/Projeção";
       case "transmissao": return "Transmissão";
       case "camera": return "Câmera";
       default: return role;
@@ -404,7 +404,7 @@ export default function TechPage() {
       assignments += `🎛️ *Som:*\n${somMembers.map(tm => `• ${tm.member?.name || "N/A"}`).join("\n")}\n\n`;
     }
     if (midiaMembers.length > 0) {
-      assignments += `📺 *Mídia:*\n${midiaMembers.map(tm => `• ${tm.member?.name || "N/A"}`).join("\n")}\n\n`;
+      assignments += `📺 *Media:*\n${midiaMembers.map(tm => `• ${tm.member?.name || "N/A"}`).join("\n")}\n\n`;
     }
     if (transmissaoMembers.length > 0) {
       assignments += `🎥 *Live:*\n${transmissaoMembers.map(tm => `• ${tm.member?.name || "N/A"}`).join("\n")}\n\n`;
@@ -433,7 +433,7 @@ export default function TechPage() {
     ].filter(Boolean);
 
     const mIsTech = mFunctions.some(f =>
-      f?.includes("som") || f?.includes("mídia") || f?.includes("midia") ||
+      f?.includes("som") || f?.includes("media") || f?.includes("midia") ||
       f?.includes("transmissão") || f?.includes("transmissao") ||
       f?.includes("projeção") || f?.includes("projecao") ||
       f?.includes("câmera") || f?.includes("camera") ||
@@ -461,8 +461,8 @@ export default function TechPage() {
         <Monitor className="w-12 h-12 text-muted-foreground mb-4" />
         <h2 className="text-xl font-semibold mb-2">Acesso Restrito</h2>
         <p className="text-muted-foreground">
-          Você não possui habilidades técnicas (som, mídia, etc.) vinculadas ao seu perfil.
-          Entre em contato com um administrador para configurar seu acesso.
+          Não possui habilidades técnicas (som, media, etc.) vinculadas ao seu perfil.
+          Entre em contacto com um administrador para configurar seu acesso.
         </p>
       </div>
     );
@@ -473,10 +473,10 @@ export default function TechPage() {
       {/* Header */}
       <div>
         <h1 className="font-display text-3xl font-bold text-foreground">
-          Mesa de Som & Mídia
+          Mesa de Som & Media
         </h1>
         <p className="text-muted-foreground mt-1">
-          Gerencie a equipe técnica de som, transmissão e projeção
+          Gerencie a equipa técnica de som, transmissão e projeção
         </p>
       </div>
 
@@ -523,7 +523,7 @@ export default function TechPage() {
               <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-foreground mb-2">Nenhum integrante encontrado</h3>
               <p className="text-muted-foreground mb-4">
-                Adicione integrantes com funções técnicas (Som, Mídia, etc.)
+                Adicione integrantes com funções técnicas (Som, Media, etc.)
               </p>
               <Button onClick={() => { resetMemberForm(); setIsNewMemberDialogOpen(true); }}>
                 <Plus className="w-4 h-4 mr-2" />
@@ -595,7 +595,7 @@ export default function TechPage() {
         <TabsContent value="schedule" className="space-y-6">
           <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
             <h2 className="font-display text-xl font-semibold text-foreground">
-              Escalas com Equipe Técnica
+              Escalas com Equipa Técnica
             </h2>
             {isAdmin && (
               <Button onClick={() => { resetScheduleForm(); setIsDialogOpen(true); }}>
@@ -662,7 +662,7 @@ export default function TechPage() {
               <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-foreground mb-2">Nenhuma escala encontrada</h3>
               <p className="text-muted-foreground">
-                As escalas com equipe técnica aparecerão aqui quando forem criadas.
+                As escalas com equipa técnica aparecerão aqui quando forem criadas.
               </p>
             </div>
           ) : (
@@ -737,7 +737,7 @@ export default function TechPage() {
                           <div className="space-y-2">
                             <span className="text-sm font-medium text-foreground flex items-center gap-2">
                               <Monitor className="w-4 h-4 text-blue-500" />
-                              Mídia
+                              Media
                             </span>
                             {midiaAssignments.map((tm) => (
                               <div key={tm.id} className="flex items-center gap-3 p-2 rounded-lg bg-muted/50 ml-6">
@@ -892,10 +892,10 @@ export default function TechPage() {
             </div>
             {isAdmin && (
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Usuário Vinculado (Opcional)</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Utilizador Associado (Opcional)</label>
                 <Select value={newMemberUserId} onValueChange={setNewMemberUserId}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione um usuário" />
+                    <SelectValue placeholder="Selecione um utilizador" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">Nenhum</SelectItem>
@@ -1008,10 +1008,10 @@ export default function TechPage() {
             </div>
             {isAdmin && (
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Usuário Vinculado (Opcional)</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Utilizador Associado (Opcional)</label>
                 <Select value={newMemberUserId} onValueChange={setNewMemberUserId}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione um usuário" />
+                    <SelectValue placeholder="Selecione um utilizador" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">Nenhum</SelectItem>
@@ -1043,7 +1043,7 @@ export default function TechPage() {
                 Cancelar
               </Button>
               <Button type="submit" className="flex-1" disabled={updateMember.isPending}>
-                {updateMember.isPending ? "Salvando..." : "Salvar"}
+                {updateMember.isPending ? "Salvando..." : "Guardar"}
               </Button>
             </div>
           </form>
@@ -1152,11 +1152,11 @@ export default function TechPage() {
               </div>
             </div>
 
-            {/* Mídia */}
+            {/* Media */}
             <div>
               <label className="block text-sm font-medium text-foreground mb-2 flex items-center gap-2">
                 <Monitor className="w-4 h-4 text-blue-500" />
-                Mídia
+                Media
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-32 overflow-y-auto border rounded-md p-2">
                 {midiaMembers.map((member) => (
@@ -1217,7 +1217,7 @@ export default function TechPage() {
                 Cancelar
               </Button>
               <Button type="submit" className="flex-1" disabled={createGeneralSchedule.isPending || updateGeneralSchedule.isPending}>
-                {createGeneralSchedule.isPending || updateGeneralSchedule.isPending ? "Salvando..." : isEditing ? "Salvar" : "Criar"}
+                {createGeneralSchedule.isPending || updateGeneralSchedule.isPending ? "Salvando..." : isEditing ? "Guardar" : "Criar"}
               </Button>
             </div>
           </form>

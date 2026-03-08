@@ -294,7 +294,7 @@ export default function AdminEventosPage() {
                   Cancelar
                 </Button>
                 <Button type="submit" className="flex-1" disabled={createEvent.isPending || updateEvent.isPending}>
-                  {editingEvent ? "Salvar" : "Criar"}
+                  {editingEvent ? "Guardar" : "Criar"}
                 </Button>
               </div>
             </form>

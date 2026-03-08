@@ -326,7 +326,7 @@ export default function UsersPage() {
                           />
                         </div>
                         <div className="space-y-1 md:col-span-2">
-                          <Label className="text-xs">Nova Senha (deixe em branco para não alterar)</Label>
+                          <Label className="text-xs">Nova Palavra-passe (deixe em branco para não alterar)</Label>
                           <div className="relative">
                             <Input
                               type={showEditPassword ? "text" : "password"}
@@ -377,7 +377,7 @@ export default function UsersPage() {
                       </Select>
                       <Button size="sm" onClick={handleSave} disabled={isSaving}>
                         {isSaving ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Save className="w-4 h-4 mr-1" />}
-                        Salvar
+                        Guardar
                       </Button>
                       <Button size="sm" variant="ghost" onClick={() => setEditingUser(null)} disabled={isSaving}>
                         Cancelar
@@ -514,7 +514,7 @@ export default function UsersPage() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Senha Temporária *</Label>
+              <Label>Palavra-passe Temporária *</Label>
               <div className="relative">
                 <Input
                   type={showPassword ? "text" : "password"}

@@ -14,7 +14,7 @@ export default function CasadosMaterialPage() {
                         Conteúdo de Estudo
                     </h1>
                     <p className="text-xl text-white/80 max-w-2xl mx-auto">
-                        Acesse as aulas, vídeos e materiais exclusivos do Casados Para Sempre.
+                        Aceda as aulas, vídeos e materiais exclusivos do Casados Para Sempre.
                     </p>
                 </div>
             </section>

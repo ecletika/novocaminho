@@ -996,7 +996,7 @@ const BibleView: React.FC<BibleViewProps> = ({ user, initialBook, initialChapter
             <textarea value={tempComment} onChange={e => setTempComment(e.target.value)} placeholder="Sua reflexão..." className={`w-full min-h-[160px] ${currentTheme.button} rounded-2xl p-6 outline-none text-lg italic border ${currentTheme.border} focus:border-[#8B7355] transition-all`} />
             <button onClick={handleSaveComment} disabled={isSavingComment} className="w-full bg-[#8B7355] text-white py-5 rounded-2xl font-bold shadow-2xl mt-8 flex items-center justify-center gap-3">
               {isSavingComment ? <Loader2 className="animate-spin" size={24} /> : <Save size={24} />}
-              Salvar Anotação
+              Guardar Anotação
             </button>
           </div>
         </div>

@@ -254,11 +254,11 @@ export default function CasadosPage() {
             Dúvidas ou Informações?
           </h2>
           <p className="text-xl text-primary-foreground/80 max-w-2xl mx-auto mb-10">
-            Fale conosco para saber mais sobre o ministério ou como participar das turmas.
+            Fale connosco para saber mais sobre o ministério ou como participar das turmas.
           </p>
           <Button variant="hero" size="xl" asChild>
-            <Link to="/contato">
-              Entre em Contato
+            <Link to="/contacto">
+              Entre em Contacto
               <ArrowRight className="w-5 h-5 ml-2" />
             </Link>
           </Button>

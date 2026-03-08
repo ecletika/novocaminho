@@ -41,8 +41,8 @@ export default function CasadosProtectedRoute({ children }: CasadosProtectedProp
                     </div>
                     <h2 className="font-display text-2xl font-bold mb-4">Acesso Restrito</h2>
                     <p className="text-muted-foreground mb-8 leading-relaxed">
-                        Você não tem permissão para acessar o Material Online.
-                        Entre em contato com um administrador para solicitar o acesso "Casados Para Sempre".
+                        Não tem permissão para aceder o Material Online.
+                        Entre em contacto com um administrador para solicitar o acesso "Casados Para Sempre".
                     </p>
                     <Link
                         to="/"

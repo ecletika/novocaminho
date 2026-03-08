@@ -99,7 +99,7 @@ export default function CasadosOnlineMaterial() {
 
     const handleToggleProgress = async (lessonId: string) => {
         if (!user) {
-            toast.error("É necessário estar logado para salvar seu progresso.");
+            toast.error("É necessário estar logado para guardar seu progresso.");
             return;
         }
         const success = await markCasadosLessonRead(user.id, lessonId);
@@ -202,7 +202,7 @@ export default function CasadosOnlineMaterial() {
 
     const handleCompromissoSubmit = async () => {
         if (!user) {
-            toast.error("Você precisa estar logado");
+            toast.error("Precisa estar logado");
             return;
         }
 
@@ -222,7 +222,7 @@ export default function CasadosOnlineMaterial() {
                 toast.success("Compromisso firmado com sucesso! Que Deus abençoe vossa jornada.");
                 setHasSubmittedCompromisso(true);
             } else {
-                toast.error("Erro ao salvar compromisso");
+                toast.error("Erro ao guardar compromisso");
             }
         } catch (err) {
             toast.error("Erro de conexão");
@@ -247,7 +247,7 @@ export default function CasadosOnlineMaterial() {
                 </div>
                 <h3 className="font-display text-2xl font-bold mb-2">Acesso Restrito</h3>
                 <p className="text-foreground/70 max-w-xs italic font-serif mb-6">
-                    Você precisa estar logado para acessar o Material Online do Casados Para Sempre.
+                    Precisa estar logado para aceder o Material Online do Casados Para Sempre.
                 </p>
                 <Button asChild>
                     <a href="/login">Fazer Login</a>
@@ -381,7 +381,7 @@ export default function CasadosOnlineMaterial() {
                             <div className="max-w-[760px] mx-auto bg-white rounded-[24px] shadow-2xl overflow-hidden border border-border mb-16 text-left">
                                 <div className="bg-[#1a2e4a] p-10 text-center relative">
                                     <h2 className="font-display text-3xl text-white font-bold mb-2 tracking-wide">Compromisso do Casal</h2>
-                                    <p className="text-[#a8bdd4] text-sm font-light">Registre o vosso compromisso perante Deus e um com o outro</p>
+                                    <p className="text-[#a8bdd4] text-sm font-light">Registe o vosso compromisso perante Deus e um com o outro</p>
                                     <div className="w-16 h-1 bg-[#c9a84c] mx-auto mt-4 rounded-full"></div>
                                 </div>
 
@@ -519,12 +519,12 @@ export default function CasadosOnlineMaterial() {
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
                     <div className="bg-white dark:bg-gray-900 rounded-3xl p-8 w-full max-w-md shadow-2xl relative">
                         <button onClick={() => setIsTopicModalOpen(false)} className="absolute top-4 right-4 p-2 hover:bg-muted rounded-full"><X size={20} /></button>
-                        <h3 className="text-xl font-bold mb-6">Gerenciar Módulo</h3>
+                        <h3 className="text-xl font-bold mb-6">Gerir Módulo</h3>
                         <div className="space-y-4">
                             <input type="text" placeholder="Título do Módulo" value={editingTopic?.title || ''} onChange={e => setEditingTopic({ ...editingTopic, title: e.target.value })} className="w-full p-4 rounded-xl border bg-muted/20" />
                             <input type="number" placeholder="Posição" value={editingTopic?.position || ''} onChange={e => setEditingTopic({ ...editingTopic, position: parseInt(e.target.value) })} className="w-full p-4 rounded-xl border bg-muted/20" />
                             <Button className="w-full h-12" disabled={isSaving} onClick={() => handleSaveTopic(editingTopic)}>
-                                {isSaving ? <Loader2 className="animate-spin" /> : <Save className="mr-2" size={18} />} Salvar Módulo
+                                {isSaving ? <Loader2 className="animate-spin" /> : <Save className="mr-2" size={18} />} Guardar Módulo
                             </Button>
                         </div>
                     </div>
@@ -536,7 +536,7 @@ export default function CasadosOnlineMaterial() {
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
                     <div className="bg-white dark:bg-gray-900 rounded-3xl p-8 w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-y-auto relative">
                         <button onClick={() => setIsLessonModalOpen(false)} className="absolute top-4 right-4 p-2 hover:bg-muted rounded-full"><X size={20} /></button>
-                        <h3 className="text-xl font-bold mb-6">Gerenciar Aula</h3>
+                        <h3 className="text-xl font-bold mb-6">Gerir Aula</h3>
                         <div className="space-y-4 text-left">
                             <div className="grid grid-cols-4 gap-4">
                                 <input type="text" placeholder="Título da Aula" value={editingLesson?.title || ''} onChange={e => setEditingLesson({ ...editingLesson, title: e.target.value })} className="col-span-3 p-4 rounded-xl border bg-muted/20" />

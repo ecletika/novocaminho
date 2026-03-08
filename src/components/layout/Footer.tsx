@@ -34,7 +34,7 @@ export default function Footer() {
                 { name: "Eventos", href: "/eventos" },
                 { name: "Casados Para Sempre", href: "/casados" },
                 { name: "No que Cremos", href: "/no-que-cremos" },
-                { name: "Contato", href: "/contato" },
+                { name: "Contacto", href: "/contacto" },
                 { name: "Documentação", href: "/admin/docs" },
               ].map((link) => (
                 <li key={link.name}>
@@ -51,7 +51,7 @@ export default function Footer() {
 
           {/* Contact */}
           <div>
-            <h3 className="font-display text-lg font-semibold mb-6">Contato</h3>
+            <h3 className="font-display text-lg font-semibold mb-6">Contacto</h3>
             <ul className="space-y-4">
               <li className="flex items-start gap-3 group">
                 <MapPin className="w-5 h-5 text-secondary shrink-0 mt-0.5" />

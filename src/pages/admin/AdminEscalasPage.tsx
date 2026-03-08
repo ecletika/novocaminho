@@ -206,7 +206,7 @@ export default function AdminEscalasPage() {
                 <div>
                     <h1 className="font-display text-3xl font-bold text-foreground">Escalas Gerais</h1>
                     <p className="text-muted-foreground mt-1">
-                        Cronograma completo de todas as equipes (Louvor e Técnica)
+                        Cronograma completo de todas as equipas (Louvor e Técnica)
                     </p>
                 </div>
                 <Button onClick={handleCreateNew}>
@@ -373,9 +373,9 @@ export default function AdminEscalasPage() {
                                         </div>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label className="text-xs">Mídia / Projeção</Label>
+                                        <Label className="text-xs">Media / Projeção</Label>
                                         <div className="border rounded-md p-3 space-y-2 bg-muted/20">
-                                            {members.filter(m => m.primary_function?.name?.toLowerCase().includes("mídia") || m.primary_function?.name?.toLowerCase().includes("midia")).map(m => (
+                                            {members.filter(m => m.primary_function?.name?.toLowerCase().includes("media") || m.primary_function?.name?.toLowerCase().includes("midia")).map(m => (
                                                 <div key={m.id} className="flex items-center gap-2">
                                                     <Checkbox
                                                         id={`midia-${m.id}`}
@@ -396,7 +396,7 @@ export default function AdminEscalasPage() {
                                 Cancelar
                             </Button>
                             <Button type="submit" className="flex-1">
-                                Salvar Escala
+                                Guardar Escala
                             </Button>
                         </div>
                     </form>

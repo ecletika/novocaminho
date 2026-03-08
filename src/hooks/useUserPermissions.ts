@@ -11,7 +11,7 @@ export interface UserPermission {
 export const ALL_PERMISSIONS = [
   { key: "inventario", label: "Inventário" },
   { key: "louvor", label: "Louvor" },
-  { key: "tech", label: "Mesa & Mídia" },
+  { key: "tech", label: "Mesa & Media" },
   { key: "ministerios", label: "Ministérios" },
   { key: "eventos", label: "Eventos" },
   { key: "conteudos", label: "Conteúdos" },

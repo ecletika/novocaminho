@@ -220,7 +220,7 @@ const PurposesView: React.FC<PurposesViewProps> = ({ onReadChapter }) => {
       showFeedbackMsg("Plano salvo!");
     } else {
       if (result.error?.includes('42P01') || result.error?.includes('not found')) setTableMissing(true);
-      setAdminError(result.error || "Erro ao salvar plano.");
+      setAdminError(result.error || "Erro ao guardar plano.");
     }
     setIsSavingAdmin(false);
   };
@@ -250,7 +250,7 @@ const PurposesView: React.FC<PurposesViewProps> = ({ onReadChapter }) => {
         if (result.error?.includes('42P01') || result.error?.includes('not found')) {
             setTableMissing(true);
         } else {
-            setAdminError(result.error || "Erro ao salvar conteúdo diário.");
+            setAdminError(result.error || "Erro ao guardar conteúdo diário.");
         }
       }
     } catch (err: any) {
@@ -502,7 +502,7 @@ const PurposesView: React.FC<PurposesViewProps> = ({ onReadChapter }) => {
                         );
                       })}
 
-                      {/* VERSÍCULOS ADICIONADOS PELO USUÁRIO */}
+                      {/* VERSÍCULOS ADICIONADOS PELO UTILIZADOR */}
                       {extraVerses.map((ref: string, idx: number) => {
                         const isChecked = checkedVerses.includes(ref);
                         return (
@@ -548,7 +548,7 @@ const PurposesView: React.FC<PurposesViewProps> = ({ onReadChapter }) => {
                         disabled={!newExtraVerse.trim()}
                         className="bg-white text-black px-4 py-3 rounded-xl font-bold text-xs hover:scale-105 transition-all disabled:opacity-50"
                       >
-                        Vincular
+                        Associar
                       </button>
                    </div>
                 </div>
@@ -619,7 +619,7 @@ const PurposesView: React.FC<PurposesViewProps> = ({ onReadChapter }) => {
                       placeholder="Ex: João 3:16, Salmos 23:1, Mateus 1:1-10" 
                       className="w-full p-5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-2xl font-serif text-lg text-gray-900 dark:text-white focus:ring-4 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF] outline-none transition-all shadow-inner" 
                     />
-                    <p className="text-[9px] text-gray-400 px-2 font-medium">Use vírgula para separar cada referência que o usuário deve ler.</p>
+                    <p className="text-[9px] text-gray-400 px-2 font-medium">Use vírgula para separar cada referência que o utilizador deve ler.</p>
                  </div>
 
                  <div className="space-y-2">
@@ -627,7 +627,7 @@ const PurposesView: React.FC<PurposesViewProps> = ({ onReadChapter }) => {
                     <textarea 
                       value={editingContent?.content || ''} 
                       onChange={e => setEditingContent({...editingContent, content: e.target.value})} 
-                      placeholder="Escreva aqui o texto que o usuário lerá no dia..." 
+                      placeholder="Escreva aqui o texto que o utilizador lerá no dia..." 
                       className="w-full p-6 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-2xl min-h-[250px] font-serif text-lg leading-relaxed text-gray-900 dark:text-white focus:ring-4 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF] outline-none transition-all shadow-inner resize-none" 
                     />
                  </div>
@@ -671,7 +671,7 @@ const PurposesView: React.FC<PurposesViewProps> = ({ onReadChapter }) => {
                     <input type="number" value={editingPurpose?.duration_days} onChange={e => setEditingPurpose({...editingPurpose, duration_days: Number(e.target.value)})} className="w-full p-4 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-2xl dark:text-white" />
                  </div>
                  <button type="submit" disabled={isSavingAdmin} className="w-full py-5 bg-black dark:bg-white text-white dark:text-black rounded-2xl font-bold shadow-xl active:scale-95 transition-all">
-                    {isSavingAdmin ? <Loader2 className="animate-spin mx-auto" /> : 'Salvar Plano'}
+                    {isSavingAdmin ? <Loader2 className="animate-spin mx-auto" /> : 'Guardar Plano'}
                  </button>
               </form>
            </div>

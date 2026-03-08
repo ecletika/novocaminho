@@ -36,7 +36,7 @@ export default function ConfigPage() {
       await updateConfig.mutateAsync({ key: "facebook_page_id", value: fbPageId });
       toast.success("Link do Facebook salvo!");
     } catch {
-      toast.error("Erro ao salvar");
+      toast.error("Erro ao guardar");
     }
   };
 
@@ -179,7 +179,7 @@ export default function ConfigPage() {
           </div>
           <Button onClick={handleSaveFacebook} disabled={updateConfig.isPending}>
             {updateConfig.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-            Salvar
+            Guardar
           </Button>
         </div>
       </div>

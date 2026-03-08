@@ -189,7 +189,7 @@ const DevotionalsView: React.FC<DevotionalsViewProps> = ({ user, initialDevotion
 
         const imageData = canvas.toDataURL('image/png');
         const blob = await (await fetch(imageData)).blob();
-        storyFiles.push(new File([blob], `estudo-tela-${i + 1}.png`, { type: 'image/png' }));
+        storyFiles.push(new File([blob], `estudo-ecrã-${i + 1}.png`, { type: 'image/png' }));
         
         if (platform === 'download') {
            const link = document.createElement('a');
@@ -362,7 +362,7 @@ const DevotionalsView: React.FC<DevotionalsViewProps> = ({ user, initialDevotion
       setShowFormModal(false);
       setEditingDevoId(null);
     } catch (err) {
-      showFeedback("Erro ao salvar.");
+      showFeedback("Erro ao guardar.");
     } finally {
       setIsProcessingForm(false);
     }
@@ -469,7 +469,7 @@ const DevotionalsView: React.FC<DevotionalsViewProps> = ({ user, initialDevotion
                          <textarea 
                            value={reflection} 
                            onChange={(e) => setReflection(e.target.value)} 
-                           placeholder="O que o Senhor falou com você hoje?" 
+                           placeholder="O que o Senhor falou consigo hoje?" 
                            className="flex-1 bg-gray-50 dark:bg-gray-800/50 border-none rounded-2xl p-6 outline-none font-serif text-xl italic text-gray-800 dark:text-white shadow-inner resize-none" 
                          />
                          <button onClick={handleSaveReflection} disabled={isSaving} className={`w-full py-5 rounded-2xl font-bold shadow-xl transition-all ${saveSuccess ? 'bg-green-500' : 'bg-[#1E40AF]'} text-white flex items-center justify-center gap-3`}>

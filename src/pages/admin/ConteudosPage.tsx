@@ -226,7 +226,7 @@ export default function ConteudosPage() {
         {filteredPosts.length === 0 && (
           <div className="text-center py-12 text-muted-foreground">
             <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p>Nenhum conteúdo cadastrado ainda.</p>
+            <p>Nenhum conteúdo registado ainda.</p>
           </div>
         )}
       </div>
@@ -344,7 +344,7 @@ export default function ConteudosPage() {
               </Button>
               <Button type="submit" className="flex-1" disabled={createPost.isPending || updatePost.isPending}>
                 {(createPost.isPending || updatePost.isPending) && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                {selectedPost ? "Salvar" : "Criar"}
+                {selectedPost ? "Guardar" : "Criar"}
               </Button>
             </div>
           </form>

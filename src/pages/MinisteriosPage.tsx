@@ -69,7 +69,7 @@ export default function MinisteriosPage() {
             Nossos Ministérios
           </h1>
           <p className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto animate-fade-up [animation-delay:200ms] font-medium">
-            Descubra como você pode florescer usando seus dons para servir a Deus e edificar a nossa comunidade.
+            Descubra como pode florescer usando seus dons para servir a Deus e edificar a nossa comunidade.
           </p>
         </div>
       </section>
@@ -108,14 +108,14 @@ export default function MinisteriosPage() {
               "Ide por todo o mundo e pregai o evangelho"
             </h2>
             <p className="text-xl text-white/80 font-medium tracking-wide">
-              Quer fazer parte de um ministério? Entre em contato e comece sua jornada de serviço hoje mesmo.
+              Quer fazer parte de um ministério? Entre em contacto e comece sua jornada de serviço hoje mesmo.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6">
               <Button size="lg" className="rounded-full px-10 bg-white text-primary hover:bg-white/90 font-bold uppercase tracking-widest text-xs" asChild>
-                <Link to="/contato">Fale Conosco</Link>
+                <Link to="/contacto">Fale Connosco</Link>
               </Button>
               <Button size="lg" variant="outline" className="rounded-full px-10 border-white/40 text-white hover:bg-white/10 font-bold uppercase tracking-widest text-xs" asChild>
-                <Link to="/cadastro-aniversario">Cadastrar-se na Igreja</Link>
+                <Link to="/registo-aniversario">Registar-se na Igreja</Link>
               </Button>
             </div>
           </div>
@@ -282,10 +282,10 @@ function MinistryDetailModal({ ministry, isOpen, onClose }: { ministry: Ministry
                   </div>
                 </div>
 
-                {/* Equipe */}
+                {/* Equipa */}
                 <div className="space-y-10">
                   <div className="text-center space-y-2">
-                    <h3 className="font-display text-3xl font-extrabold text-foreground uppercase tracking-tight">Equipe</h3>
+                    <h3 className="font-display text-3xl font-extrabold text-foreground uppercase tracking-tight">Equipa</h3>
                     <div className="w-12 h-1 bg-secondary mx-auto rounded-full" />
                   </div>
 
@@ -307,14 +307,14 @@ function MinistryDetailModal({ ministry, isOpen, onClose }: { ministry: Ministry
                       ))}
                     </div>
                   ) : (
-                    <p className="text-muted-foreground italic text-lg text-center py-4 w-full">Seja o primeiro a se unir a esta equipe!</p>
+                    <p className="text-muted-foreground italic text-lg text-center py-4 w-full">Seja o primeiro a se unir a esta equipa!</p>
                   )}
                 </div>
 
                 {/* Call Action */}
                 <div className="pt-10 border-t border-border mt-10">
                   <Button className="w-full rounded-full h-16 text-xs font-bold gap-3 uppercase tracking-[0.2em] shadow-xl shadow-primary/20" asChild>
-                    <Link to="/cadastro-aniversario">
+                    <Link to="/registo-aniversario">
                       <Star className="w-4 h-4 fill-current" />
                       Quero Fazer Parte Deste Ministério
                     </Link>

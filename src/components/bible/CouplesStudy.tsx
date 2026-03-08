@@ -116,7 +116,7 @@ const CouplesStudyView: React.FC<CouplesStudyViewProps> = ({ user, onAuthRequire
       }
       setLessons(lessonMap);
 
-      // Carregar Progresso do Usuário
+      // Carregar Progresso do Utilizador
       const progress = await getCouplesReadLessons(user.id);
       if (progress === "__TABLE_MISSING__") {
         setProgressTableMissing(true);
@@ -168,7 +168,7 @@ const CouplesStudyView: React.FC<CouplesStudyViewProps> = ({ user, onAuthRequire
       showFeedbackMsg("Aula concluída! Progresso salvo.");
     } else {
       if (result.code === '42P01') setProgressTableMissing(true);
-      else showFeedbackMsg("Erro ao salvar progresso.");
+      else showFeedbackMsg("Erro ao guardar progresso.");
     }
     setIsMarkingProgress(false);
   };
@@ -236,7 +236,7 @@ const CouplesStudyView: React.FC<CouplesStudyViewProps> = ({ user, onAuthRequire
         setColumnMissing(true);
         setShowLessonModal(false);
       } else {
-        setFormError(result.error || "Erro ao salvar aula. Verifique o banco.");
+        setFormError(result.error || "Erro ao guardar aula. Verifique o banco.");
       }
     }
     setIsSaving(false);
@@ -267,10 +267,10 @@ const CouplesStudyView: React.FC<CouplesStudyViewProps> = ({ user, onAuthRequire
           </div>
           <h2 className="text-3xl font-serif font-bold text-gray-900 dark:text-gray-100 mb-4 text-center">Área Reservada</h2>
           <p className="text-gray-500 dark:text-gray-400 mb-10 leading-relaxed italic font-serif text-lg text-center">
-            Este conteúdo é exclusivo para membros. Entre com sua conta para acessar os estudos bíblicos para casais.
+            Este conteúdo é exclusivo para membros. Entre com sua conta para aceder os estudos bíblicos para casais.
           </p>
           <button onClick={onAuthRequired} className="w-full bg-[#1E40AF] text-white py-5 rounded-2xl font-bold shadow-xl hover:scale-105 transition-all text-lg">
-            Acessar minha conta
+            Aceder minha conta
           </button>
         </div>
       </div>
@@ -502,7 +502,7 @@ CREATE POLICY "Users can insert own progress" ON couples_progress FOR INSERT WIT
               <input type="text" value={editingTopic?.title || ''} onChange={e => setEditingTopic({ ...editingTopic, title: e.target.value })} className="w-full bg-gray-50 dark:bg-gray-800 rounded-2xl p-5 outline-none border border-transparent focus:border-[#1E40AF]" placeholder="Título" required />
               <input type="number" value={editingTopic?.position || ''} onChange={e => setEditingTopic({ ...editingTopic, position: Number(e.target.value) })} className="w-full bg-gray-50 dark:bg-gray-800 rounded-2xl p-5 outline-none border border-transparent focus:border-[#1E40AF]" placeholder="Ordem" required />
               <button type="submit" disabled={isSaving} className="w-full bg-[#1E40AF] text-white py-5 rounded-2xl font-bold shadow-xl">
-                {isSaving ? <Loader2 className="animate-spin mx-auto" /> : 'Salvar'}
+                {isSaving ? <Loader2 className="animate-spin mx-auto" /> : 'Guardar'}
               </button>
             </form>
           </div>
@@ -514,7 +514,7 @@ CREATE POLICY "Users can insert own progress" ON couples_progress FOR INSERT WIT
         <div className="fixed inset-0 z-[160] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => { setShowLessonModal(false); setImagePreview(null); }} />
           <div className="relative w-full max-w-2xl bg-white dark:bg-gray-900 rounded-[2.5rem] p-10 shadow-2xl max-h-[90dvh] overflow-y-auto custom-scrollbar">
-            <h3 className="text-2xl font-serif font-bold mb-8">Gerenciar Aula</h3>
+            <h3 className="text-2xl font-serif font-bold mb-8">Gerir Aula</h3>
             <form onSubmit={handleSaveLesson} className="space-y-6 text-left">
               {formError && <div className="mb-4 p-4 bg-red-50 text-red-600 rounded-2xl flex items-center gap-2 text-xs"><AlertTriangle size={14} /> {formError}</div>}
 

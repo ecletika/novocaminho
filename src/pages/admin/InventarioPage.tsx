@@ -159,8 +159,8 @@ export default function InventarioPage() {
       setIsDialogOpen(false);
       resetForm();
     } catch (error: any) {
-      console.error("Erro ao salvar item:", error);
-      toast.error("Erro ao salvar item: " + (error.message || "Tente novamente"));
+      console.error("Erro ao guardar item:", error);
+      toast.error("Erro ao guardar item: " + (error.message || "Tente novamente"));
     }
   };
 
@@ -441,7 +441,7 @@ export default function InventarioPage() {
                 Cancelar
               </Button>
               <Button type="submit" variant="default" className="flex-1" disabled={createItem.isPending || updateItem.isPending}>
-                {createItem.isPending || updateItem.isPending ? "Salvando..." : isEditing ? "Salvar" : "Adicionar Item"}
+                {createItem.isPending || updateItem.isPending ? "Salvando..." : isEditing ? "Guardar" : "Adicionar Item"}
               </Button>
             </div>
           </form>

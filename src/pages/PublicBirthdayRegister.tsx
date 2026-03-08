@@ -90,7 +90,7 @@ export default function PublicBirthdayRegister() {
       if (error) throw error;
       setSubmitted(true);
     } catch (err: any) {
-      toast.error(err.message || "Erro ao cadastrar. Tente novamente.");
+      toast.error(err.message || "Erro ao registar. Tente novamente.");
     } finally {
       setIsSubmitting(false);
     }
@@ -284,11 +284,11 @@ export default function PublicBirthdayRegister() {
           </div>
 
           <div className="space-y-2">
-            <Label>Endereço</Label>
+            <Label>Morada</Label>
             <Input
               value={formData.address}
               onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-              placeholder="Seu endereço"
+              placeholder="Seu morada"
             />
           </div>
 

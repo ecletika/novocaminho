@@ -124,7 +124,7 @@ export default function MinisterioDetailPage() {
           <section className="space-y-8">
             <div className="text-center">
               <h2 className="font-display text-3xl font-bold text-foreground inline-flex flex-col items-center gap-2">
-                Equipe
+                Equipa
                 <span className="w-12 h-1 bg-secondary rounded-full" />
               </h2>
             </div>
@@ -141,7 +141,7 @@ export default function MinisterioDetailPage() {
                   </div>
                 ))
               ) : (
-                <p className="text-muted-foreground italic text-center w-full">Nenhum integrante cadastrado.</p>
+                <p className="text-muted-foreground italic text-center w-full">Nenhum integrante registado.</p>
               )}
             </div>
           </section>

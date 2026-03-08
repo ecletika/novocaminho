@@ -24,7 +24,7 @@ export const CASADOS_RESOURCES = [
         color: "primary"
     },
     {
-        title: "Material de Treinamento",
+        title: "Material de Formação",
         description: "Acesso a todos os materiais e recursos para líderes de grupo.",
         link: "https://2equal1.eu/europe/eu-training-material/",
         icon: "BookOpen",
@@ -49,7 +49,7 @@ export const CASADOS_RESOURCES = [
 export const CASADOS_PORTAL_LOGINS = [
     {
         title: "Portal do Líder (2equal1)",
-        description: "Acesse sua conta oficial para gerenciar materiais e treinamentos.",
+        description: "Aceda sua conta oficial para gerir materiais e formações.",
         link: "https://2equal1.eu/europe/eu-training-material/",
         icon: "Lock",
         color: "primary"

@@ -11,14 +11,14 @@ import logoImage from "@/assets/logo-igreja.jpeg";
 
 const loginSchema = z.object({
   email: z.string().trim().min(3, { message: "Identificador muito curto" }),
-  password: z.string().min(6, { message: "Senha deve ter pelo menos 6 caracteres" }),
+  password: z.string().min(6, { message: "Palavra-passe deve ter pelo menos 6 caracteres" }),
 });
 
 const signUpSchema = loginSchema.extend({
   fullName: z.string().trim().min(2, { message: "Nome deve ter pelo menos 2 caracteres" }),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
-  message: "As senhas não coincidem",
+  message: "As palavra-passes não coincidem",
   path: ["confirmPassword"],
 });
 
@@ -70,7 +70,7 @@ export default function AuthPage() {
           if (error.message.includes("Invalid login credentials")) {
             toast({
               title: "Erro no login",
-              description: "Email ou senha incorretos.",
+              description: "Email ou palavra-passe incorretos.",
               variant: "destructive",
             });
           } else {
@@ -83,7 +83,7 @@ export default function AuthPage() {
         } else {
           toast({
             title: "Bem-vindo!",
-            description: "Login realizado com sucesso.",
+            description: "Sessão iniciada com sucesso.",
           });
           navigate(from, { replace: true });
         }
@@ -110,8 +110,8 @@ export default function AuthPage() {
         if (error) {
           if (error.message.includes("User already registered")) {
             toast({
-              title: "Erro no cadastro",
-              description: "Este email já está cadastrado. Tente fazer login.",
+              title: "Erro no registo",
+              description: "Este email já está registado. Tente iniciar sessão.",
               variant: "destructive",
             });
           } else {
@@ -124,7 +124,7 @@ export default function AuthPage() {
         } else {
           toast({
             title: "Conta criada!",
-            description: "Seu cadastro foi realizado com sucesso.",
+            description: "Seu registo foi realizado com sucesso.",
           });
           navigate(from, { replace: true });
         }
@@ -164,8 +164,8 @@ export default function AuthPage() {
             </h1>
             <p className="text-muted-foreground mt-2">
               {isLogin
-                ? "Acesse o painel administrativo"
-                : "Cadastre-se para acessar o painel"}
+                ? "Aceda o painel administrativo"
+                : "Registe-se para aceder o painel"}
             </p>
           </div>
 
@@ -203,7 +203,7 @@ export default function AuthPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
+              <Label htmlFor="password">Palavra-passe</Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -228,7 +228,7 @@ export default function AuthPage() {
 
             {!isLogin && (
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirmar senha</Label>
+                <Label htmlFor="confirmPassword">Confirmar palavra-passe</Label>
                 <Input
                   id="confirmPassword"
                   type={showPassword ? "text" : "password"}
@@ -267,7 +267,7 @@ export default function AuthPage() {
               className="text-primary hover:underline text-sm"
             >
               {isLogin
-                ? "Não tem conta? Cadastre-se"
+                ? "Não tem conta? Registe-se"
                 : "Já tem conta? Faça login"}
             </button>
           </div>

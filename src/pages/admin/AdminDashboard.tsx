@@ -39,7 +39,7 @@ export default function AdminDashboard() {
       href: "/admin/inventario"
     },
     {
-      name: "Músicas Cadastradas",
+      name: "Músicas Registadas",
       value: statsLoading ? "-" : stats?.songsCount.toString() || "0",
       icon: Music,
       href: "/admin/louvor"
@@ -170,7 +170,7 @@ export default function AdminDashboard() {
               className="p-4 rounded-xl bg-secondary/10 hover:bg-secondary/20 transition-colors text-center"
             >
               <Tv className="w-8 h-8 text-secondary mx-auto mb-2" />
-              <span className="text-sm font-medium text-foreground">Mídia</span>
+              <span className="text-sm font-medium text-foreground">Media</span>
             </Link>
             <Link
               to="/admin/inventario"
@@ -203,7 +203,7 @@ export default function AdminDashboard() {
                 </div>
                 <div className="text-sm text-muted-foreground">
                   {nextSchedule.team_members?.filter((tm: any) => tm.role === "louvor")
-                    .map((tm: any) => tm.member?.name).join(", ") || "Sem equipe definida"}
+                    .map((tm: any) => tm.member?.name).join(", ") || "Sem equipa definida"}
                 </div>
               </div>
             ) : (

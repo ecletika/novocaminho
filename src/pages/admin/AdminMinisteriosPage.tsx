@@ -29,7 +29,7 @@ import { Plus, Edit, Trash2, Loader2, Users, Music, Tv, Heart, BookOpen, Mic2 } 
 const iconOptions = [
   { value: "Users", label: "Pessoas", Icon: Users },
   { value: "Music", label: "Música", Icon: Music },
-  { value: "Tv", label: "Mídia", Icon: Tv },
+  { value: "Tv", label: "Media", Icon: Tv },
   { value: "Heart", label: "Coração", Icon: Heart },
   { value: "BookOpen", label: "Livro", Icon: BookOpen },
   { value: "Mic2", label: "Microfone", Icon: Mic2 },
@@ -263,7 +263,7 @@ export default function AdminMinisteriosPage() {
                   {(createMinistry.isPending || updateMinistry.isPending) && (
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   )}
-                  {editingMinistry ? "Salvar" : "Criar"}
+                  {editingMinistry ? "Guardar" : "Criar"}
                 </Button>
               </DialogFooter>
             </form>
@@ -327,7 +327,7 @@ export default function AdminMinisteriosPage() {
 
         {ministries?.length === 0 && (
           <div className="text-center py-12 text-muted-foreground">
-            Nenhum ministério cadastrado ainda.
+            Nenhum ministério registado ainda.
           </div>
         )}
       </div>

@@ -77,7 +77,7 @@ const ShopView: React.FC<ShopViewProps> = ({ user, cart, setCart, addToCart }) =
       setShowAdminModal(false);
       setNewName(''); setNewPrice(''); setNewCategory(''); setNewImage('');
     } else {
-      setFormError(result.error || "Erro desconhecido ao salvar.");
+      setFormError(result.error || "Erro desconhecido ao guardar.");
     }
     setIsSaving(false);
   };
@@ -285,7 +285,7 @@ const ShopView: React.FC<ShopViewProps> = ({ user, cart, setCart, addToCart }) =
               <input type="text" value={newCategory} onChange={e => setNewCategory(e.target.value)} placeholder="Categoria" className="w-full bg-gray-50 dark:bg-gray-800 rounded-2xl p-4 outline-none" required />
               <input type="url" value={newImage} onChange={e => setNewImage(e.target.value)} placeholder="URL Imagem" className="w-full bg-gray-50 dark:bg-gray-800 rounded-2xl p-4 outline-none" required />
               <button type="submit" disabled={isSaving} className="w-full bg-[#1E40AF] text-white py-4 rounded-2xl font-bold">
-                {isSaving ? <Loader2 className="animate-spin mx-auto" /> : 'Salvar'}
+                {isSaving ? <Loader2 className="animate-spin mx-auto" /> : 'Guardar'}
               </button>
             </form>
           </div>

@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 
-export default function ContatoPage() {
+export default function ContactoPage() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -25,7 +25,7 @@ export default function ContatoPage() {
 
     toast({
       title: "Mensagem enviada!",
-      description: "Obrigado pelo contato. Responderemos em breve.",
+      description: "Obrigado pelo contacto. Responderemos em breve.",
     });
 
     setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
@@ -38,13 +38,13 @@ export default function ContatoPage() {
       <section className="pt-32 pb-16 gradient-hero">
         <div className="container-church text-center text-primary-foreground">
           <span className="inline-block px-4 py-2 rounded-full bg-secondary/20 text-secondary text-sm font-medium mb-6">
-            Fale Conosco
+            Fale Connosco
           </span>
           <h1 className="font-display text-5xl md:text-6xl font-bold mb-6">
-            Contato
+            Contacto
           </h1>
           <p className="text-xl text-primary-foreground/80 max-w-2xl mx-auto">
-            Estamos aqui para ajudar. Entre em contato conosco e teremos prazer em atendê-lo.
+            Estamos aqui para ajudar. Entre em contacto connosco e teremos prazer em atendê-lo.
           </p>
         </div>
       </section>
@@ -55,7 +55,7 @@ export default function ContatoPage() {
             {/* Contact Info */}
             <div>
               <h2 className="font-display text-3xl font-bold text-foreground mb-8">
-                Informações de Contato
+                Informações de Contacto
               </h2>
 
               <div className="space-y-6">
@@ -64,7 +64,7 @@ export default function ContatoPage() {
                     <MapPin className="w-6 h-6 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-foreground mb-1">Endereço</h3>
+                    <h3 className="font-semibold text-foreground mb-1">Morada</h3>
                     <a href="https://maps.app.goo.gl/sXLL4ZogkSUZ6uyt7" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
                       Rua da Parada N° 6<br />
                       Agualva-Cacém, Portugal
@@ -182,7 +182,7 @@ export default function ContatoPage() {
                         required
                         value={formData.subject}
                         onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                        placeholder="Motivo do contato"
+                        placeholder="Motivo do contacto"
                         className="h-12"
                       />
                     </div>

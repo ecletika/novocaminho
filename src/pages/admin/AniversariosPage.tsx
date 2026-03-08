@@ -160,9 +160,9 @@ export default function AniversariosPage() {
         await updateBirthday.mutateAsync({ id: selectedBirthday.id, ...data });
         toast.success("Aniversário atualizado com sucesso!");
       } else {
-        console.log("Modo de criação: inserindo novo registro...");
+        console.log("Modo de criação: inserindo novo registo...");
         await createBirthday.mutateAsync(data);
-        toast.success("Aniversário cadastrado com sucesso!");
+        toast.success("Aniversário registado com sucesso!");
       }
 
       setIsDialogOpen(false);
@@ -170,7 +170,7 @@ export default function AniversariosPage() {
       console.log("Submissão concluída com sucesso.");
     } catch (error: any) {
       console.error("Erro detalhado na submissão:", error);
-      toast.error("Erro ao salvar: " + (error.message || "Ocorreu um erro inesperado"));
+      toast.error("Erro ao guardar: " + (error.message || "Ocorreu um erro inesperado"));
     }
   };
 
@@ -239,7 +239,7 @@ export default function AniversariosPage() {
   };
 
   const copyRegistrationLink = () => {
-    const link = `${window.location.origin}/cadastro-aniversario`;
+    const link = `${window.location.origin}/registo-aniversario`;
     navigator.clipboard.writeText(link);
     toast.success("Link copiado para a área de transferência!");
   };
@@ -363,7 +363,7 @@ export default function AniversariosPage() {
             {filteredBirthdays.length === 0 && (
               <div className="text-center py-12 text-muted-foreground">
                 <Cake className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>Nenhum aniversário cadastrado ainda.</p>
+                <p>Nenhum aniversário registado ainda.</p>
               </div>
             )}
           </div>
@@ -405,7 +405,7 @@ export default function AniversariosPage() {
                     <th className="text-left p-3 font-medium text-muted-foreground">Tipo</th>
                     <th className="text-left p-3 font-medium text-muted-foreground">Telefone</th>
                     <th className="text-left p-3 font-medium text-muted-foreground">Email</th>
-                    <th className="text-left p-3 font-medium text-muted-foreground">Endereço</th>
+                    <th className="text-left p-3 font-medium text-muted-foreground">Morada</th>
                     <th className="text-left p-3 font-medium text-muted-foreground">Ministérios</th>
                   </tr>
                 </thead>
@@ -595,7 +595,7 @@ export default function AniversariosPage() {
               <Button type="button" variant="outline" className="flex-1" onClick={() => { setIsDialogOpen(false); resetForm(); }}>Cancelar</Button>
               <Button type="submit" className="flex-1" disabled={createBirthday.isPending || updateBirthday.isPending}>
                 {(createBirthday.isPending || updateBirthday.isPending) && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                {selectedBirthday ? "Salvar" : "Criar"}
+                {selectedBirthday ? "Guardar" : "Criar"}
               </Button>
             </div>
           </form>

@@ -94,9 +94,9 @@ const mockArticles = [
   },
   {
     id: 3,
-    title: "Configuração do espelhamento de telas",
+    title: "Configuração do espelhamento de ecrãs",
     category: "transmissao",
-    content: `<h2>Espelhamento de telas</h2>
+    content: `<h2>Espelhamento de ecrãs</h2>
 <p>Como configurar o espelhamento para projeção das letras.</p>`,
     author: "Pedro Costa",
     createdAt: "2024-12-08",
@@ -171,7 +171,7 @@ export default function DocsPage() {
     setEditContent(newArticle.content);
     toast({
       title: "Artigo criado!",
-      description: "Agora você pode editar o conteúdo.",
+      description: "Agora pode editar o conteúdo.",
     });
   };
 
@@ -259,7 +259,7 @@ export default function DocsPage() {
                 </Button>
                 <Button onClick={handleSaveArticle}>
                   <Save className="w-4 h-4 mr-2" />
-                  Salvar
+                  Guardar
                 </Button>
               </>
             ) : (

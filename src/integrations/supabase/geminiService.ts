@@ -35,7 +35,7 @@ export const generatePurposeDevotional = async (purposeTitle: string, day: numbe
       contents: `Gere um devocional rico e profundo para o DIA ${day} do propósito "${purposeTitle}".`,
       config: {
         responseMimeType: "application/json",
-        systemInstruction: `Você é um mentor espiritual cristão com profundo conhecimento bíblico. Gere um devocional impactante em português.
+        systemInstruction: `É um mentor espiritual cristão com profundo conhecimento bíblico. Gere um devocional impactante em português.
 A resposta DEVE ser um objeto JSON com:
 - title: Um título inspirador para o dia.
 - summary: Um resumo curto (2 frases).

@@ -273,7 +273,7 @@ export default function AdminCasadosPage() {
             </div>
             <Button onClick={saveAboutContent} disabled={isSavingAbout}>
               {isSavingAbout ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-              Salvar Página
+              Guardar Página
             </Button>
           </div>
         </TabsContent>
@@ -419,7 +419,7 @@ export default function AdminCasadosPage() {
                         </p>
                         {course.link && (
                           <a href={course.link} target="_blank" rel="noopener noreferrer" className="text-xs text-primary flex items-center gap-1 hover:underline">
-                            <ExternalLink className="w-3 h-3" /> Link de Cadastro
+                            <ExternalLink className="w-3 h-3" /> Link de Registo
                           </a>
                         )}
                       </div>
@@ -503,9 +503,9 @@ export default function AdminCasadosPage() {
                       </div>
                       <div>
                         <h4 className="font-bold text-lg group-hover:text-primary transition-colors">{portal.title}</h4>
-                        <p className="text-sm text-muted-foreground mt-1">{portal.description} Utilize seu e-mail e senha de acesso.</p>
+                        <p className="text-sm text-muted-foreground mt-1">{portal.description} Utilize seu e-mail e palavra-passe de acesso.</p>
                         <div className="flex items-center gap-2 mt-2 text-xs font-medium text-primary">
-                          <span>Acessar Login</span>
+                          <span>Aceder Login</span>
                           <ExternalLink className="w-3 h-3" />
                         </div>
                       </div>
@@ -576,7 +576,7 @@ export default function AdminCasadosPage() {
               <Button type="button" variant="outline" className="flex-1" onClick={() => { setIsPostDialogOpen(false); resetForm(); }}>Cancelar</Button>
               <Button type="submit" className="flex-1" disabled={createPost.isPending || updatePost.isPending}>
                 {(createPost.isPending || updatePost.isPending) && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                {selectedPost ? "Salvar" : "Criar"}
+                {selectedPost ? "Guardar" : "Criar"}
               </Button>
             </div>
           </form>
@@ -642,7 +642,7 @@ export default function AdminCasadosPage() {
               <Input id="courseDate" type="date" value={courseFormData.startDate} onChange={e => setCourseFormData({ ...courseFormData, startDate: e.target.value })} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="courseLink">Link de Cadastro (Externo)</Label>
+              <Label htmlFor="courseLink">Link de Registo (Externo)</Label>
               <Input id="courseLink" value={courseFormData.link} onChange={e => setCourseFormData({ ...courseFormData, link: e.target.value })} placeholder="https://..." />
             </div>
             <div className="space-y-2">
@@ -668,7 +668,7 @@ export default function AdminCasadosPage() {
                 setCourses([...courses, { id: Math.random().toString(), ...courseFormData }]);
               }
               setIsCourseDialogOpen(false);
-            }}>Salvar</Button>
+            }}>Guardar</Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -715,7 +715,7 @@ export default function AdminCasadosPage() {
                 setStudents([...students, { id: Math.random().toString(), ...studentFormData }]);
               }
               setIsStudentDialogOpen(false);
-            }}>Salvar</Button>
+            }}>Guardar</Button>
           </div>
         </DialogContent>
       </Dialog>

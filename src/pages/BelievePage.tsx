@@ -104,7 +104,7 @@ export default function BelievePage() {
                         </h2>
                         <p className="text-muted-foreground text-lg">
                             Estamos aqui para caminhar juntos e crescer no conhecimento da verdade.
-                            Sinta-se à vontade para entrar em contato ou nos visitar.
+                            Sinta-se à vontade para entrar em contacto ou nos visitar.
                         </p>
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                             <div className="flex items-center gap-2 px-6 py-3 bg-card rounded-full shadow-soft font-medium text-foreground">
@@ -113,7 +113,7 @@ export default function BelievePage() {
                             </div>
                             <div className="flex items-center gap-2 px-6 py-3 bg-card rounded-full shadow-soft font-medium text-foreground">
                                 <Heart className="w-5 h-5 text-red-500" />
-                                <span>Você é sempre bem-vindo!</span>
+                                <span>É sempre bem-vindo!</span>
                             </div>
                         </div>
                     </div>

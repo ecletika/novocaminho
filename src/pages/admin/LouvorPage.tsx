@@ -649,8 +649,8 @@ export default function LouvorPage() {
         <Music className="w-12 h-12 text-muted-foreground mb-4" />
         <h2 className="text-xl font-semibold mb-2">Acesso Restrito</h2>
         <p className="text-muted-foreground">
-          Você não possui habilidades de louvor vinculadas ao seu perfil.
-          Entre em contato com um administrador para configurar seu acesso.
+          Não possui habilidades de louvor vinculadas ao seu perfil.
+          Entre em contacto com um administrador para configurar seu acesso.
         </p>
       </div>
     );
@@ -870,7 +870,7 @@ export default function LouvorPage() {
                                   variant="ghost"
                                   size="icon"
                                   onClick={() => openViewLyricsInNewTab(song)}
-                                  title="Abrir cifra em tela inteira"
+                                  title="Abrir cifra em ecrã inteira"
                                 >
                                   <ExternalLink className="w-4 h-4 text-muted-foreground" />
                                 </Button>
@@ -926,7 +926,7 @@ export default function LouvorPage() {
             {membersLoading ? (
               <div className="col-span-full text-center py-8 text-muted-foreground">Carregando...</div>
             ) : ministers.length === 0 ? (
-              <div className="col-span-full text-center py-8 text-muted-foreground">Nenhum ministrante cadastrado. Adicione membros com a função "Ministrante" na aba Membros.</div>
+              <div className="col-span-full text-center py-8 text-muted-foreground">Nenhum ministrante registado. Adicione membros com a função "Ministrante" na aba Membros.</div>
             ) : (
               ministers.map((minister) => {
                 const ministerAssignments = assignments.filter(a => a.minister_id === minister.id);
@@ -1062,7 +1062,7 @@ export default function LouvorPage() {
           {functionsLoading ? (
             <div className="text-center py-8 text-muted-foreground">Carregando...</div>
           ) : functions.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">Nenhuma função cadastrada</div>
+            <div className="text-center py-8 text-muted-foreground">Nenhuma função registada</div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
               {functions.map((func) => (
@@ -1346,7 +1346,7 @@ export default function LouvorPage() {
                 Cancelar
               </Button>
               <Button type="submit" className="flex-1" disabled={updateSong.isPending}>
-                {updateSong.isPending ? "Salvando..." : "Salvar"}
+                {updateSong.isPending ? "Salvando..." : "Guardar"}
               </Button>
             </div>
           </form>
@@ -1509,7 +1509,7 @@ export default function LouvorPage() {
                 Cancelar
               </Button>
               <Button type="submit" className="flex-1" disabled={createGeneralSchedule.isPending || updateGeneralSchedule.isPending}>
-                {createGeneralSchedule.isPending || updateGeneralSchedule.isPending ? "Salvando..." : selectedSchedule ? "Salvar" : "Criar"}
+                {createGeneralSchedule.isPending || updateGeneralSchedule.isPending ? "Salvando..." : selectedSchedule ? "Guardar" : "Criar"}
               </Button>
             </div>
           </form>
@@ -1612,10 +1612,10 @@ export default function LouvorPage() {
             </div>
             {isAdmin && (
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Usuário Vinculado (Opcional)</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Utilizador Associado (Opcional)</label>
                 <Select value={newMemberUserId} onValueChange={setNewMemberUserId}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione um usuário" />
+                    <SelectValue placeholder="Selecione um utilizador" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">Nenhum</SelectItem>
@@ -1751,10 +1751,10 @@ export default function LouvorPage() {
             </div>
             {isAdmin && (
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Usuário Vinculado (Opcional)</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Utilizador Associado (Opcional)</label>
                 <Select value={newMemberUserId} onValueChange={setNewMemberUserId}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione um usuário" />
+                    <SelectValue placeholder="Selecione um utilizador" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">Nenhum</SelectItem>
@@ -1787,7 +1787,7 @@ export default function LouvorPage() {
                 Cancelar
               </Button>
               <Button type="submit" className="flex-1" disabled={updateMember.isPending}>
-                {updateMember.isPending ? "Salvando..." : "Salvar"}
+                {updateMember.isPending ? "Salvando..." : "Guardar"}
               </Button>
             </div>
           </form>

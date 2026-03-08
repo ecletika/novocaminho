@@ -22,7 +22,7 @@ const ministries = [
     href: "/ministerios/louvor",
   },
   {
-    title: "Mesa de Som & Mídia",
+    title: "Mesa de Som & Media",
     description: "Tecnologia a serviço do Reino, transmitindo a palavra ao mundo.",
     image: techImage,
     icon: Tv,
@@ -42,7 +42,7 @@ const upcomingEvents = [
     title: "Culto de Domingo",
     date: "22 Dez",
     time: "10:30",
-    description: "Venha adorar conosco e receber a palavra de Deus.",
+    description: "Venha adorar connosco e receber a palavra de Deus.",
   },
   {
     title: "Culto de Oração",
@@ -126,7 +126,7 @@ export default function HomePage() {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 animate-fade-up delay-300">
             <Button className="bg-white text-primary hover:bg-primary-foreground transition-all duration-500 rounded-full px-10 py-7 uppercase tracking-widest text-xs font-bold shadow-lg shadow-black/20" asChild>
-              <Link to="/contato">
+              <Link to="/contacto">
                 Visite-nos
               </Link>
             </Button>
@@ -189,7 +189,7 @@ export default function HomePage() {
               Servindo com Amor
             </h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Descubra como você pode fazer parte dos nossos ministérios e usar seus dons para o Reino de Deus
+              Descubra como pode fazer parte dos nossos ministérios e usar seus dons para o Reino de Deus
             </p>
           </div>
 
@@ -328,12 +328,12 @@ export default function HomePage() {
             Faça Parte da Nossa Família
           </h2>
           <p className="text-xl text-primary-foreground/80 max-w-2xl mx-auto mb-10">
-            Você é bem-vindo aqui. Venha conhecer nossa igreja e experimentar o amor de Deus.
+            É bem-vindo aqui. Venha conhecer nossa igreja e experimentar o amor de Deus.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button variant="hero" size="xl" asChild>
-              <Link to="/contato">
-                Entre em Contato
+              <Link to="/contacto">
+                Entre em Contacto
               </Link>
             </Button>
             <Button variant="hero-outline" size="xl" asChild>

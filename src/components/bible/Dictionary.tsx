@@ -93,7 +93,7 @@ const DictionaryView: React.FC = () => {
           messages: [
             { 
               role: "system", 
-              content: "Você é um assistente teológico especialista em léxico bíblico. Sua tarefa é extrair termos importantes do texto fornecido e formatá-los como um ARRAY de objetos JSON seguindo a estrutura de um dicionário bíblico (Strong). " +
+              content: "É um assistente teológico especialista em léxico bíblico. Sua tarefa é extrair termos importantes do texto fornecido e formatá-los como um ARRAY de objetos JSON seguindo a estrutura de um dicionário bíblico (Strong). " +
                        "Campos necessários por objeto: term, originalWord, transliteration, languagesInfo, definition, etymology, grammaticalForms (array), culturalContext, biblicalOccurrences (array de objetos {reference, text, explanation}), theologicalPerspectives (array de objetos {tradition, view}), practicalApplication. " +
                        "Retorne APENAS o JSON puro, sem explicações."
             },
@@ -372,7 +372,7 @@ const DictionaryView: React.FC = () => {
            <p className="text-gray-500 font-serif italic text-xl">Não encontramos nada para "{searchTerm}".</p>
            {isAdmin && (
              <button onClick={() => setShowAddModal(true)} className="mt-6 text-[#1E40AF] font-bold underline flex items-center gap-2 mx-auto">
-               <Plus size={16} /> Cadastrar "{searchTerm}" no acervo
+               <Plus size={16} /> Registar "{searchTerm}" no acervo
              </button>
            )}
         </div>
@@ -415,7 +415,7 @@ const DictionaryView: React.FC = () => {
                        {isProcessingPdf ? <Loader2 className="animate-spin" size={40} /> : <FileText size={40} />}
                     </div>
                     <h4 className="font-bold text-gray-900 dark:text-white text-lg">Importar do PDF</h4>
-                    <p className="text-sm text-gray-500 mt-2">Grok analisará o texto e extrairá os termos para você.</p>
+                    <p className="text-sm text-gray-500 mt-2">Grok analisará o texto e extrairá os termos para si.</p>
                   </div>
                   
                   {pdfFeedback && (
@@ -452,7 +452,7 @@ const DictionaryView: React.FC = () => {
                         className="w-full bg-[#1E40AF] text-white py-5 rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-95 transition-all"
                     >
                         {isProcessingPdf ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} />}
-                        Salvar tudo no Acervo
+                        Guardar tudo no Acervo
                     </button>
                   )}
                </div>

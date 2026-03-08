@@ -174,7 +174,7 @@ const ReflectionsView: React.FC<ReflectionsViewProps> = ({ user, onAuthRequired,
           <Lock size={64} className="text-[#1E40AF] mx-auto mb-6 opacity-20" />
           <h2 className="text-3xl font-serif font-bold text-gray-900 dark:text-gray-100 mb-4">Acesso Restrito</h2>
           <p className="text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">
-            Faça login para salvar e gerenciar suas anotações pessoais, reflexões bíblicas e pensamentos sobre os devocionais.
+            Faça login para guardar e gerir suas anotações pessoais, reflexões bíblicas e pensamentos sobre os devocionais.
           </p>
           <button 
             onClick={onAuthRequired}
@@ -239,7 +239,7 @@ const ReflectionsView: React.FC<ReflectionsViewProps> = ({ user, onAuthRequired,
         <div className="py-24 text-center bg-white dark:bg-gray-900 rounded-[3rem] border-4 border-dashed border-gray-100 dark:border-gray-800">
            <StickyNote size={64} className="mx-auto mb-4 text-gray-100 dark:text-gray-800" />
            <p className="text-gray-400 font-serif italic text-xl">Você ainda não tem anotações nesta categoria.</p>
-           <p className="text-gray-300 text-sm mt-2">Comece a ler a Bíblia e anote o que Deus falar com você!</p>
+           <p className="text-gray-300 text-sm mt-2">Comece a ler a Bíblia e anote o que Deus falar consigo!</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6">

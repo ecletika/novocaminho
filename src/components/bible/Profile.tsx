@@ -142,7 +142,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ user, onAuthRequired, setView
       <div className="max-w-2xl mx-auto py-20 text-center animate-in fade-in duration-700">
         <div className="bg-white dark:bg-gray-900 rounded-[3rem] p-12 shadow-xl border border-gray-100 dark:border-gray-800">
           <UserIcon size={64} className="mx-auto mb-6 text-[#1E40AF] opacity-20" />
-          <h2 className="text-3xl font-serif font-bold mb-4">Acesse seu Perfil</h2>
+          <h2 className="text-3xl font-serif font-bold mb-4">Aceda seu Perfil</h2>
           <p className="text-gray-500 mb-8">Faça login para ver suas notas, favoritos e personalizar sua conta.</p>
           <button onClick={onAuthRequired} className="bg-[#1E40AF] text-white px-10 py-4 rounded-full font-bold shadow-lg hover:scale-105 transition-all">Entrar agora</button>
         </div>
@@ -359,7 +359,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ user, onAuthRequired, setView
                   className="w-full bg-[#1E40AF] text-white py-5 rounded-2xl font-bold shadow-xl flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-95 transition-all"
                 >
                   {isSaving ? <Loader2 className="animate-spin" size={24} /> : <Save size={24} />}
-                  Salvar Alterações
+                  Guardar Alterações
                 </button>
               </form>
            </div>

@@ -39,7 +39,7 @@ export default function Auth({ onClose, onSuccess }: AuthProps) {
     }
   };
 
-  // Se o cadastro foi realizado com sucesso, mostramos a tela de "Verificar Email"
+  // Se o registo foi realizado com sucesso, mostramos a ecrã de "Verificar Email"
   if (isSignedUp) {
     return (
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -54,7 +54,7 @@ export default function Auth({ onClose, onSuccess }: AuthProps) {
            <h2 className="text-3xl font-serif font-bold text-gray-900 dark:text-white mb-4">Verifique seu e-mail</h2>
            <p className="text-gray-500 dark:text-gray-400 mb-10 leading-relaxed italic font-serif">
               Enviamos um link de confirmação para <strong className="text-[#1E40AF]">{email}</strong>. <br/><br/>
-              Aceda à sua caixa de entrada e clique no link para ativar a sua conta e começar a sua jornada conosco.
+              Aceda à sua caixa de entrada e clique no link para ativar a sua conta e começar a sua jornada connosco.
            </p>
            <button 
              onClick={onClose} 
@@ -91,7 +91,7 @@ export default function Auth({ onClose, onSuccess }: AuthProps) {
           </h2>
           <p className="text-gray-500 dark:text-gray-400 mt-2">
             {isLogin 
-              ? 'Continue sua jornada de fé conosco.' 
+              ? 'Continue sua jornada de fé connosco.' 
               : 'Junte-se à nossa comunidade de oração.'}
           </p>
         </div>
@@ -133,7 +133,7 @@ export default function Auth({ onClose, onSuccess }: AuthProps) {
             <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
             <input 
               type="password"
-              placeholder="Sua senha"
+              placeholder="Sua palavra-passe"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -150,7 +150,7 @@ export default function Auth({ onClose, onSuccess }: AuthProps) {
               <Loader2 className="animate-spin" size={24} />
             ) : (
               <>
-                {isLogin ? 'Entrar' : 'Cadastrar'}
+                {isLogin ? 'Entrar' : 'Registar'}
                 <ArrowRight size={20} />
               </>
             )}
@@ -163,7 +163,7 @@ export default function Auth({ onClose, onSuccess }: AuthProps) {
             className="text-sm font-bold text-[#1E40AF] hover:underline"
           >
             {isLogin 
-              ? 'Não tem uma conta? Cadastre-se' 
+              ? 'Não tem uma conta? Registe-se' 
               : 'Já possui uma conta? Entre aqui'}
           </button>
         </div>
