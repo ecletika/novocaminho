@@ -583,7 +583,7 @@ export default function DiscipuladoPage() {
     const { data: sessions = [], isLoading: loadingSessions } = useQuery({
         queryKey: ["discipleship-sessions"],
         queryFn: async () => {
-            const { data, error } = await supabase
+            const { data, error } = await (supabase as any)
                 .from("discipleship_sessions")
                 .select("*")
                 .order("session_date", { ascending: false });
@@ -616,7 +616,7 @@ export default function DiscipuladoPage() {
     // Mutations
     const createMutation = useMutation({
         mutationFn: async (newData: any) => {
-            const { error } = await supabase.from("discipleship_sessions").insert([{ ...newData, created_by: user?.id }]);
+            const { error } = await (supabase as any).from("discipleship_sessions").insert([{ ...newData, created_by: user?.id }]);
             if (error) throw error;
         },
         onSuccess: () => {
@@ -629,7 +629,7 @@ export default function DiscipuladoPage() {
 
     const deleteMutation = useMutation({
         mutationFn: async (id: string) => {
-            const { error } = await supabase.from("discipleship_sessions").delete().eq("id", id);
+            const { error } = await (supabase as any).from("discipleship_sessions").delete().eq("id", id);
             if (error) throw error;
         },
         onSuccess: () => {

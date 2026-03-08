@@ -288,6 +288,50 @@ export type Database = {
         }
         Relationships: []
       }
+      discipleship_sessions: {
+        Row: {
+          answers: Json
+          created_at: string
+          created_by: string
+          id: string
+          notes: string | null
+          person_id: string | null
+          person_name: string
+          ratings: Json
+          session_date: string
+        }
+        Insert: {
+          answers?: Json
+          created_at?: string
+          created_by: string
+          id?: string
+          notes?: string | null
+          person_id?: string | null
+          person_name: string
+          ratings?: Json
+          session_date?: string
+        }
+        Update: {
+          answers?: Json
+          created_at?: string
+          created_by?: string
+          id?: string
+          notes?: string | null
+          person_id?: string | null
+          person_name?: string
+          ratings?: Json
+          session_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discipleship_sessions_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "birthdays"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           category: string
