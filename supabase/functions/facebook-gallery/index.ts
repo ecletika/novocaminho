@@ -56,9 +56,9 @@ serve(async (req) => {
             )
         }
 
-        // Fetch from Facebook Graph API
-        // fields: images contains the different sizes, link is the post link
-        const fbUrl = `https://graph.facebook.com/v19.0/${pageId}/photos?type=uploaded&fields=images,link,name,created_time&limit=8&access_token=${accessToken}`
+        // Fetch from Facebook Graph API via /posts which is more reliable for most apps
+        // using attachments to get images
+        const fbUrl = `https://graph.facebook.com/v19.0/${pageId}/posts?fields=attachments,link,message,created_time&limit=10&access_token=${accessToken}`
         const response = await fetch(fbUrl);
 
         if (!response.ok) {
