@@ -82,7 +82,7 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         {/* Background Video / Overlay */}
-        <div className="absolute inset-0">
+        <div className="absolute inset-0 bg-black">
           <video
             autoPlay
             loop
@@ -90,28 +90,13 @@ export default function HomePage() {
             playsInline
             preload="auto"
             poster={heroImage}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover scale-[0.98] opacity-80"
+            style={{ transform: 'translateZ(0)', willChange: 'transform' }}
           >
             <source src="/home-video.mp4" type="video/mp4" />
           </video>
           {/* Subtle dark overlay for readability only, without blue tint */}
-          <div className="absolute inset-0 bg-black/20" />
-        </div>
-
-        {/* Geometric Background Overlay */}
-        <div className="absolute inset-0 z-0 opacity-20 pointer-events-none overflow-hidden">
-          <svg className="absolute -top-24 -right-24 w-[600px] h-[600px] text-white" viewBox="0 0 100 100">
-            <circle cx="100" cy="0" r="40" fill="none" stroke="currentColor" strokeWidth="0.2" />
-            <circle cx="100" cy="0" r="60" fill="none" stroke="currentColor" strokeWidth="0.2" />
-            <circle cx="100" cy="0" r="80" fill="none" stroke="currentColor" strokeWidth="0.2" />
-            <circle cx="100" cy="0" r="100" fill="none" stroke="currentColor" strokeWidth="0.2" />
-          </svg>
-          <svg className="absolute -bottom-24 -left-24 w-[600px] h-[600px] text-white" viewBox="0 0 100 100">
-            <circle cx="0" cy="100" r="40" fill="none" stroke="currentColor" strokeWidth="0.2" />
-            <circle cx="0" cy="100" r="60" fill="none" stroke="currentColor" strokeWidth="0.2" />
-            <circle cx="0" cy="100" r="80" fill="none" stroke="currentColor" strokeWidth="0.2" />
-            <circle cx="0" cy="100" r="100" fill="none" stroke="currentColor" strokeWidth="0.2" />
-          </svg>
+          <div className="absolute inset-0 bg-black/30 md:bg-black/20" />
         </div>
 
         {/* Content */}
@@ -160,7 +145,7 @@ export default function HomePage() {
           </div>
 
           {/* Scroll Indicator */}
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-float opacity-30 pointer-events-none">
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 opacity-30 pointer-events-none">
             <div className="w-px h-12 bg-gradient-to-b from-white to-transparent" />
           </div>
         </div>
