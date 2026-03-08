@@ -48,6 +48,7 @@ Deno.serve(async (req) => {
         phone: phone || null,
         email: email || null,
         address: address || null,
+        photo_url: photo_url || null,
         woman_birthday: woman_birthday || null,
         man_birthday: man_birthday || null,
         leader_name: leader_name || null,
