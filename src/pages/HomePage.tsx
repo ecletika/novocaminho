@@ -80,12 +80,21 @@ export default function HomePage() {
     <>
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Background Image / Overlay */}
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${heroImage})` }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-primary/60 to-background opacity-95" />
+        {/* Background Video / Overlay */}
+        <div className="absolute inset-0">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            poster={heroImage}
+            className="w-full h-full object-cover scale-105"
+          >
+            <source src="/home-video.mp4" type="video/mp4" />
+          </video>
+          {/* Overlays for contrast and brand colors */}
+          <div className="absolute inset-0 bg-black/40" />
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/70 via-primary/40 to-background opacity-90" />
         </div>
 
         {/* Geometric Background Overlay */}
