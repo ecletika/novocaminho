@@ -177,8 +177,8 @@ export default function RegistoAniversarioPage() {
                 type="button"
                 onClick={() => handleTypeChange("personal")}
                 className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${!isWedding
-                    ? "border-primary bg-primary/5 text-primary"
-                    : "border-border text-muted-foreground hover:border-muted-foreground/50"
+                  ? "border-primary bg-primary/5 text-primary"
+                  : "border-border text-muted-foreground hover:border-muted-foreground/50"
                   }`}
               >
                 <User className="w-6 h-6" />
@@ -188,8 +188,8 @@ export default function RegistoAniversarioPage() {
                 type="button"
                 onClick={() => handleTypeChange("wedding")}
                 className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${isWedding
-                    ? "border-primary bg-primary/5 text-primary"
-                    : "border-border text-muted-foreground hover:border-muted-foreground/50"
+                  ? "border-primary bg-primary/5 text-primary"
+                  : "border-border text-muted-foreground hover:border-muted-foreground/50"
                   }`}
               >
                 <Heart className="w-6 h-6" />
@@ -251,7 +251,7 @@ export default function RegistoAniversarioPage() {
                 </div>
               </div>
 
-              {/* Telemóveis */}
+              {/* Telemóveis individuais */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Telemóvel do Marido</Label>
@@ -269,6 +269,16 @@ export default function RegistoAniversarioPage() {
                     placeholder="9xx xxx xxx"
                   />
                 </div>
+              </div>
+
+              {/* Telemóvel geral do casal (para contacto único) */}
+              <div className="space-y-2">
+                <Label>Telemóvel Geral do Casal</Label>
+                <Input
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  placeholder="Telemóvel principal para contacto"
+                />
               </div>
             </>
           ) : (
