@@ -28,9 +28,6 @@ export default function CasadosOnlineMaterial() {
     const [lessons, setLessons] = useState<Record<string, any[]>>({});
     const [completedLessons, setCompletedLessons] = useState<string[]>([]);
     const [selectedLesson, setSelectedLesson] = useState<any | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [expandedTopics, setExpandedTopics] = useState<Record<string, boolean>>({});
-
     // Admin state
     const [isTopicModalOpen, setIsTopicModalOpen] = useState(false);
     const [isLessonModalOpen, setIsLessonModalOpen] = useState(false);
@@ -52,6 +49,17 @@ export default function CasadosOnlineMaterial() {
 
     // HTML Mode state
     const [isHtmlMode, setIsHtmlMode] = useState(false);
+
+    // Load Signature Pad Library
+    useEffect(() => {
+        const script = document.createElement('script');
+        script.src = "https://cdnjs.cloudflare.com/ajax/libs/signature_pad/4.1.7/signature_pad.umd.min.js";
+        script.async = true;
+        document.body.appendChild(script);
+        return () => {
+            document.body.removeChild(script);
+        };
+    }, []);
 
     // Permitir edição apenas se explicitamente for admin e não estiver carregando auth
     const canEdit = !authLoading && user && isAdmin;
@@ -368,62 +376,88 @@ export default function CasadosOnlineMaterial() {
                         </div>
 
                         {selectedLesson.title === "Compromisso" && (
-                            <div className="bg-secondary/5 border-2 border-secondary/20 rounded-3xl p-8 mb-12 shadow-inner text-left">
-                                <h3 className="font-display text-2xl font-bold mb-6 text-secondary flex items-center gap-2">
-                                    <HeartHandshake className="w-6 h-6" /> Aliança de Compromisso
-                                </h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-bold text-foreground">Nome do Marido <span className="text-red-500">*</span></label>
+                            <div className="max-w-[760px] mx-auto bg-white rounded-[24px] shadow-2xl overflow-hidden border border-border mb-16 text-left">
+                                <div className="bg-[#1a2e4a] p-10 text-center relative">
+                                    <h2 className="font-display text-3xl text-white font-bold mb-2 tracking-wide">Compromisso do Casal</h2>
+                                    <p className="text-[#a8bdd4] text-sm font-light">Registre o vosso compromisso perante Deus e um com o outro</p>
+                                    <div className="w-16 h-1 bg-[#c9a84c] mx-auto mt-4 rounded-full"></div>
+                                </div>
+
+                                <div className="p-8 md:p-12 space-y-10">
+                                    {/* SEÇÃO MARIDO */}
+                                    <div className="relative border-2 border-[#d0d8e4] rounded-2xl p-8 pt-10">
+                                        <span className="absolute -top-4 left-6 bg-white px-3 font-display font-bold text-[#2563a8] text-lg">✦ O Marido</span>
+                                        <div className="space-y-6">
+                                            <div className="space-y-2">
+                                                <label className="text-xs font-black uppercase text-[#1a2e4a] tracking-wider">Nome do Marido <span className="text-red-500">*</span></label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="Nome completo"
+                                                    className="w-full p-4 rounded-xl border-2 border-[#d0d8e4] bg-[#fafbfc] focus:border-[#2563a8] focus:bg-white transition-all outline-none"
+                                                    value={compromissoForm.nome_marido}
+                                                    onChange={e => setCompromissoForm({ ...compromissoForm, nome_marido: e.target.value })}
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-xs font-black uppercase text-[#1a2e4a] tracking-wider">Assinatura do Marido <span className="text-red-500">*</span></label>
+                                                <SignaturePad
+                                                    onSave={(data) => setCompromissoForm({ ...compromissoForm, assinatura_marido: data })}
+                                                    onClear={() => setCompromissoForm({ ...compromissoForm, assinatura_marido: '' })}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* SEÇÃO ESPOSA */}
+                                    <div className="relative border-2 border-[#d0d8e4] rounded-2xl p-8 pt-10">
+                                        <span className="absolute -top-4 left-6 bg-white px-3 font-display font-bold text-[#2563a8] text-lg">✦ A Esposa</span>
+                                        <div className="space-y-6">
+                                            <div className="space-y-2">
+                                                <label className="text-xs font-black uppercase text-[#1a2e4a] tracking-wider">Nome da Esposa <span className="text-red-500">*</span></label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="Nome completo"
+                                                    className="w-full p-4 rounded-xl border-2 border-[#d0d8e4] bg-[#fafbfc] focus:border-[#2563a8] focus:bg-white transition-all outline-none"
+                                                    value={compromissoForm.nome_esposa}
+                                                    onChange={e => setCompromissoForm({ ...compromissoForm, nome_esposa: e.target.value })}
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-xs font-black uppercase text-[#1a2e4a] tracking-wider">Assinatura da Esposa <span className="text-red-500">*</span></label>
+                                                <SignaturePad
+                                                    onSave={(data) => setCompromissoForm({ ...compromissoForm, assinatura_esposa: data })}
+                                                    onClear={() => setCompromissoForm({ ...compromissoForm, assinatura_esposa: '' })}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* DATA */}
+                                    <div className="max-w-[240px] space-y-2">
+                                        <label className="text-xs font-black uppercase text-[#1a2e4a] tracking-wider">Data do Compromisso <span className="text-red-500">*</span></label>
                                         <input
-                                            type="text"
-                                            className="w-full p-4 rounded-xl border-2 border-border bg-background focus:border-secondary transition-all"
-                                            value={compromissoForm.nome_marido}
-                                            onChange={e => setCompromissoForm({ ...compromissoForm, nome_marido: e.target.value })}
+                                            type="date"
+                                            className="w-full p-4 rounded-xl border-2 border-[#d0d8e4] bg-[#fafbfc] focus:border-[#2563a8] focus:bg-white transition-all outline-none"
+                                            value={compromissoForm.data_compromisso}
+                                            onChange={e => setCompromissoForm({ ...compromissoForm, data_compromisso: e.target.value })}
                                         />
                                     </div>
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-bold text-foreground">Nome da Esposa <span className="text-red-500">*</span></label>
-                                        <input
-                                            type="text"
-                                            className="w-full p-4 rounded-xl border-2 border-border bg-background focus:border-secondary transition-all"
-                                            value={compromissoForm.nome_esposa}
-                                            onChange={e => setCompromissoForm({ ...compromissoForm, nome_esposa: e.target.value })}
-                                        />
-                                    </div>
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-bold text-foreground">Assinatura do Marido <span className="text-red-500">*</span></label>
-                                        <SignaturePad
-                                            onSave={(data) => setCompromissoForm({ ...compromissoForm, assinatura_marido: data })}
-                                            onClear={() => setCompromissoForm({ ...compromissoForm, assinatura_marido: '' })}
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-bold text-foreground">Assinatura da Esposa <span className="text-red-500">*</span></label>
-                                        <SignaturePad
-                                            onSave={(data) => setCompromissoForm({ ...compromissoForm, assinatura_esposa: data })}
-                                            onClear={() => setCompromissoForm({ ...compromissoForm, assinatura_esposa: '' })}
-                                        />
+
+                                    <div className="pt-8 border-t-2 border-[#d0d8e4] text-center">
+                                        <button
+                                            className="bg-[#1a2e4a] text-white font-display text-xl font-bold py-5 px-16 rounded-2xl hover:bg-[#2563a8] hover:scale-105 transition-all shadow-xl disabled:opacity-50 disabled:scale-100"
+                                            onClick={handleCompromissoSubmit}
+                                            type="button"
+                                            disabled={isSubmittingCompromisso || hasSubmittedCompromisso}
+                                        >
+                                            {isSubmittingCompromisso ? <Loader2 className="animate-spin mx-auto" /> : hasSubmittedCompromisso ? "✅ Registado com Sucesso" : "✦ Eu Aceito"}
+                                        </button>
+
+                                        <div className="mt-6 flex items-center justify-center gap-2 text-[#aaa] text-xs font-bold uppercase tracking-widest">
+                                            <Lock size={14} className="opacity-50" /> Dados guardados de forma segura
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="space-y-2 mb-8 max-w-xs">
-                                    <label className="text-sm font-bold text-foreground">Data do Compromisso <span className="text-red-500">*</span></label>
-                                    <input
-                                        type="date"
-                                        className="w-full p-4 rounded-xl border-2 border-border bg-background focus:border-secondary transition-all"
-                                        value={compromissoForm.data_compromisso}
-                                        onChange={e => setCompromissoForm({ ...compromissoForm, data_compromisso: e.target.value })}
-                                    />
-                                </div>
-                                <Button
-                                    className="bg-secondary text-primary font-black py-6 px-12 rounded-2xl text-xl hover:scale-105 transition-all shadow-xl"
-                                    onClick={handleCompromissoSubmit}
-                                    disabled={isSubmittingCompromisso || hasSubmittedCompromisso}
-                                >
-                                    {isSubmittingCompromisso ? <Loader2 className="animate-spin" /> : hasSubmittedCompromisso ? "Compromisso Enviado" : "Eu Aceito"}
-                                </Button>
                             </div>
                         )}
 
@@ -566,94 +600,65 @@ export default function CasadosOnlineMaterial() {
 
 const SignaturePad = ({ onSave, onClear }: { onSave: (data: string) => void, onClear: () => void }) => {
     const canvasRef = React.useRef<HTMLCanvasElement>(null);
-    const [isDrawing, setIsDrawing] = React.useState(false);
+    const signaturePadRef = React.useRef<any>(null);
 
     React.useEffect(() => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-        ctx.strokeStyle = '#222';
-        ctx.lineWidth = 2.5;
-        ctx.lineJoin = 'round';
-        ctx.lineCap = 'round';
-    }, []);
+        const initPad = () => {
+            if (canvasRef.current && (window as any).SignaturePad) {
+                signaturePadRef.current = new (window as any).SignaturePad(canvasRef.current, {
+                    backgroundColor: 'rgb(250, 251, 252)',
+                    penColor: 'rgb(26, 46, 74)',
+                    minWidth: 1.0,
+                    maxWidth: 3.0
+                });
 
-    const getPos = (e: React.MouseEvent | React.TouchEvent | MouseEvent | TouchEvent) => {
-        const canvas = canvasRef.current;
-        if (!canvas) return { x: 0, y: 0 };
-        const rect = canvas.getBoundingClientRect();
-        const clientX = 'touches' in e ? e.touches[0].clientX : (e as MouseEvent).clientX;
-        const clientY = 'touches' in e ? e.touches[0].clientY : (e as MouseEvent).clientY;
-        return {
-            x: clientX - rect.left,
-            y: clientY - rect.top
-        };
-    };
-
-    const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
-        setIsDrawing(true);
-        const ctx = canvasRef.current?.getContext('2d');
-        if (ctx) {
-            const { x, y } = getPos(e);
-            ctx.beginPath();
-            ctx.moveTo(x, y);
-        }
-    };
-
-    const draw = (e: React.MouseEvent | React.TouchEvent) => {
-        if (!isDrawing) return;
-        const ctx = canvasRef.current?.getContext('2d');
-        if (ctx) {
-            const { x, y } = getPos(e);
-            ctx.lineTo(x, y);
-            ctx.stroke();
-        }
-    };
-
-    const stopDrawing = () => {
-        if (isDrawing) {
-            setIsDrawing(false);
-            const canvas = canvasRef.current;
-            if (canvas) {
-                onSave(canvas.toDataURL());
+                signaturePadRef.current.onEnd = () => {
+                    onSave(signaturePadRef.current.toDataURL());
+                };
             }
+        };
+
+        // Check if library is loaded, if not wait a bit
+        if (!(window as any).SignaturePad) {
+            const interval = setInterval(() => {
+                if ((window as any).SignaturePad) {
+                    initPad();
+                    clearInterval(interval);
+                }
+            }, 100);
+            return () => clearInterval(interval);
+        } else {
+            initPad();
         }
-    };
+    }, [onSave]);
 
     const clear = () => {
-        const canvas = canvasRef.current;
-        if (canvas) {
-            const ctx = canvas.getContext('2d');
-            if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (signaturePadRef.current) {
+            signaturePadRef.current.clear();
             onClear();
         }
     };
 
     return (
-        <div className="space-y-3">
-            <div className="border-2 border-dashed border-secondary/30 rounded-2xl overflow-hidden bg-white shadow-inner">
+        <div className="space-y-2">
+            <div className="border-2 border-[#d0d8e4] rounded-xl overflow-hidden bg-[#fafbfc] transition-all focus-within:border-[#2563a8] focus-within:shadow-[0_0_0_3px_rgba(37,99,168,0.1)]">
                 <canvas
                     ref={canvasRef}
-                    width={450}
+                    width={500}
                     height={160}
                     className="w-full h-32 cursor-crosshair touch-none"
-                    onMouseDown={startDrawing}
-                    onMouseMove={draw}
-                    onMouseUp={stopDrawing}
-                    onMouseOut={stopDrawing}
-                    onTouchStart={startDrawing}
-                    onTouchMove={draw}
-                    onTouchEnd={stopDrawing}
                 ></canvas>
+                <div className="bg-white border-t border-[#d0d8e4] p-2 flex justify-end">
+                    <button
+                        type="button"
+                        onClick={clear}
+                        className="text-[10px] font-bold uppercase py-1.5 px-3 border border-[#d0d8e4] rounded-lg text-[#888] hover:text-red-500 hover:border-red-500 transition-all flex items-center gap-1"
+                    >
+                        <X size={12} /> Limpar
+                    </button>
+                </div>
             </div>
-            <button
-                type="button"
-                onClick={clear}
-                className="text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-secondary flex items-center gap-1 transition-colors"
-            >
-                <X size={14} /> Limpar Assinatura
-            </button>
+            <p className="text-[10px] text-[#aaa] italic font-medium">Use o dedo ou o rato para assinar</p>
         </div>
     );
 };
