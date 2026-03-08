@@ -136,9 +136,11 @@ function MinistryCard({ ministry, index, onClick }: { ministry: Ministry, index:
   const IconComponent = iconMap[ministry.icon] || Users;
   const imageUrl = ministry.image_url || defaultImages[ministry.slug] || worshipImage;
 
-  // Apenas o slug "casados-para-sempre" redireciona para a página dedicada /casados
-  // Todos os outros ministérios (incluindo o ministério de casais) abrem o modal normal
-  const isCasadosParaSempre = ministry.slug === "casados-para-sempre";
+  // Detecta "Casados Para Sempre" pelo TÍTULO (independente do slug na BD)
+  // Qualquer outro ministério (incluindo "Ministério de Casais") abre o modal normal
+  const isCasadosParaSempre =
+    ministry.title.toLowerCase().includes("casados para sempre") ||
+    ministry.slug === "casados";
 
   return (
     <div
