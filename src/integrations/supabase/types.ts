@@ -63,6 +63,7 @@ export type Database = {
           man_name: string | null
           man_phone: string | null
           phone: string | null
+          photo_url: string | null
           updated_at: string
           woman_birthday: string | null
           woman_name: string | null
@@ -80,6 +81,7 @@ export type Database = {
           man_name?: string | null
           man_phone?: string | null
           phone?: string | null
+          photo_url?: string | null
           updated_at?: string
           woman_birthday?: string | null
           woman_name?: string | null
@@ -97,6 +99,7 @@ export type Database = {
           man_name?: string | null
           man_phone?: string | null
           phone?: string | null
+          photo_url?: string | null
           updated_at?: string
           woman_birthday?: string | null
           woman_name?: string | null
