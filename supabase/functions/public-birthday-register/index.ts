@@ -17,7 +17,11 @@ Deno.serve(async (req) => {
     );
 
     const body = await req.json();
-    const { woman_name, man_name, photo_url, birthday_date, birthday_type, phone, email, address, ministry_ids, woman_birthday, man_birthday, leader_name } = body;
+    const {
+      woman_name, man_name, photo_url, birthday_date, birthday_type,
+      phone, email, address, ministry_ids, woman_birthday, man_birthday,
+      leader_name, man_phone, woman_phone
+    } = body;
 
     if (!birthday_date || !birthday_type) {
       return new Response(JSON.stringify({ error: "Data e tipo são obrigatórios" }), {
@@ -47,6 +51,8 @@ Deno.serve(async (req) => {
         woman_birthday: woman_birthday || null,
         man_birthday: man_birthday || null,
         leader_name: leader_name || null,
+        man_phone: man_phone || null,
+        woman_phone: woman_phone || null,
       })
       .select()
       .single();

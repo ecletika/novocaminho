@@ -16,7 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-export default function PublicBirthdayRegister() {
+export default function RegistoAniversarioPage() {
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { data: ministries = [] } = useMinistries();
@@ -33,6 +33,8 @@ export default function PublicBirthdayRegister() {
     woman_birthday: "",
     man_birthday: "",
     leader_name: "",
+    man_phone: "",
+    woman_phone: "",
     ministry_ids: [] as string[],
   });
   const [uploading, setUploading] = useState(false);
@@ -106,7 +108,7 @@ export default function PublicBirthdayRegister() {
           <p className="text-muted-foreground">
             Obrigado por se registar. Seus dados foram salvos com sucesso.
           </p>
-          <Button onClick={() => { setSubmitted(false); setFormData({ woman_name: "", man_name: "", photo_url: "", birthday_date: "", birthday_type: "personal", phone: "", email: "", address: "", woman_birthday: "", man_birthday: "", leader_name: "", ministry_ids: [] }); }}>
+          <Button onClick={() => { setSubmitted(false); setFormData({ woman_name: "", man_name: "", photo_url: "", birthday_date: "", birthday_type: "personal", phone: "", email: "", address: "", woman_birthday: "", man_birthday: "", leader_name: "", man_phone: "", woman_phone: "", ministry_ids: [] }); }}>
             Fazer outro registo
           </Button>
         </div>
@@ -182,6 +184,25 @@ export default function PublicBirthdayRegister() {
                     value={formData.woman_birthday}
                     onChange={(e) => setFormData({ ...formData, woman_birthday: e.target.value })}
                     required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Telemóvel do Marido</Label>
+                  <Input
+                    value={formData.man_phone}
+                    onChange={(e) => setFormData({ ...formData, man_phone: e.target.value })}
+                    placeholder="9xx xxx xxx"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Telemóvel da Mulher</Label>
+                  <Input
+                    value={formData.woman_phone}
+                    onChange={(e) => setFormData({ ...formData, woman_phone: e.target.value })}
+                    placeholder="9xx xxx xxx"
                   />
                 </div>
               </div>
@@ -264,14 +285,16 @@ export default function PublicBirthdayRegister() {
             />
           </div>
 
-          <div className="space-y-2">
-            <Label>Telefone</Label>
-            <Input
-              value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              placeholder="912 345 678"
-            />
-          </div>
+          {formData.birthday_type === "personal" && (
+            <div className="space-y-2">
+              <Label>Telemóvel</Label>
+              <Input
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                placeholder="912 345 678"
+              />
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label>Email</Label>
