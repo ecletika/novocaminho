@@ -61,10 +61,13 @@ export type Database = {
           leader_name: string | null
           man_birthday: string | null
           man_name: string | null
+          man_phone: string | null
           phone: string | null
+          photo_url: string | null
           updated_at: string
           woman_birthday: string | null
           woman_name: string | null
+          woman_phone: string | null
         }
         Insert: {
           address?: string | null
@@ -76,10 +79,13 @@ export type Database = {
           leader_name?: string | null
           man_birthday?: string | null
           man_name?: string | null
+          man_phone?: string | null
           phone?: string | null
+          photo_url?: string | null
           updated_at?: string
           woman_birthday?: string | null
           woman_name?: string | null
+          woman_phone?: string | null
         }
         Update: {
           address?: string | null
@@ -91,10 +97,13 @@ export type Database = {
           leader_name?: string | null
           man_birthday?: string | null
           man_name?: string | null
+          man_phone?: string | null
           phone?: string | null
+          photo_url?: string | null
           updated_at?: string
           woman_birthday?: string | null
           woman_name?: string | null
+          woman_phone?: string | null
         }
         Relationships: []
       }
@@ -119,6 +128,100 @@ export type Database = {
           id?: string
           image_url?: string
           sort_order?: number | null
+        }
+        Relationships: []
+      }
+      casados_online_lessons: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          image_url: string | null
+          pdf_url: string | null
+          position: number
+          title: string
+          topic_id: string
+          video_url: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          pdf_url?: string | null
+          position: number
+          title: string
+          topic_id: string
+          video_url?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          pdf_url?: string | null
+          position?: number
+          title?: string
+          topic_id?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "casados_online_lessons_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "casados_online_topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      casados_online_progress: {
+        Row: {
+          created_at: string | null
+          id: string
+          lesson_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          lesson_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          lesson_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "casados_online_progress_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "casados_online_lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      casados_online_topics: {
+        Row: {
+          created_at: string | null
+          id: string
+          position: number
+          title: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          position: number
+          title: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          position?: number
+          title?: string
         }
         Relationships: []
       }
@@ -149,6 +252,39 @@ export type Database = {
           published?: boolean | null
           title?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      compromissos_casais: {
+        Row: {
+          assinatura_esposa: string
+          assinatura_marido: string
+          created_at: string
+          data_compromisso: string
+          id: number
+          nome_esposa: string
+          nome_marido: string
+          user_id: string
+        }
+        Insert: {
+          assinatura_esposa: string
+          assinatura_marido: string
+          created_at?: string
+          data_compromisso: string
+          id?: number
+          nome_esposa: string
+          nome_marido: string
+          user_id: string
+        }
+        Update: {
+          assinatura_esposa?: string
+          assinatura_marido?: string
+          created_at?: string
+          data_compromisso?: string
+          id?: number
+          nome_esposa?: string
+          nome_marido?: string
+          user_id?: string
         }
         Relationships: []
       }
