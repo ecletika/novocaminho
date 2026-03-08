@@ -88,14 +88,14 @@ export default function HomePage() {
             loop
             muted={isMuted}
             playsInline
+            preload="auto"
             poster={heroImage}
-            className="w-full h-full object-cover scale-105"
+            className="w-full h-full object-cover"
           >
             <source src="/home-video.mp4" type="video/mp4" />
           </video>
-          {/* Overlays for contrast and brand colors */}
-          <div className="absolute inset-0 bg-black/30" />
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/60 via-transparent to-background opacity-90" />
+          {/* Subtle dark overlay for readability only, without blue tint */}
+          <div className="absolute inset-0 bg-black/20" />
         </div>
 
         {/* Geometric Background Overlay */}
@@ -115,44 +115,53 @@ export default function HomePage() {
         </div>
 
         {/* Content */}
-        <div className="relative z-10 container-church text-center text-primary-foreground pt-32">
-          <div className="max-w-3xl mx-auto mb-8 animate-fade-up delay-200">
+        <div className="relative z-10 container-church min-h-screen flex flex-col items-center justify-between pt-16 pb-12 md:pt-24 md:pb-24">
+          {/* Top part: Verse for mobile */}
+          <div className="w-full max-w-2xl mx-auto animate-fade-up delay-200 md:hidden dark">
             <DailyVerse />
           </div>
 
-          <div className="flex justify-center mb-12 animate-fade-up delay-250">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsMuted(!isMuted)}
-              className="bg-white/10 border-white/20 text-white hover:bg-white/20 rounded-full px-6 backdrop-blur-md flex items-center gap-3"
-            >
-              {isMuted ? (
-                <>
-                  <VolumeX className="w-4 h-4" /> Ativar Som
-                </>
-              ) : (
-                <>
-                  <Volume2 className="w-4 h-4" /> Desativar Som
-                </>
-              )}
-            </Button>
+          {/* Middle part: Action Buttons and Sound Toggle */}
+          <div className="flex-1 flex flex-col items-center justify-center text-center text-primary-foreground">
+            <div className="flex justify-center mb-12 animate-fade-up delay-250">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsMuted(!isMuted)}
+                className="bg-white/10 border-white/20 text-white hover:bg-white/20 rounded-full px-6 backdrop-blur-md flex items-center gap-3"
+              >
+                {isMuted ? (
+                  <>
+                    <VolumeX className="w-4 h-4" /> Ativar Som
+                  </>
+                ) : (
+                  <>
+                    <Volume2 className="w-4 h-4" /> Desativar Som
+                  </>
+                )}
+              </Button>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-6 animate-fade-up delay-300">
+              <Button className="bg-white text-primary hover:bg-primary-foreground transition-all duration-500 rounded-full px-10 py-7 uppercase tracking-widest text-xs font-bold shadow-lg shadow-black/20" asChild>
+                <Link to="/contacto">
+                  Visite-nos
+                </Link>
+              </Button>
+              <Button className="bg-transparent border-2 border-white/40 text-white hover:bg-white/10 transition-all duration-500 rounded-full px-10 py-7 uppercase tracking-widest text-xs font-bold backdrop-blur-sm" onClick={() => setShowLive(true)}>
+                Assistir ao Vivo
+              </Button>
+            </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 animate-fade-up delay-300">
-            <Button className="bg-white text-primary hover:bg-primary-foreground transition-all duration-500 rounded-full px-10 py-7 uppercase tracking-widest text-xs font-bold shadow-lg shadow-black/20" asChild>
-              <Link to="/contacto">
-                Visite-nos
-              </Link>
-            </Button>
-            <Button className="bg-transparent border-2 border-white/40 text-white hover:bg-white/10 transition-all duration-500 rounded-full px-10 py-7 uppercase tracking-widest text-xs font-bold backdrop-blur-sm" onClick={() => setShowLive(true)}>
-              Assistir ao Vivo
-            </Button>
+          {/* Bottom part: Verse for desktop */}
+          <div className="w-full max-w-4xl mx-auto animate-fade-up delay-200 hidden md:block dark">
+            <DailyVerse />
           </div>
 
           {/* Scroll Indicator */}
-          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-float opacity-50">
-            <div className="w-px h-16 bg-gradient-to-b from-white to-transparent" />
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-float opacity-30 pointer-events-none">
+            <div className="w-px h-12 bg-gradient-to-b from-white to-transparent" />
           </div>
         </div>
       </section>
