@@ -28,6 +28,8 @@ export default function CasadosOnlineMaterial() {
     const [lessons, setLessons] = useState<Record<string, any[]>>({});
     const [completedLessons, setCompletedLessons] = useState<string[]>([]);
     const [selectedLesson, setSelectedLesson] = useState<any | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [expandedTopics, setExpandedTopics] = useState<Record<string, boolean>>({});
     // Admin state
     const [isTopicModalOpen, setIsTopicModalOpen] = useState(false);
     const [isLessonModalOpen, setIsLessonModalOpen] = useState(false);
