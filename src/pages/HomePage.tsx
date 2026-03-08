@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Play, Calendar, ArrowRight, Users, Music, Tv, BookOpen, Heart, Radio, Cake } from "lucide-react";
+import { Play, Calendar, ArrowRight, Users, Music, Tv, BookOpen, Heart, Radio, Cake, Volume2, VolumeX } from "lucide-react";
 import heroImage from "@/assets/hero-church.jpg";
 import worshipImage from "@/assets/ministry-worship.jpg";
 import techImage from "@/assets/ministry-tech.jpg";
@@ -71,6 +71,7 @@ export default function HomePage() {
   const { data: monthlyBirthdays = [] } = useMonthlyBirthdays();
   const { data: dbMinistries = [] } = useMinistries();
   const [showLive, setShowLive] = useState(false);
+  const [isMuted, setIsMuted] = useState(false); // Enable sound by default as per user request
 
   const activeMinistries = dbMinistries.filter(m => m.is_active).slice(0, 3);
   const getIcon = (iconName: string) => iconMap[iconName] || Users;
@@ -85,7 +86,7 @@ export default function HomePage() {
           <video
             autoPlay
             loop
-            muted
+            muted={isMuted}
             playsInline
             poster={heroImage}
             className="w-full h-full object-cover scale-105"
@@ -93,8 +94,8 @@ export default function HomePage() {
             <source src="/home-video.mp4" type="video/mp4" />
           </video>
           {/* Overlays for contrast and brand colors */}
-          <div className="absolute inset-0 bg-black/40" />
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/70 via-primary/40 to-background opacity-90" />
+          <div className="absolute inset-0 bg-black/30" />
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/60 via-transparent to-background opacity-90" />
         </div>
 
         {/* Geometric Background Overlay */}
@@ -115,22 +116,27 @@ export default function HomePage() {
 
         {/* Content */}
         <div className="relative z-10 container-church text-center text-primary-foreground pt-32">
-          <div className="animate-fade-up">
-            <span className="inline-block px-5 py-2 rounded-full border border-white/20 bg-white/10 text-white text-xs font-bold uppercase tracking-[0.3em] mb-8 backdrop-blur-sm">
-              Uma Igreja Relevante para a Cidade
-            </span>
+          <div className="max-w-3xl mx-auto mb-8 animate-fade-up delay-200">
+            <DailyVerse />
           </div>
 
-          <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-extrabold mb-8 animate-fade-up delay-100 flex flex-col gap-1 tracking-tighter uppercase">
-            <span className="text-white">Resista a esse medo,</span>
-            <span className="text-white">Resista a esse sofrimento,</span>
-            <span className="text-white/80 italic font-serif lowercase">busque o</span>
-            <span className="text-white">Novo Caminho,</span>
-            <span className="text-white">Busque a Deus.</span>
-          </h1>
-
-          <div className="max-w-3xl mx-auto mb-12 animate-fade-up delay-200">
-            <DailyVerse />
+          <div className="flex justify-center mb-12 animate-fade-up delay-250">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsMuted(!isMuted)}
+              className="bg-white/10 border-white/20 text-white hover:bg-white/20 rounded-full px-6 backdrop-blur-md flex items-center gap-3"
+            >
+              {isMuted ? (
+                <>
+                  <VolumeX className="w-4 h-4" /> Ativar Som
+                </>
+              ) : (
+                <>
+                  <Volume2 className="w-4 h-4" /> Desativar Som
+                </>
+              )}
+            </Button>
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 animate-fade-up delay-300">
@@ -187,10 +193,10 @@ export default function HomePage() {
           {/* Radio Player */}
           <RadioPlayer />
         </div>
-      </section>
+      </section >
 
       {/* Ministries Section */}
-      <section className="section-padding">
+      < section className="section-padding" >
         <div className="container-church">
           <div className="text-center mb-16">
             <span className="text-secondary font-medium text-sm uppercase tracking-wider">Nossos Ministérios</span>
@@ -244,10 +250,10 @@ export default function HomePage() {
             </Button>
           </div>
         </div>
-      </section>
+      </section >
 
       {/* Events Section */}
-      <section className="section-padding bg-muted/50">
+      < section className="section-padding bg-muted/50" >
         <div className="container-church">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
@@ -288,26 +294,28 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-      </section>
+      </section >
 
       {/* Birthdays Section */}
-      {monthlyBirthdays.length > 0 && (
-        <section className="section-padding">
-          <div className="container-church">
-            <div className="text-center mb-12">
-              <span className="text-secondary font-medium text-sm uppercase tracking-wider">Celebrações</span>
-              <h2 className="font-display text-4xl md:text-5xl font-bold text-foreground mt-3 mb-4">
-                Aniversários do Mês
-              </h2>
-              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                Celebramos com alegria os aniversários da nossa família
-              </p>
-            </div>
+      {
+        monthlyBirthdays.length > 0 && (
+          <section className="section-padding">
+            <div className="container-church">
+              <div className="text-center mb-12">
+                <span className="text-secondary font-medium text-sm uppercase tracking-wider">Celebrações</span>
+                <h2 className="font-display text-4xl md:text-5xl font-bold text-foreground mt-3 mb-4">
+                  Aniversários do Mês
+                </h2>
+                <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+                  Celebramos com alegria os aniversários da nossa família
+                </p>
+              </div>
 
-            <BirthdayCard birthdays={monthlyBirthdays} title="Aniversários do Mês" />
-          </div>
-        </section>
-      )}
+              <BirthdayCard birthdays={monthlyBirthdays} title="Aniversários do Mês" />
+            </div>
+          </section>
+        )
+      }
 
       {/* Gallery Section */}
       <section className="section-padding bg-muted/30">
