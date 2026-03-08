@@ -19,6 +19,7 @@ import {
   Cake,
   Layers,
   Heart,
+  MessageSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,6 +40,7 @@ const navigation = [
   { name: "Aniversários", href: "/admin/aniversarios", icon: Cake, perm: "aniversarios" },
   { name: "Lideranças", href: "/admin/lideranca", icon: Layers, perm: "ministerios" },
   { name: "Documentação", href: "/admin/docs", icon: FileText, perm: "docs" },
+  { name: "Entrevistas", href: "/discipulado", icon: MessageSquare, perm: "discipulado" },
   { name: "Utilizadores", href: "/admin/users", icon: Users, perm: null },
   { name: "Configurações", href: "/admin/config", icon: Settings, perm: "config" },
 ];

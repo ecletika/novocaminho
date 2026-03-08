@@ -567,8 +567,19 @@ export default function DiscipuladoPage() {
     const queryClient = useQueryClient();
     const [view, setView] = useState<"home" | "new" | "history" | "detail">("home");
     const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
+    const [isLocked, setIsLocked] = useState(() => !sessionStorage.getItem("discipulado_unlocked"));
+    const [password, setPassword] = useState("");
+    const [isVerifying, setIsVerifying] = useState(false);
 
     // Queries
+    const { data: dbPassword } = useQuery({
+        queryKey: ["discipulado-config-pass"],
+        queryFn: async () => {
+            const { data } = await supabase.from("site_config").select("value").eq("key", "discipulado_password").maybeSingle();
+            return data?.value || "discipulado2024"; // Senha padrão se não configurada
+        },
+    });
+
     const { data: sessions = [], isLoading: loadingSessions } = useQuery({
         queryKey: ["discipleship-sessions"],
         queryFn: async () => {
@@ -579,7 +590,7 @@ export default function DiscipuladoPage() {
             if (error) throw error;
             return data as Session[];
         },
-        enabled: !!user,
+        enabled: !!user && !isLocked,
     });
 
     const { data: persons = [] } = useQuery({
@@ -629,6 +640,53 @@ export default function DiscipuladoPage() {
     });
 
     const selectedSession = sessions.find(s => s.id === selectedSessionId);
+
+    const handleUnlock = (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsVerifying(true);
+        setTimeout(() => {
+            if (password === dbPassword) {
+                sessionStorage.setItem("discipulado_unlocked", "true");
+                setIsLocked(false);
+                toast.success("Acesso autorizado.");
+            } else {
+                toast.error("Chave de acesso incorreta.");
+            }
+            setIsVerifying(false);
+        }, 600);
+    };
+
+    if (isLocked) {
+        return (
+            <div style={{ ...styles.page, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+                <div style={{ ...styles.card, maxWidth: 360, width: "100%", textAlign: "center", padding: "48px 32px" }}>
+                    <div style={{ fontSize: 40, marginBottom: 24, color: C.gold }}>✦</div>
+                    <h2 style={{ fontSize: 18, fontWeight: "bold", marginBottom: 8 }}>Área Confidencial</h2>
+                    <p style={{ fontSize: 13, color: C.soft, marginBottom: 32, lineHeight: 1.6 }}>
+                        Este módulo contém informações sensíveis. Por favor, introduza a chave de acesso.
+                    </p>
+                    <form onSubmit={handleUnlock} style={{ textAlign: "left" }}>
+                        <label style={styles.label}>Chave de Acesso</label>
+                        <input
+                            type="password"
+                            autoFocus
+                            style={{ ...styles.input, textAlign: "center", fontSize: 20, letterSpacing: 8 }}
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="••••"
+                        />
+                        <button
+                            type="submit"
+                            style={{ ...styles.btnPrimary, marginTop: 24, height: 48 }}
+                            disabled={isVerifying || !password}
+                        >
+                            {isVerifying ? <Loader2 className="animate-spin" size={18} /> : "ENTRAR"}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        );
+    }
 
     if (loadingSessions) {
         return (

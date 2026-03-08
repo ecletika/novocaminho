@@ -20,7 +20,7 @@ export const ALL_PERMISSIONS = [
   { key: "escalas", label: "Escalas" },
   { key: "docs", label: "Documentação" },
   { key: "config", label: "Configurações" },
-  { key: "discipulado", label: "Discipulado (Confidencial)" },
+  { key: "discipulado", label: "Entrevistas de Discipulado" },
 ] as const;
 
 export function useAllUserPermissions() {
