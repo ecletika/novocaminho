@@ -585,8 +585,20 @@ export default function DiscipuladoPage() {
     const { data: persons = [] } = useQuery({
         queryKey: ["discipleship-persons"],
         queryFn: async () => {
-            const { data: profiles } = await supabase.from("profiles").select("user_id, full_name").order("full_name");
-            return (profiles || []).map(p => ({ id: p.user_id, name: p.full_name || "Sem nome" }));
+            const { data: birthdays, error } = await supabase
+                .from("birthdays")
+                .select("id, woman_name, man_name, person_id:id")
+                .order("woman_name", { ascending: true });
+
+            if (error) throw error;
+
+            const list: PersonOption[] = [];
+            (birthdays || []).forEach(b => {
+                if (b.woman_name) list.push({ id: b.id, name: b.woman_name });
+                if (b.man_name) list.push({ id: b.id, name: b.man_name });
+            });
+
+            return list.sort((a, b) => a.name.localeCompare(b.name));
         },
     });
 
