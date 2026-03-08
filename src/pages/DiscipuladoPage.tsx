@@ -629,7 +629,7 @@ export default function DiscipuladoPage() {
 
     const deleteMutation = useMutation({
         mutationFn: async (id: string) => {
-            const { error } = await supabase.from("discipleship_sessions").delete().eq("id", id);
+            const { error } = await (supabase as any).from("discipleship_sessions").delete().eq("id", id);
             if (error) throw error;
         },
         onSuccess: () => {
