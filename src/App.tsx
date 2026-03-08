@@ -18,7 +18,7 @@ import CasadosMaterialPage from "./pages/casados/CasadosMaterialPage";
 import CasadosEstudosPage from "./pages/casados/CasadosEstudosPage";
 import CasadosRecursosPage from "./pages/casados/CasadosRecursosPage";
 import AuthPage from "./pages/AuthPage";
-import PublicBirthdayRegister from "./pages/PublicBirthdayRegister";
+import RegistoAniversarioPage from "./pages/RegistoAniversarioPage";
 import BelievePage from "./pages/BelievePage";
 import BibliaPage from "./pages/BibliaPage";
 import NotFound from "./pages/NotFound";
@@ -65,7 +65,7 @@ const App = () => (
             <Route element={<PublicLayout><BelievePage /></PublicLayout>} path="/no-que-cremos" />
             <Route element={<PublicLayout><BibliaPage /></PublicLayout>} path="/biblia" />
             <Route path="/auth" element={<AuthPage />} />
-            <Route path="/registo-aniversario" element={<PublicBirthdayRegister />} />
+            <Route path="/registo-aniversario" element={<RegistoAniversarioPage />} />
 
             {/* Admin Routes - Protected */}
             <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
