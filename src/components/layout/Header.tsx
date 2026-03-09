@@ -49,7 +49,7 @@ export default function Header() {
               <img
                 src={logoImage}
                 alt="Logo Igreja"
-                className="h-16 w-auto object-contain"
+                className="h-24 w-auto object-contain"
               />
             </Link>
 
