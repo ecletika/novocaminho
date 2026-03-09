@@ -105,19 +105,70 @@ export default function RegistoAniversarioPage() {
     }));
   };
 
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>, key: string) => {
+    const value = e.target.value.replace(/\D/g, "");
+    setFormData(prev => ({ ...prev, [key]: value }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validação extra para garantir que temos pelo menos um nome
+    if (formData.birthday_type === "personal" && !formData.woman_name && !formData.man_name) {
+      toast.error("Por favor, preencha o seu nome.");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      // Independentemente do tipo de registo, o registo de casamento é guardado
-      // como registo normal — o campo birthday_type indica a origem para o admin
-      // poder associar depois a outros ministérios.
-      const { error } = await supabase.functions.invoke("public-birthday-register", {
-        body: formData,
-      });
-      if (error) throw error;
+      console.log("Submitting directly to tables:", formData);
+
+      const { ministry_ids, ...birthdayData } = formData;
+
+      // 1. Inserir na tabela birthdays
+      const { data: birthday, error: insertError } = await supabase
+        .from("birthdays")
+        .insert({
+          woman_name: birthdayData.woman_name || null,
+          man_name: birthdayData.man_name || null,
+          photo_url: birthdayData.photo_url || null,
+          birthday_date: birthdayData.birthday_date,
+          birthday_type: birthdayData.birthday_type,
+          phone: birthdayData.phone || null,
+          email: birthdayData.email || null,
+          address: birthdayData.address || null,
+          woman_birthday: birthdayData.woman_birthday || null,
+          man_birthday: birthdayData.man_birthday || null,
+          leader_name: birthdayData.leader_name || null,
+          man_phone: birthdayData.man_phone || null,
+          woman_phone: birthdayData.woman_phone || null,
+        })
+        .select()
+        .single();
+
+      if (insertError) throw insertError;
+
+      // 2. Inserir relações de ministério se houver
+      if (ministry_ids && ministry_ids.length > 0) {
+        const relationships = ministry_ids.map((id) => ({
+          birthday_id: birthday.id,
+          ministry_id: id,
+        }));
+
+        const { error: relError } = await supabase
+          .from("birthday_ministries")
+          .insert(relationships);
+
+        if (relError) {
+          console.error("Erro ao associar ministérios:", relError);
+          // Não falhamos o registo principal se as relações falharem
+        }
+      }
+
+      toast.success("Registo concluído com sucesso!");
       setSubmitted(true);
     } catch (err: any) {
+      console.error("Submission error:", err);
       toast.error(err.message || "Erro ao registar. Tente novamente.");
     } finally {
       setIsSubmitting(false);
@@ -134,6 +185,7 @@ export default function RegistoAniversarioPage() {
             Obrigado por se registar. Os seus dados foram guardados com sucesso.
           </p>
           <Button
+            className="w-full"
             onClick={() => {
               setSubmitted(false);
               setFormData(initialForm);
@@ -256,16 +308,18 @@ export default function RegistoAniversarioPage() {
                 <div className="space-y-2">
                   <Label>Telemóvel do Marido</Label>
                   <Input
+                    type="tel"
                     value={formData.man_phone}
-                    onChange={(e) => setFormData({ ...formData, man_phone: e.target.value })}
+                    onChange={(e) => handlePhoneChange(e, 'man_phone')}
                     placeholder="9xx xxx xxx"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>Telemóvel da Mulher</Label>
                   <Input
+                    type="tel"
                     value={formData.woman_phone}
-                    onChange={(e) => setFormData({ ...formData, woman_phone: e.target.value })}
+                    onChange={(e) => handlePhoneChange(e, 'woman_phone')}
                     placeholder="9xx xxx xxx"
                   />
                 </div>
@@ -275,8 +329,9 @@ export default function RegistoAniversarioPage() {
               <div className="space-y-2">
                 <Label>Telemóvel Geral do Casal</Label>
                 <Input
+                  type="tel"
                   value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  onChange={(e) => handlePhoneChange(e, 'phone')}
                   placeholder="Telemóvel principal para contacto"
                 />
               </div>
@@ -297,8 +352,9 @@ export default function RegistoAniversarioPage() {
               <div className="space-y-2">
                 <Label>Telemóvel</Label>
                 <Input
+                  type="tel"
                   value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  onChange={(e) => handlePhoneChange(e, 'phone')}
                   placeholder="912 345 678"
                 />
               </div>

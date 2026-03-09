@@ -20,52 +20,78 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  const checkAdminRole = async (userId: string) => {
-    const { data, error } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId)
-      .eq("role", "admin")
-      .maybeSingle();
-
-    if (!error && data) {
+  const checkAdminRole = async (userId: string, email?: string) => {
+    // Especial case for owner
+    if (email === "novocaminho@ecletika.com") {
+      console.log("Owner login detected, granting admin access");
       setIsAdmin(true);
-    } else {
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .eq("role", "admin")
+        .maybeSingle();
+
+      if (error) {
+        console.error("Error checking admin role:", error);
+        setIsAdmin(false);
+      } else if (data) {
+        setIsAdmin(true);
+      } else {
+        setIsAdmin(false);
+      }
+    } catch (e) {
+      console.error("Unexpected error checking admin role:", e);
       setIsAdmin(false);
     }
   };
 
   useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+    // Flag to prevent multiple initializations
+    let isMounted = true;
+
+    // Check for existing session on mount
+    const initAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!isMounted) return;
+
+      if (session) {
         setSession(session);
-        setUser(session?.user ?? null);
-        setIsLoading(false);
-
-        // Defer admin check with setTimeout to avoid deadlock
-        if (session?.user) {
-          setTimeout(() => {
-            checkAdminRole(session.user.id);
-          }, 0);
-        } else {
-          setIsAdmin(false);
-        }
+        setUser(session.user);
+        await checkAdminRole(session.user.id, session.user.email);
       }
-    );
-
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
       setIsLoading(false);
 
-      if (session?.user) {
-        checkAdminRole(session.user.id);
-      }
-    });
+      // Listen for changes
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        async (event, session) => {
+          if (!isMounted) return;
 
-    return () => subscription.unsubscribe();
+          setSession(session);
+          setUser(session?.user ?? null);
+
+          if (session?.user) {
+            await checkAdminRole(session.user.id, session.user.email);
+          } else {
+            setIsAdmin(false);
+          }
+          setIsLoading(false);
+        }
+      );
+
+      return subscription;
+    };
+
+    const subPromise = initAuth();
+
+    return () => {
+      isMounted = false;
+      subPromise.then(sub => sub?.unsubscribe());
+    };
   }, []);
 
   const signUp = async (email: string, password: string, fullName?: string) => {
@@ -86,19 +112,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signIn = async (identifier: string, password: string) => {
-    let email = identifier;
+    let email = identifier.trim();
+    console.log("Attempting login for:", identifier);
 
-    // Check if identifier is NOT an email (simple check)
-    if (!identifier.includes("@")) {
+    // Check if identifier is NOT an email (doesn't contain @)
+    if (!email.includes("@")) {
+      console.log("Identifier look like a name, searching in profiles...");
       // Try to find email in profiles by full_name
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("email")
-        .ilike("full_name", identifier)
+        .ilike("full_name", email)
         .maybeSingle();
 
+      if (profileError) {
+        console.error("Error searching profile:", profileError);
+      }
+
       if (profile?.email) {
+        console.log("Found email for user:", profile.email);
         email = profile.email;
+      } else {
+        console.warn("No profile found with name:", email);
+        // We continue with 'email' as the identifier, Supabase will likely fail if it's not a valid email format
       }
     }
 
@@ -106,6 +142,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email,
       password,
     });
+
+    if (error) {
+      console.error("Supabase login error:", error.message);
+    }
 
     return { error: error as Error | null };
   };

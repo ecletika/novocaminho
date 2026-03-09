@@ -53,9 +53,8 @@ export default function AdminLayout() {
   const worshipSkills = useUserWorshipSkills(user?.id);
 
   const visibleNavigation = navigation.filter((item) => {
-    if (item.perm === "owner") {
-      return user?.email === "novocaminho@ecletika.com";
-    }
+    const isOwner = user?.email?.toLowerCase() === "novocaminho@ecletika.com";
+    if (isOwner) return true;
 
     if (isAdmin) return true;
 

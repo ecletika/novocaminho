@@ -33,16 +33,19 @@ export default function PermissionRoute({ children, perm }: PermissionRouteProps
         return <Navigate to="/auth" replace />;
     }
 
-    // Admin tem acesso a tudo, exceto áreas 'owner' (se especificado)
-    if (isAdmin && perm !== "owner") {
+    // Acesso universal ao proprietário (novocaminho@ecletika.com)
+    const isOwner = user?.email?.toLowerCase() === "novocaminho@ecletika.com";
+    if (isOwner) {
         return <>{children}</>;
     }
 
-    // Acesso exclusivo ao proprietário (mauricio.junior)
+    // Admin tem acesso a tudo
+    if (isAdmin) {
+        return <>{children}</>;
+    }
+
+    // Acesso exclusivo ao proprietário (mauricio.junior) - mantido por compatibilidade
     if (perm === "owner") {
-        if (user.email === "novocaminho@ecletika.com") {
-            return <>{children}</>;
-        }
         return <AccessDenied />;
     }
 
@@ -51,7 +54,7 @@ export default function PermissionRoute({ children, perm }: PermissionRouteProps
         return <>{children}</>;
     }
 
-    // Acesso exclusivo a admins
+    // Acesso exclusivo a admins (se chegou aqui, isAdmin é falso)
     if (perm === "admin") {
         return <AccessDenied />;
     }
