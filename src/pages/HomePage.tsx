@@ -107,8 +107,18 @@ export default function HomePage() {
           </div>
 
           {/* Middle part: Action Buttons and Sound Toggle */}
-          <div className="flex-1 flex flex-col items-center justify-center text-center text-primary-foreground">
-            <div className="flex justify-center mb-12 animate-fade-up delay-250">
+          {/* Middle part: Hero content removed as per user request */}
+          <div className="flex-1 flex flex-col items-center justify-center text-center">
+            {/* Espaço vazio para manter o layout centralizado ou para futuras mensagens curtas */}
+          </div>
+
+          {/* Bottom part: Verse and Sound Toggle */}
+          <div className="w-full flex flex-col items-center gap-8 mb-4">
+            <div className="w-full max-w-4xl mx-auto animate-fade-up delay-200 hidden md:block dark">
+              <DailyVerse />
+            </div>
+
+            <div className="animate-fade-up delay-250">
               <Button
                 variant="outline"
                 size="sm"
@@ -126,22 +136,6 @@ export default function HomePage() {
                 )}
               </Button>
             </div>
-
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-6 animate-fade-up delay-300">
-              <Button className="bg-white text-primary hover:bg-primary-foreground transition-all duration-500 rounded-full px-10 py-7 uppercase tracking-widest text-xs font-bold shadow-lg shadow-black/20" asChild>
-                <Link to="/contacto">
-                  Visite-nos
-                </Link>
-              </Button>
-              <Button className="bg-transparent border-2 border-white/40 text-white hover:bg-white/10 transition-all duration-500 rounded-full px-10 py-7 uppercase tracking-widest text-xs font-bold backdrop-blur-sm" onClick={() => setShowLive(true)}>
-                Assistir ao Vivo
-              </Button>
-            </div>
-          </div>
-
-          {/* Bottom part: Verse for desktop */}
-          <div className="w-full max-w-4xl mx-auto animate-fade-up delay-200 hidden md:block dark">
-            <DailyVerse />
           </div>
 
           {/* Scroll Indicator */}
