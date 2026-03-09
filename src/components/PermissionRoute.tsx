@@ -10,33 +10,8 @@ interface PermissionRouteProps {
 }
 
 export default function PermissionRoute({ children, perm }: PermissionRouteProps) {
-    const { user, isLoading } = useAuth();
-
-    // Aguardar carregamento do auth principal
-    if (isLoading) {
-        return (
-            <div className="min-h-[60vh] flex items-center justify-center">
-                <div className="text-center">
-                    <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
-                    <p className="text-muted-foreground">A verificar autenticação...</p>
-                </div>
-            </div>
-        );
-    }
-
-    // Não autenticado —ProtectedRoute já redireciona, mas por segurança:
-    if (!user) {
-        return <Navigate to="/auth" replace />;
-    }
-
-    // TEMPORÁRIO: Permitir acesso a qualquer utilizador autenticado
-    // Isso evita processar permissões pesadas enquanto resolvemos o acesso
-    if (user) {
-        return <>{children}</>;
-    }
-
-    // Sem permissão (fallback)
-    return <AccessDenied />;
+    // ACESSO TOTAL TEMPORÁRIO: Retorna apenas os componentes filhos sem qualquer validação ou carregamento
+    return <>{children}</>;
 }
 
 function AccessDenied() {

@@ -22,32 +22,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const checkAdminRole = async (userId: string, email?: string) => {
     // Especial case for owner
-    if (email === "novocaminho@ecletika.com") {
-      console.log("Owner login detected, granting admin access");
+    if (email?.toLowerCase() === "novocaminho@ecletika.com") {
       setIsAdmin(true);
       return;
     }
-
-    try {
-      const { data, error } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", userId)
-        .eq("role", "admin")
-        .maybeSingle();
-
-      if (error) {
-        console.error("Error checking admin role:", error);
-        setIsAdmin(false);
-      } else if (data) {
-        setIsAdmin(true);
-      } else {
-        setIsAdmin(false);
-      }
-    } catch (e) {
-      console.error("Unexpected error checking admin role:", e);
-      setIsAdmin(false);
-    }
+    setIsAdmin(false);
   };
 
   useEffect(() => {
