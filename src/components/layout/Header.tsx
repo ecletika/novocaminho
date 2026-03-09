@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Radio, ChevronDown } from "lucide-react";
+import { Menu, X, ChevronDown } from "lucide-react";
 import { useMinistries } from "@/hooks/useMinistries";
 import logoImage from "@/assets/logo-igreja.jpeg";
-import RadioModal from "@/components/RadioModal";
 
 const baseNavigation = [
   { name: "Início", href: "/" },
@@ -21,7 +20,6 @@ export default function Header() {
   const [isCasadosOpen, setIsCasadosOpen] = useState(false);
   const [isMobileMinisteriosOpen, setIsMobileMinisteriosOpen] = useState(false);
   const [isMobileCasadosOpen, setIsMobileCasadosOpen] = useState(false);
-  const [isRadioOpen, setIsRadioOpen] = useState(false);
   const location = useLocation();
   const { data: ministries } = useMinistries();
 
@@ -196,15 +194,6 @@ export default function Header() {
 
             {/* Right Actions */}
             <div className="flex items-center gap-3">
-              <Button
-                variant={isScrolled ? "outline" : "hero-outline"}
-                size="sm"
-                className="hidden sm:flex items-center gap-2"
-                onClick={() => setIsRadioOpen(true)}
-              >
-                <Radio className="w-4 h-4 animate-pulse" />
-                <span>Rádio</span>
-              </Button>
 
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -336,21 +325,11 @@ export default function Header() {
                     {item.name}
                   </Link>
                 ))}
-                <button
-                  onClick={() => { setIsMobileMenuOpen(false); setIsRadioOpen(true); }}
-                  className="w-full px-4 py-3 rounded-lg text-base font-medium text-foreground hover:bg-muted transition-colors flex items-center gap-2"
-                >
-                  <Radio className="w-4 h-4 animate-pulse" />
-                  Rádio
-                </button>
               </div>
             </div>
           )}
         </div>
       </header>
-
-      {/* Radio Modal */}
-      <RadioModal open={isRadioOpen} onOpenChange={setIsRadioOpen} />
     </>
   );
 }
