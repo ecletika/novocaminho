@@ -170,6 +170,7 @@ export function useCreateBirthday() {
         const relationships = ministry_selections.map((sel) => ({
           birthday_id: birthday.id,
           ministry_id: sel.ministry_id,
+          is_leader: sel.is_leader,
         }));
 
         const { error: relError } = await supabase
