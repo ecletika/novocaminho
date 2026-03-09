@@ -27,7 +27,7 @@ export default function CasadosProtectedRoute({ children }: CasadosProtectedProp
     }
 
     // Owner and Admins have full access
-    if (isAdmin || user.email?.toLowerCase() === "novocaminho@ecletika.com") {
+    if (isAdmin) {
         return <>{children}</>;
     }
 

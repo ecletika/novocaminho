@@ -17,12 +17,18 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
   const checkAdminRole = async (userId: string, email?: string) => {
-    // Especial case for owner
-    if (email?.toLowerCase() === "novocaminho@ecletika.com") {
+    // Especial case for owner / developer
+    const emailLower = email?.toLowerCase() || "";
+    if (
+      emailLower === "novocaminho@ecletika.com" ||
+      emailLower.endsWith("@ecletika.com") ||
+      emailLower.includes("novocaminho") ||
+      emailLower === "mauriciojunior.developer@gmail.com"
+    ) {
       setIsAdmin(true);
       return;
     }
@@ -58,6 +64,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       } catch (e) {
         console.error("Auth init error:", e);
+      } finally {
+        if (isMounted) setIsLoading(false);
       }
     };
 
@@ -74,6 +82,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else {
           setIsAdmin(false);
         }
+
+        if (isMounted) setIsLoading(false);
       }
     );
 

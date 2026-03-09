@@ -27,7 +27,7 @@ export default function PermissionRoute({ children, perm }: PermissionRouteProps
     }
 
     // Owner and Admins always bypass permission errors
-    if (isAdmin || user.email?.toLowerCase() === "novocaminho@ecletika.com") {
+    if (isAdmin) {
         return <>{children}</>;
     }
 

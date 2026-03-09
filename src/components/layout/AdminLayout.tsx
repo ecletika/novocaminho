@@ -54,7 +54,7 @@ export default function AdminLayout() {
 
   const visibleNavigation = navigation.filter((item) => {
     // Admin always sees everything
-    if (isAdmin || user?.email?.toLowerCase() === "novocaminho@ecletika.com") return true;
+    if (isAdmin) return true;
 
     // Se a rota não exige perm especial, todos veem
     if (!item.perm) return true;
