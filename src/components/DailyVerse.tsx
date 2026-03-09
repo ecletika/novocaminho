@@ -31,30 +31,30 @@ export default function DailyVerse() {
     if (!verse) return null;
 
     return (
-        <div className="w-full bg-secondary/5 backdrop-blur-md rounded-2xl p-8 border border-secondary/10 relative group overflow-hidden">
-            <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
+        <div className="w-full bg-black/20 backdrop-blur-md rounded-xl p-4 md:p-8 border border-white/10 relative group overflow-hidden">
+            <div className="absolute top-0 right-0 p-4 md:p-8 opacity-5 pointer-events-none hidden md:block">
                 <Quote size={120} />
             </div>
 
-            <div className="relative z-10">
-                <div className="flex items-center justify-between mb-6">
-                    <span className="text-secondary text-[10px] font-black uppercase tracking-[0.3em]">Versículo do Dia</span>
+            <div className="relative z-10 text-left md:text-center">
+                <div className="flex items-center justify-between mb-3 md:mb-6">
+                    <span className="text-secondary text-[8px] md:text-[10px] font-black uppercase tracking-[0.3em]">Versículo do Dia</span>
                     <button
                         onClick={fetchVerse}
-                        className="text-secondary/40 hover:text-secondary p-2 transition-colors"
+                        className="text-white/20 hover:text-secondary p-1 transition-colors"
                         title="Trocar versículo"
                     >
-                        <RefreshCw size={16} />
+                        <RefreshCw size={14} />
                     </button>
                 </div>
 
-                <p className="font-serif text-2xl md:text-3xl text-foreground italic leading-relaxed mb-6">
+                <p className="font-serif text-lg md:text-3xl text-white italic leading-relaxed mb-4 md:mb-6">
                     "{verse.text}"
                 </p>
 
-                <div className="flex items-center gap-4">
-                    <div className="h-px w-8 bg-secondary/50"></div>
-                    <span className="font-bold text-foreground/70 uppercase tracking-widest text-xs">
+                <div className="flex items-center md:justify-center gap-3 md:gap-4">
+                    <div className="h-px w-6 md:w-8 bg-white/30"></div>
+                    <span className="font-bold text-white/70 uppercase tracking-widest text-[10px] md:text-xs">
                         {verse.reference}
                     </span>
                 </div>
