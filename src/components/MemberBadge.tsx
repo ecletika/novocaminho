@@ -1,5 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import logoImage from "@/assets/logo-igreja.jpeg";
+import logoImage from "@/assets/logo-igreja.png";
 
 interface MemberBadgeProps {
     name: string;

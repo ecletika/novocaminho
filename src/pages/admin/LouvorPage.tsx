@@ -65,7 +65,7 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMont
 import { pt } from "date-fns/locale";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfiles } from "@/hooks/useUserPermissions";
-import logoImage from "@/assets/logo-igreja.jpeg";
+import logoImage from "@/assets/logo-igreja.png";
 
 const MUSICAL_KEYS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 const scheduleTypes = ["Culto Domingo", "Culto Quarta", "Culto de Oração", "Evento Especial"];
