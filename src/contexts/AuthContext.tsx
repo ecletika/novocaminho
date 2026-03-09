@@ -17,7 +17,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
 
   const checkAdminRole = async (userId: string, email?: string) => {
@@ -32,7 +32,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let isMounted = true;
 
-    // 1. Initial manual check
     const checkInitialSession = async () => {
       try {
         const { data: { session: initialSession } } = await supabase.auth.getSession();
@@ -45,18 +44,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       } catch (e) {
         console.error("Auth init error:", e);
-      } finally {
-        if (isMounted) setIsLoading(false);
       }
     };
 
     checkInitialSession();
 
-    // 2. Auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
         if (!isMounted) return;
-
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
 
@@ -65,7 +60,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else {
           setIsAdmin(false);
         }
-        setIsLoading(false);
       }
     );
 
