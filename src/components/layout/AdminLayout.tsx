@@ -53,19 +53,9 @@ export default function AdminLayout() {
   const worshipSkills = useUserWorshipSkills(user?.id);
 
   const visibleNavigation = navigation.filter((item) => {
-    const isOwner = user?.email?.toLowerCase() === "novocaminho@ecletika.com";
-    if (isOwner) return true;
-
-    if (isAdmin) return true;
-
-    // Check specific worship skills for restricted menus
-    if (item.href === "/admin/louvor" && worshipSkills.hasLouvorAccess) return true;
-    if (item.href === "/admin/tech" && worshipSkills.hasTechAccess) return true;
-
-    if (item.perm === null) {
-      return true;
-    }
-    return myPermissions.includes(item.perm);
+    // TEMPORÁRIO: Qualquer utilizador autenticado vê todo o menu
+    if (user) return true;
+    return false;
   });
 
   const isActive = (href: string) => {

@@ -33,30 +33,9 @@ export default function PermissionRoute({ children, perm }: PermissionRouteProps
         return <Navigate to="/auth" replace />;
     }
 
-    // Acesso universal ao proprietário (novocaminho@ecletika.com)
-    const isOwner = user?.email?.toLowerCase() === "novocaminho@ecletika.com";
-    if (isOwner) {
+    // TEMPORÁRIO: Permitir acesso a qualquer utilizador autenticado
+    if (user) {
         return <>{children}</>;
-    }
-
-    // Admin tem acesso a tudo
-    if (isAdmin) {
-        return <>{children}</>;
-    }
-
-    // Acesso exclusivo ao proprietário (mauricio.junior) - mantido por compatibilidade
-    if (perm === "owner") {
-        return <AccessDenied />;
-    }
-
-    // Sem permissão específica necessária — acesso livre a autenticados
-    if (perm === null) {
-        return <>{children}</>;
-    }
-
-    // Acesso exclusivo a admins (se chegou aqui, isAdmin é falso)
-    if (perm === "admin") {
-        return <AccessDenied />;
     }
 
     // Verificar permissão de louvor via skills de worship
