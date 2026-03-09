@@ -2,6 +2,7 @@ import { Navigate } from "react-router-dom";
 import { Loader2, ShieldOff } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import { useMyPermissions } from "@/hooks/useUserPermissions";
 
 interface PermissionRouteProps {
     children: React.ReactNode;
@@ -10,8 +11,35 @@ interface PermissionRouteProps {
 }
 
 export default function PermissionRoute({ children, perm }: PermissionRouteProps) {
-    // ACESSO TOTAL TEMPORÁRIO: Retorna apenas os componentes filhos sem qualquer validação ou carregamento
-    return <>{children}</>;
+    const { user, isAdmin, isLoading: authLoading } = useAuth();
+    const { data: permissions, isLoading: permsLoading } = useMyPermissions();
+
+    if (authLoading || permsLoading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-muted/30">
+                <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
+            </div>
+        );
+    }
+
+    if (!user) {
+        return <Navigate to="/auth" replace />;
+    }
+
+    // Owner and Admins always bypass permission errors
+    if (isAdmin || user.email?.toLowerCase() === "novocaminho@ecletika.com") {
+        return <>{children}</>;
+    }
+
+    if (!perm) {
+        return <>{children}</>;
+    }
+
+    if (permissions && permissions.includes(perm)) {
+        return <>{children}</>;
+    }
+
+    return <AccessDenied />;
 }
 
 function AccessDenied() {

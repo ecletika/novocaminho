@@ -49,6 +49,7 @@ export function useMyPermissions() {
       if (error) throw error;
       return data.map((p) => p.permission);
     },
+    staleTime: 1000 * 60 * 10, // 10 minutes to prevent slowness across routes
   });
 }
 

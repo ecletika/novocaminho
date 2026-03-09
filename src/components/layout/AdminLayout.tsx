@@ -24,6 +24,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
+import { useMyPermissions } from "@/hooks/useUserPermissions";
+import { useUserWorshipSkills } from "@/hooks/useWorship";
 import logoImage from "@/assets/logo-igreja.jpeg";
 
 const navigation = [
@@ -46,11 +48,26 @@ const navigation = [
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
-  const { signOut, user } = useAuth();
+  const { signOut, user, isAdmin } = useAuth();
+  const { data: myPermissions } = useMyPermissions();
+  const { hasLouvorAccess } = useUserWorshipSkills(user?.id);
 
   const visibleNavigation = navigation.filter((item) => {
-    // TEMPORÁRIO: Qualquer utilizador autenticado vê todo o menu
-    if (user) return true;
+    // Admin always sees everything
+    if (isAdmin || user?.email?.toLowerCase() === "novocaminho@ecletika.com") return true;
+
+    // Se a rota não exige perm especial, todos veem
+    if (!item.perm) return true;
+
+    // Se for rota de 'Admin'
+    if (item.perm === "admin") return false;
+
+    // Se tiver a perm específica na tabela user_permissions
+    if (myPermissions?.includes(item.perm)) return true;
+
+    // Regra extra pro Dashboard de Louvor (worship_skills)
+    if (item.perm === "louvor" && hasLouvorAccess) return true;
+
     return false;
   });
 
