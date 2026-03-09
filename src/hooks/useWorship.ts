@@ -465,7 +465,10 @@ export function useSongMinisterAssignments() {
           song:worship_songs(*),
           minister:worship_ministers(*)
         `);
-      if (error) throw error;
+      if (error) {
+        console.warn("song_minister_assignments might be missing", error);
+        return [];
+      }
       return data as SongMinisterAssignment[];
     },
   });
@@ -551,7 +554,10 @@ export function useWorshipSchedules() {
           minister:worship_ministers(*)
         `)
         .order("date", { ascending: false });
-      if (error) throw error;
+      if (error) {
+        console.warn("worship_schedules might be missing", error);
+        return [];
+      }
 
       // If no schedules, return empty array
       if (!data || data.length === 0) {

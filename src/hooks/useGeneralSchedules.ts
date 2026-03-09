@@ -29,7 +29,10 @@ export function useGeneralSchedules() {
         .from("general_schedules")
         .select("*")
         .order("date", { ascending: false });
-      if (error) throw error;
+      if (error) {
+        console.warn("general_schedules might be missing", error);
+        return [];
+      }
 
       // If no schedules, return empty array
       if (!data || data.length === 0) {
