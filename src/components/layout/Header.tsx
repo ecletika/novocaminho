@@ -45,22 +45,12 @@ export default function Header() {
         <div className="container-church">
           <nav className="flex items-center justify-between h-20">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-4">
+            <Link to="/" className="flex items-center">
               <img
                 src={logoImage}
                 alt="Logo Igreja"
-                className="w-12 h-12 object-cover rounded-sm border border-white/10"
+                className="h-12 w-auto object-contain"
               />
-              <div className="hidden sm:flex flex-col">
-                <span className={`font-display text-2xl font-black uppercase tracking-[0.2em] leading-none transition-colors ${isScrolled ? "text-primary" : "text-white"
-                  }`}>
-                  NOVO CAMINHO
-                </span>
-                <span className={`block text-[10px] uppercase tracking-[0.5em] font-bold transition-colors ${isScrolled ? "text-muted-foreground" : "text-white/70"
-                  }`}>
-                  Portugal
-                </span>
-              </div>
             </Link>
 
             {/* Desktop Navigation */}

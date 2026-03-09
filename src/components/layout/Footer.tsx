@@ -9,16 +9,12 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {/* About */}
           <div>
-            <div className="flex items-center gap-3 mb-6">
+            <div className="flex items-center mb-6">
               <img
                 src={logoImage}
                 alt="Logo Igreja"
-                className="w-12 h-12 object-cover rounded-sm border border-white/10"
+                className="h-16 w-auto object-contain brightness-0 invert"
               />
-              <div className="flex flex-col">
-                <span className="font-serif text-2xl uppercase tracking-[0.15em] text-white">Novo Caminho</span>
-                <span className="block text-[10px] uppercase tracking-[0.3em] font-light text-white/50">Portugal</span>
-              </div>
             </div>
             <p className="text-primary-foreground/80 text-sm leading-relaxed">
               Uma igreja que acolhe, transforma vidas e proclama o amor de Cristo em Portugal.
