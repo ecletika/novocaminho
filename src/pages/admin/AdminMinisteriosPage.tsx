@@ -5,6 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -24,7 +27,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Edit, Trash2, Loader2, Users, Music, Tv, Heart, BookOpen, Mic2 } from "lucide-react";
+import { Plus, Edit, Trash2, Loader2, Users, Music, Tv, Heart, BookOpen, Mic2, Image as ImageIcon, Upload, Link2 } from "lucide-react";
 
 const iconOptions = [
   { value: "Users", label: "Pessoas", Icon: Users },
@@ -59,6 +62,7 @@ export default function AdminMinisteriosPage() {
     features: "",
     is_active: true,
     sort_order: 0,
+    image_url: "",
   });
 
   const resetForm = () => {
@@ -71,6 +75,7 @@ export default function AdminMinisteriosPage() {
       features: "",
       is_active: true,
       sort_order: 0,
+      image_url: "",
     });
     setEditingMinistry(null);
   };
@@ -86,6 +91,7 @@ export default function AdminMinisteriosPage() {
       features: (ministry.features || []).join(", "),
       is_active: ministry.is_active,
       sort_order: ministry.sort_order,
+      image_url: ministry.image_url || "",
     });
     setIsDialogOpen(true);
   };
@@ -99,7 +105,7 @@ export default function AdminMinisteriosPage() {
       description: formData.description || null,
       bible_verse: formData.bible_verse || null,
       icon: formData.icon,
-      image_url: null,
+      image_url: formData.image_url || null,
       features: formData.features.split(",").map((f) => f.trim()).filter(Boolean),
       is_active: formData.is_active,
       sort_order: formData.sort_order,
@@ -116,6 +122,33 @@ export default function AdminMinisteriosPage() {
 
     setIsDialogOpen(false);
     resetForm();
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `ministries/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('photos')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('photos')
+        .getPublicUrl(filePath);
+
+      setFormData(prev => ({ ...prev, image_url: publicUrl }));
+      toast.success("Foto carregada com sucesso!");
+    } catch (error: any) {
+      console.error("Erro no upload:", error);
+      toast.error("Erro ao carregar imagem: " + error.message);
+    }
   };
 
   const handleDelete = async () => {
@@ -215,8 +248,8 @@ export default function AdminMinisteriosPage() {
                         type="button"
                         onClick={() => setFormData({ ...formData, icon: opt.value })}
                         className={`p-2 rounded-lg border transition-colors ${formData.icon === opt.value
-                            ? "bg-primary text-primary-foreground border-primary"
-                            : "border-border hover:bg-muted"
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "border-border hover:bg-muted"
                           }`}
                         title={opt.label}
                       >
@@ -244,6 +277,67 @@ export default function AdminMinisteriosPage() {
                   onChange={(e) => setFormData({ ...formData, features: e.target.value })}
                   placeholder="Ensaios, Escalas, Retiros"
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Capa do Ministério</Label>
+                <Tabs defaultValue="upload" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2 mb-2">
+                    <TabsTrigger value="upload" className="text-xs">
+                      <Upload className="w-3 h-3 mr-2" />
+                      Ficheiro
+                    </TabsTrigger>
+                    <TabsTrigger value="link" className="text-xs">
+                      <Link2 className="w-3 h-3 mr-2" />
+                      Link Externo
+                    </TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="upload" className="space-y-3">
+                    <div className="flex flex-col items-center justify-center border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 hover:bg-muted/50 transition-colors cursor-pointer relative group">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileUpload}
+                        className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                        title="Escolher foto"
+                      />
+                      <div className="flex flex-col items-center gap-2 pointer-events-none">
+                        <div className="p-3 bg-primary/10 rounded-full text-primary group-hover:scale-110 transition-transform">
+                          <Upload className="w-6 h-6" />
+                        </div>
+                        <div className="text-center">
+                          <p className="text-sm font-semibold">Clique ou arraste uma foto</p>
+                          <p className="text-xs text-muted-foreground mt-1">Computador ou Telemóvel (JPG, PNG)</p>
+                        </div>
+                      </div>
+                    </div>
+                  </TabsContent>
+                  <TabsContent value="link">
+                    <Input
+                      type="url"
+                      placeholder="https://exemplo.com/imagem.jpg"
+                      value={formData.image_url}
+                      onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                      className="text-xs"
+                    />
+                  </TabsContent>
+                </Tabs>
+                {formData.image_url && (
+                  <div className="mt-2 relative group aspect-video rounded-lg overflow-hidden border border-border">
+                    <img
+                      src={formData.image_url}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, image_url: "" })}
+                      className="absolute top-2 right-2 p-1.5 bg-destructive text-destructive-foreground rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center gap-3">
@@ -278,12 +372,22 @@ export default function AdminMinisteriosPage() {
           return (
             <div
               key={ministry.id}
-              className="bg-card rounded-xl p-6 shadow-soft flex items-start gap-4"
+              className="bg-card rounded-xl shadow-soft flex items-start gap-4 overflow-hidden border border-border/50 hover:border-primary/50 transition-colors"
             >
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                <IconComponent className="w-6 h-6 text-primary" />
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-muted flex items-center justify-center shrink-0 overflow-hidden relative group">
+                {ministry.image_url ? (
+                  <img src={ministry.image_url} alt={ministry.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                ) : (
+                  <IconComponent className="w-8 h-8 text-primary/40" />
+                )}
+                <div
+                  className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                  onClick={() => openEditDialog(ministry)}
+                >
+                  <ImageIcon className="w-5 h-5 text-white" />
+                </div>
               </div>
-              <div className="flex-1">
+              <div className="flex-1 py-4 pr-2">
                 <div className="flex items-center gap-2">
                   <h3 className="font-semibold text-foreground">{ministry.title}</h3>
                   {!ministry.is_active && (

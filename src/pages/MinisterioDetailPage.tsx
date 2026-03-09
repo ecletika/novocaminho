@@ -56,9 +56,21 @@ export default function MinisterioDetailPage() {
     <div className="min-h-screen bg-background pb-20">
       {/* Hero with Bible Verse */}
       <section className="pt-32 pb-20 gradient-hero overflow-hidden relative text-white">
-        {/* Geometric Decor */}
-        <div className="absolute inset-0 z-0 opacity-10 pointer-events-none">
-          <svg className="absolute -top-10 -right-10 w-64 h-64 text-white" viewBox="0 0 100 100">
+        {/* Background Image / Gradient */}
+        <div className="absolute inset-0 z-0 overflow-hidden">
+          {ministry.image_url ? (
+            <>
+              <img
+                src={ministry.image_url}
+                alt=""
+                className="w-full h-full object-cover scale-105 blur-sm opacity-20"
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-primary/95 to-background" />
+            </>
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/90 to-primary/80" />
+          )}
+          <svg className="absolute -top-10 -right-10 w-64 h-64 text-white opacity-10" viewBox="0 0 100 100">
             <circle cx="100" cy="0" r="40" fill="none" stroke="currentColor" strokeWidth="0.5" />
             <circle cx="100" cy="0" r="60" fill="none" stroke="currentColor" strokeWidth="0.5" />
           </svg>
