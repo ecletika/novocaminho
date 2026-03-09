@@ -19,6 +19,8 @@ export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMinisteriosOpen, setIsMinisteriosOpen] = useState(false);
   const [isCasadosOpen, setIsCasadosOpen] = useState(false);
+  const [isMobileMinisteriosOpen, setIsMobileMinisteriosOpen] = useState(false);
+  const [isMobileCasadosOpen, setIsMobileCasadosOpen] = useState(false);
   const [isRadioOpen, setIsRadioOpen] = useState(false);
   const location = useLocation();
   const { data: ministries } = useMinistries();
@@ -218,7 +220,7 @@ export default function Header() {
 
           {/* Mobile Menu */}
           {isMobileMenuOpen && (
-            <div className="lg:hidden absolute top-full left-0 right-0 bg-card shadow-card border-t border-border animate-fade-in">
+            <div className="lg:hidden absolute top-full left-0 right-0 bg-card shadow-card border-t border-border animate-fade-in max-h-[calc(100vh-5rem)] overflow-y-auto">
               <div className="container-church py-4 space-y-1">
                 <Link
                   to="/"
@@ -230,68 +232,97 @@ export default function Header() {
                 >
                   Início
                 </Link>
-                <Link
-                  to="/ministerios"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`block px-4 py-3 rounded-lg text-base font-medium transition-colors ${isMinisteriosActive
-                    ? "bg-primary text-primary-foreground"
-                    : "text-foreground hover:bg-muted"
-                    }`}
-                >
-                  Ministérios
-                </Link>
-                {ministries?.filter(m => m.is_active).map((ministry) => (
-                  <Link
-                    key={ministry.id}
-                    to={ministry.slug === "casados" ? "/casados" : `/ministerios/${ministry.slug}`}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="block px-8 py-2 rounded-lg text-sm text-muted-foreground hover:bg-muted transition-colors"
-                  >
-                    {ministry.title}
-                  </Link>
-                ))}
 
-                {/* Mobile Casados Submenu */}
+                {/* Mobile Ministérios Collapsible */}
                 <div className="space-y-1">
-                  <div className="px-4 py-2 text-xs font-bold text-muted-foreground uppercase tracking-widest mt-2">
-                    Casados Para Sempre
-                  </div>
-                  <Link
-                    to="/casados"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="block px-8 py-2 rounded-lg text-sm text-muted-foreground hover:bg-muted transition-colors"
+                  <button
+                    onClick={() => setIsMobileMinisteriosOpen(!isMobileMinisteriosOpen)}
+                    className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-base font-medium transition-colors ${isMinisteriosActive
+                      ? "bg-primary/10 text-primary"
+                      : "text-foreground hover:bg-muted"
+                      }`}
                   >
-                    Sobre
-                  </Link>
-                  <Link
-                    to="/casados/cursos"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="block px-8 py-2 rounded-lg text-sm text-muted-foreground hover:bg-muted transition-colors"
-                  >
-                    Cursos
-                  </Link>
-                  <Link
-                    to="/casados/material"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="block px-8 py-2 rounded-lg text-sm text-muted-foreground hover:bg-muted transition-colors"
-                  >
-                    Material Online
-                  </Link>
-                  <Link
-                    to="/casados/estudos"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="block px-8 py-2 rounded-lg text-sm text-muted-foreground hover:bg-muted transition-colors"
-                  >
-                    Estudo para Casais
-                  </Link>
-                  <Link
-                    to="/casados/recursos"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="block px-8 py-2 rounded-lg text-sm text-muted-foreground hover:bg-muted transition-colors"
-                  >
-                    Recursos
-                  </Link>
+                    Ministérios
+                    <ChevronDown className={`w-5 h-5 transition-transform ${isMobileMinisteriosOpen ? "rotate-180" : ""}`} />
+                  </button>
+
+                  {isMobileMinisteriosOpen && (
+                    <div className="pl-4 space-y-1 animate-accordion-down">
+                      <Link
+                        to="/ministerios"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="block px-4 py-2 text-sm text-muted-foreground hover:bg-muted rounded-md transition-colors"
+                      >
+                        Ver Todos
+                      </Link>
+                      {ministries?.filter(m => m.is_active).map((ministry) => (
+                        <Link
+                          key={ministry.id}
+                          to={ministry.slug === "casados" ? "/casados" : `/ministerios/${ministry.slug}`}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="block px-4 py-2 text-sm text-muted-foreground hover:bg-muted rounded-md transition-colors"
+                        >
+                          {ministry.title}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
                 </div>
+
+                {/* Mobile Casados Collapsible */}
+                <div className="space-y-1">
+                  <button
+                    onClick={() => setIsMobileCasadosOpen(!isMobileCasadosOpen)}
+                    className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-base font-medium transition-colors ${location.pathname.startsWith("/casados")
+                      ? "bg-primary/10 text-primary"
+                      : "text-foreground hover:bg-muted"
+                      }`}
+                  >
+                    Casados Para Sempre
+                    <ChevronDown className={`w-5 h-5 transition-transform ${isMobileCasadosOpen ? "rotate-180" : ""}`} />
+                  </button>
+
+                  {isMobileCasadosOpen && (
+                    <div className="pl-4 space-y-1 animate-accordion-down">
+                      <Link
+                        to="/casados"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="block px-4 py-2 text-sm text-muted-foreground hover:bg-muted rounded-md transition-colors"
+                      >
+                        Sobre o Ministério
+                      </Link>
+                      <Link
+                        to="/casados/cursos"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="block px-4 py-2 text-sm text-muted-foreground hover:bg-muted rounded-md transition-colors"
+                      >
+                        Cursos
+                      </Link>
+                      <Link
+                        to="/casados/material"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="block px-4 py-2 text-sm text-muted-foreground hover:bg-muted rounded-md transition-colors"
+                      >
+                        Material Online
+                      </Link>
+                      <Link
+                        to="/casados/estudos"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="block px-4 py-2 text-sm text-muted-foreground hover:bg-muted rounded-md transition-colors"
+                      >
+                        Estudo para Casais
+                      </Link>
+                      <Link
+                        to="/casados/recursos"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="block px-4 py-2 text-sm text-muted-foreground hover:bg-muted rounded-md transition-colors"
+                      >
+                        Recursos
+                      </Link>
+                    </div>
+                  )}
+                </div>
+
                 {baseNavigation.slice(1).map((item) => (
                   <Link
                     key={item.name}
