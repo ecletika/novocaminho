@@ -27,6 +27,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useMyPermissions } from "@/hooks/useUserPermissions";
 import { useUserWorshipSkills } from "@/hooks/useWorship";
 import logoImage from "@/assets/logo-igreja.png";
+import logoAdmin from "@/assets/logo-admin.png";
 
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard, perm: null },
@@ -96,16 +97,12 @@ export default function AdminLayout() {
         <div className="h-full flex flex-col">
           {/* Logo */}
           <div className="h-16 flex items-center justify-between px-6 border-b border-border">
-            <Link to="/" className="flex items-center gap-3">
+            <Link to="/" className="flex items-center justify-center w-full px-2">
               <img
-                src={logoImage}
+                src={logoAdmin}
                 alt="Logo Igreja"
-                className="w-10 h-10 rounded-full object-cover"
+                className="h-20 w-auto object-contain"
               />
-              <div>
-                <span className="font-display text-lg font-semibold text-foreground">Novo Caminho</span>
-                <span className="block text-xs text-muted-foreground">Painel Admin</span>
-              </div>
             </Link>
             <button
               onClick={() => setSidebarOpen(false)}
