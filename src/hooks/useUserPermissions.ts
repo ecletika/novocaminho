@@ -30,7 +30,10 @@ export function useAllUserPermissions() {
       const { data, error } = await supabase
         .from("user_permissions")
         .select("*");
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching all permissions:", error.message);
+        return [];
+      }
       return data as UserPermission[];
     },
   });
@@ -46,7 +49,10 @@ export function useMyPermissions() {
         .from("user_permissions")
         .select("permission")
         .eq("user_id", user.id);
-      if (error) throw error;
+      if (error) {
+        console.warn("Fallback: No permissions found or table missing:", error.message);
+        return [];
+      }
       return data.map((p) => p.permission);
     },
     staleTime: 1000 * 60 * 10, // 10 minutes to prevent slowness across routes
