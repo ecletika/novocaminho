@@ -109,23 +109,38 @@ export function useBirthdaysByMinistry(ministryId: string | undefined) {
     queryFn: async () => {
       if (!ministryId) return [];
 
-      const { data, error } = await supabase
+      const { data: mData, error: mError } = await supabase
         .from("birthday_ministries")
-        .select("birthday_id, is_leader, birthdays(*)")
+        .select("birthday_id, is_leader")
         .eq("ministry_id", ministryId);
 
-      if (error) throw error;
+      if (mError) {
+        console.warn("Erro ao buscar birthday_ministries", mError);
+        return [];
+      }
 
-      const members = data
-        .map((item) => {
-          const birthday = item.birthdays as unknown as Birthday;
-          if (!birthday) return null;
-          return {
-            ...birthday,
-            is_leader: item.is_leader ?? false,
-          };
-        })
-        .filter(Boolean);
+      if (!mData || mData.length === 0) return [];
+
+      const birthdayIds = mData.map(m => m.birthday_id);
+
+      const { data: bData, error: bError } = await supabase
+        .from("birthdays")
+        .select("*")
+        .in("id", birthdayIds);
+
+      if (bError) {
+        console.warn("Erro ao buscar birthdays_ids", bError);
+        return [];
+      }
+
+      // Combine them
+      const members = bData.map(birthday => {
+        const ministryRel = mData.find(m => m.birthday_id === birthday.id);
+        return {
+          ...birthday,
+          is_leader: ministryRel?.is_leader ?? false
+        };
+      });
 
       return members as (Birthday & { is_leader: boolean })[];
     },
