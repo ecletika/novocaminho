@@ -13,7 +13,7 @@ export default function Footer() {
               <img
                 src={logoImage}
                 alt="Logo Igreja"
-                className="h-16 w-auto object-contain brightness-0 invert"
+                className="h-24 w-auto object-contain brightness-0 invert"
               />
             </div>
             <p className="text-primary-foreground/80 text-sm leading-relaxed">
