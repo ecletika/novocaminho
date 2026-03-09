@@ -71,7 +71,7 @@ export default function HomePage() {
   const { data: monthlyBirthdays = [] } = useMonthlyBirthdays();
   const { data: dbMinistries = [] } = useMinistries();
   const [showLive, setShowLive] = useState(false);
-  const [isMuted, setIsMuted] = useState(false); // Enable sound by default as per user request
+  const [isMuted, setIsMuted] = useState(true); // Start muted to ensure autoplay works on all browsers
 
   const activeMinistries = dbMinistries.filter(m => m.is_active).slice(0, 3);
   const getIcon = (iconName: string) => iconMap[iconName] || Users;
@@ -90,7 +90,7 @@ export default function HomePage() {
             playsInline
             preload="auto"
             poster={heroImage}
-            className="w-full h-full object-cover scale-[0.98] opacity-80"
+            className="w-full h-full object-cover opacity-80"
             style={{ transform: 'translateZ(0)', willChange: 'transform' }}
           >
             <source src="/home-video.mp4" type="video/mp4" />
