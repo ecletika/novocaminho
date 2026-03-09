@@ -26,7 +26,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsAdmin(true);
       return;
     }
-    setIsAdmin(false);
+
+    try {
+      const { data, error } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .eq("role", "admin")
+        .maybeSingle();
+
+      if (error) throw error;
+      setIsAdmin(!!data);
+    } catch (error) {
+      console.error("Error checking admin role:", error);
+      setIsAdmin(false);
+    }
   };
 
   useEffect(() => {
