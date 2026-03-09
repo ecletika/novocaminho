@@ -42,13 +42,39 @@ export function useBirthdays() {
   return useQuery({
     queryKey: ["birthdays"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // 1. Fetch birthdays
+      const { data: bData, error: bError } = await supabase
         .from("birthdays")
-        .select("*, ministries:birthday_ministries(ministry_id, is_leader)")
+        .select("*")
         .order("birthday_date", { ascending: true });
 
-      if (error) throw error;
-      return data as BirthdayWithMinistries[];
+      if (bError) throw bError;
+
+      // 2. Fetch ministries mapping
+      const { data: mData, error: mError } = await supabase
+        .from("birthday_ministries")
+        .select("birthday_id, ministry_id, is_leader");
+
+      // Se a tabela der erro (e.g. se não existir), não parte o site, retorna vazio
+      if (mError) {
+        console.error("Falha ao buscar birthday_ministries:", mError);
+        return (bData as Birthday[]).map(b => ({ ...b, ministries: [] })) as BirthdayWithMinistries[];
+      }
+
+      // 3. Combine in JS
+      const ministriesMap = mData.reduce((acc, curr) => {
+        if (!acc[curr.birthday_id]) acc[curr.birthday_id] = [];
+        acc[curr.birthday_id].push({
+          ministry_id: curr.ministry_id,
+          is_leader: curr.is_leader ?? false,
+        });
+        return acc;
+      }, {} as Record<string, { ministry_id: string; is_leader: boolean }[]>);
+
+      return (bData as Birthday[]).map(b => ({
+        ...b,
+        ministries: ministriesMap[b.id] || []
+      })) as BirthdayWithMinistries[];
     },
   });
 }

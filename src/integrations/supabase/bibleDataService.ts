@@ -5,7 +5,11 @@ import { Verse, Devotional, DailyBread, StrongDefinition, Product, PrayerRequest
 const supabaseUrl = 'https://ixupstbyynqswdehmuna.supabase.co';
 const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml4dXBzdGJ5eW5xc3dkZWhtdW5hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwMjA4OTQsImV4cCI6MjA4NDU5Njg5NH0.l8p38uFStHjXNtdbfzAd7OSJSUTv1hLR6Uc8SMBZA7I';
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    storageKey: 'bible-data-auth-token'
+  }
+});
 
 export const BIBLE_STRUCTURE = [
   { name: 'Gênesis', chapters: 50 }, { name: 'Êxodo', chapters: 40 }, { name: 'Levítico', chapters: 27 },
