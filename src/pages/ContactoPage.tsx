@@ -78,7 +78,7 @@ export default function ContactoPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-foreground mb-1">Telefone</h3>
-                    <p className="text-muted-foreground">+351 123 456 789</p>
+                    <p className="text-muted-foreground">+351 931 373 230</p>
                   </div>
                 </div>
 
