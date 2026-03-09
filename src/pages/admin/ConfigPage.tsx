@@ -24,19 +24,31 @@ export default function ConfigPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { data: facebookPageId } = useSiteConfig("facebook_page_id");
+  const { data: discipuladoPass } = useSiteConfig("discipulado_password");
   const updateConfig = useUpdateSiteConfig();
   const [fbPageId, setFbPageId] = useState("");
+  const [discPass, setDiscPass] = useState("");
 
   useEffect(() => {
     if (facebookPageId) setFbPageId(facebookPageId);
-  }, [facebookPageId]);
+    if (discipuladoPass) setDiscPass(discipuladoPass);
+  }, [facebookPageId, discipuladoPass]);
 
   const handleSaveFacebook = async () => {
     try {
       await updateConfig.mutateAsync({ key: "facebook_page_id", value: fbPageId });
-      toast.success("Link do Facebook salvo!");
+      toast.success("Configurações do Facebook salvas!");
     } catch {
-      toast.error("Erro ao guardar");
+      toast.error("Erro ao guardar Facebook");
+    }
+  };
+
+  const handleSaveDiscipuladoPass = async () => {
+    try {
+      await updateConfig.mutateAsync({ key: "discipulado_password", value: discPass });
+      toast.success("Palavra-passe do acompanhamento salva!");
+    } catch {
+      toast.error("Erro ao guardar palavra-passe");
     }
   };
 
@@ -181,6 +193,41 @@ export default function ConfigPage() {
             {updateConfig.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
             Guardar
           </Button>
+        </div>
+      </div>
+
+      {/* Discipulado Security Section */}
+      <div className="bg-card rounded-xl shadow-soft p-6">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center">
+            <Shield className="w-6 h-6 text-amber-600" />
+          </div>
+          <div>
+            <h2 className="font-display text-xl font-semibold text-foreground">Acompanhamento (Discipulado)</h2>
+            <p className="text-sm text-muted-foreground">Senha de acesso confidencial para o sistema de acompanhamento</p>
+          </div>
+        </div>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="disc-pass">Chave de Acesso Confidencial</Label>
+            <div className="flex gap-2">
+              <Input
+                id="disc-pass"
+                type="text"
+                value={discPass}
+                onChange={(e) => setDiscPass(e.target.value)}
+                placeholder="Ex: discipulado2024"
+                className="max-w-xs"
+              />
+              <Button onClick={handleSaveDiscipuladoPass} disabled={updateConfig.isPending}>
+                {updateConfig.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                Guardar Chave
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Esta é a chave que será pedida para entrar no módulo de Acompanhamento.
+            </p>
+          </div>
         </div>
       </div>
 

@@ -33,9 +33,17 @@ export default function PermissionRoute({ children, perm }: PermissionRouteProps
         return <Navigate to="/auth" replace />;
     }
 
-    // Admin tem acesso a tudo
-    if (isAdmin) {
+    // Admin tem acesso a tudo, exceto áreas 'owner' (se especificado)
+    if (isAdmin && perm !== "owner") {
         return <>{children}</>;
+    }
+
+    // Acesso exclusivo ao proprietário (mauricio.junior)
+    if (perm === "owner") {
+        if (user.email === "novocaminho@ecletika.com") {
+            return <>{children}</>;
+        }
+        return <AccessDenied />;
     }
 
     // Sem permissão específica necessária — acesso livre a autenticados

@@ -97,7 +97,7 @@ const App = () => (
               <Route path="aniversarios" element={<PermissionRoute perm="aniversarios"><AniversariosPage /></PermissionRoute>} />
               <Route path="casados" element={<PermissionRoute perm="casados"><AdminCasadosPage /></PermissionRoute>} />
               <Route path="lideranca" element={<PermissionRoute perm="ministerios"><AdminLiderancaPage /></PermissionRoute>} />
-              <Route path="config" element={<PermissionRoute perm="config"><ConfigPage /></PermissionRoute>} />
+              <Route path="config" element={<PermissionRoute perm="owner"><ConfigPage /></PermissionRoute>} />
 
               {/* Gestão de utilizadores: exclusivo para admins */}
               <Route path="users" element={<PermissionRoute perm="admin"><UsersPage /></PermissionRoute>} />

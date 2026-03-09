@@ -41,8 +41,8 @@ const navigation = [
   { name: "Lideranças", href: "/admin/lideranca", icon: Layers, perm: "ministerios" },
   { name: "Documentação", href: "/admin/docs", icon: FileText, perm: "docs" },
   { name: "Entrevistas", href: "/discipulado", icon: MessageSquare, perm: "discipulado" },
-  { name: "Utilizadores", href: "/admin/users", icon: Users, perm: null },
-  { name: "Configurações", href: "/admin/config", icon: Settings, perm: "config" },
+  { name: "Utilizadores", href: "/admin/users", icon: Users, perm: "admin" },
+  { name: "Configurações", href: "/admin/config", icon: Settings, perm: "owner" },
 ];
 
 export default function AdminLayout() {
@@ -53,6 +53,10 @@ export default function AdminLayout() {
   const worshipSkills = useUserWorshipSkills(user?.id);
 
   const visibleNavigation = navigation.filter((item) => {
+    if (item.perm === "owner") {
+      return user?.email === "novocaminho@ecletika.com";
+    }
+
     if (isAdmin) return true;
 
     // Check specific worship skills for restricted menus
@@ -60,8 +64,6 @@ export default function AdminLayout() {
     if (item.href === "/admin/tech" && worshipSkills.hasTechAccess) return true;
 
     if (item.perm === null) {
-      // Dashboard visible to all, Users only to admin
-      if (item.href === "/admin/users") return false;
       return true;
     }
     return myPermissions.includes(item.perm);
