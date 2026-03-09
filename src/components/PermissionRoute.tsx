@@ -1,8 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { Loader2, ShieldOff } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useMyPermissions } from "@/hooks/useUserPermissions";
-import { useUserWorshipSkills } from "@/hooks/useWorship";
 import { Button } from "@/components/ui/button";
 
 interface PermissionRouteProps {
@@ -12,48 +10,32 @@ interface PermissionRouteProps {
 }
 
 export default function PermissionRoute({ children, perm }: PermissionRouteProps) {
-    const { user, isLoading, isAdmin } = useAuth();
-    const { data: myPermissions = [], isLoading: permsLoading } = useMyPermissions();
-    const worshipSkills = useUserWorshipSkills(user?.id);
+    const { user, isLoading } = useAuth();
 
-    // Aguardar carregamento
-    if (isLoading || permsLoading) {
+    // Aguardar carregamento do auth principal
+    if (isLoading) {
         return (
             <div className="min-h-[60vh] flex items-center justify-center">
                 <div className="text-center">
                     <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
-                    <p className="text-muted-foreground">A verificar permissões...</p>
+                    <p className="text-muted-foreground">A verificar autenticação...</p>
                 </div>
             </div>
         );
     }
 
-    // Não autenticado — nunca deve chegar aqui (ProtectedRoute já redireciona), mas por segurança:
+    // Não autenticado —ProtectedRoute já redireciona, mas por segurança:
     if (!user) {
         return <Navigate to="/auth" replace />;
     }
 
     // TEMPORÁRIO: Permitir acesso a qualquer utilizador autenticado
+    // Isso evita processar permissões pesadas enquanto resolvemos o acesso
     if (user) {
         return <>{children}</>;
     }
 
-    // Verificar permissão de louvor via skills de worship
-    if (perm === "louvor" && worshipSkills.hasLouvorAccess) {
-        return <>{children}</>;
-    }
-
-    // Verificar permissão de tech via skills de worship
-    if (perm === "tech" && worshipSkills.hasTechAccess) {
-        return <>{children}</>;
-    }
-
-    // Verificar tabela user_permissions
-    if (myPermissions.includes(perm)) {
-        return <>{children}</>;
-    }
-
-    // Sem permissão
+    // Sem permissão (fallback)
     return <AccessDenied />;
 }
 

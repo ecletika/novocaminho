@@ -24,8 +24,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
-import { useMyPermissions } from "@/hooks/useUserPermissions";
-import { useUserWorshipSkills } from "@/hooks/useWorship";
 import logoImage from "@/assets/logo-igreja.jpeg";
 
 const navigation = [
@@ -48,9 +46,7 @@ const navigation = [
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
-  const { signOut, user, isAdmin } = useAuth();
-  const { data: myPermissions = [] } = useMyPermissions();
-  const worshipSkills = useUserWorshipSkills(user?.id);
+  const { signOut, user } = useAuth();
 
   const visibleNavigation = navigation.filter((item) => {
     // TEMPORÁRIO: Qualquer utilizador autenticado vê todo o menu

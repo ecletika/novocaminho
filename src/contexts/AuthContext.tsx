@@ -51,46 +51,48 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    // Flag to prevent multiple initializations
     let isMounted = true;
 
-    // Check for existing session on mount
-    const initAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!isMounted) return;
+    // 1. Initial manual check
+    const checkInitialSession = async () => {
+      try {
+        const { data: { session: initialSession } } = await supabase.auth.getSession();
+        if (!isMounted) return;
 
-      if (session) {
-        setSession(session);
-        setUser(session.user);
-        await checkAdminRole(session.user.id, session.user.email);
-      }
-      setIsLoading(false);
-
-      // Listen for changes
-      const { data: { subscription } } = supabase.auth.onAuthStateChange(
-        async (event, session) => {
-          if (!isMounted) return;
-
-          setSession(session);
-          setUser(session?.user ?? null);
-
-          if (session?.user) {
-            await checkAdminRole(session.user.id, session.user.email);
-          } else {
-            setIsAdmin(false);
-          }
-          setIsLoading(false);
+        if (initialSession) {
+          setSession(initialSession);
+          setUser(initialSession.user);
+          await checkAdminRole(initialSession.user.id, initialSession.user.email);
         }
-      );
-
-      return subscription;
+      } catch (e) {
+        console.error("Auth init error:", e);
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
     };
 
-    const subPromise = initAuth();
+    checkInitialSession();
+
+    // 2. Auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, currentSession) => {
+        if (!isMounted) return;
+
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
+
+        if (currentSession?.user) {
+          await checkAdminRole(currentSession.user.id, currentSession.user.email);
+        } else {
+          setIsAdmin(false);
+        }
+        setIsLoading(false);
+      }
+    );
 
     return () => {
       isMounted = false;
-      subPromise.then(sub => sub?.unsubscribe());
+      subscription.unsubscribe();
     };
   }, []);
 
