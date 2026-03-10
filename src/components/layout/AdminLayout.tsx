@@ -138,7 +138,7 @@ export default function AdminLayout() {
                   <Radio className="w-5 h-5 text-foreground" />
                 </div>
                 <div>
-                  <span className="font-medium text-foreground text-sm">Rádio NC</span>
+                  <span className="font-medium text-foreground text-sm">Rádio Igreja Novo Caminho</span>
                   <span className="block text-xs text-muted-foreground">Ao vivo</span>
                 </div>
               </div>
