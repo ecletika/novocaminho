@@ -156,32 +156,68 @@ export function useWorshipMembers() {
   return useQuery({
     queryKey: ["worship-members"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("worship_members")
-        .select(`
-          *,
-          primary_function:worship_functions(*)
-        `)
-        .order("name");
-      if (error) throw error;
+      // 1. First, try to fetch with the relationship (ideal)
+      try {
+        const { data, error } = await supabase
+          .from("worship_members")
+          .select(`
+            *,
+            primary_function:worship_functions(*)
+          `)
+          .order("name");
 
-      // If no members, return empty array
-      if (!data || data.length === 0) {
-        return [] as WorshipMember[];
+        if (!error && data) {
+          // Fetch secondary functions separately since they are a many-to-many
+          const memberIds = data.map(m => m.id);
+          const { data: secondaryFunctions } = await supabase
+            .from("member_functions")
+            .select(`*, function:worship_functions(*)`)
+            .in("member_id", memberIds);
+
+          return data.map(member => ({
+            ...member,
+            secondary_functions: secondaryFunctions?.filter(sf => sf.member_id === member.id) || []
+          })) as WorshipMember[];
+        }
+      } catch (e) {
+        console.warn("Failed to fetch with join, falling back to sequential fetch", e);
       }
 
-      // Fetch secondary functions
-      const memberIds = data.map(m => m.id);
-      const { data: secondaryFunctions } = await supabase
-        .from("member_functions")
-        .select(`*, function:worship_functions(*)`)
-        .in("member_id", memberIds);
+      // 2. Fallback: Fetch members first, then functions manually
+      const { data: members, error: mError } = await supabase.from("worship_members").select("*").order("name");
+      if (mError) throw mError;
+      if (!members || members.length === 0) return [];
 
-      return data.map(member => ({
-        ...member,
-        secondary_functions: secondaryFunctions?.filter(sf => sf.member_id === member.id) || []
-      })) as WorshipMember[];
+      const { data: functions } = await supabase.from("worship_functions").select("*");
+      const { data: memberFunctions } = await supabase.from("member_functions").select("*");
+
+      return members.map(m => {
+        const primaryFunctionRaw = functions?.find(f => f.id === m.primary_function_id);
+        // Map update_at to updated_at if necessary
+        const primaryFunction = primaryFunctionRaw ? {
+          ...primaryFunctionRaw,
+          updated_at: (primaryFunctionRaw as any).updated_at || (primaryFunctionRaw as any).update_at
+        } : null;
+
+        const secondary = memberFunctions?.filter(mf => mf.member_id === m.id).map(mf => {
+          const fRaw = functions?.find(f => f.id === mf.function_id);
+          return {
+            ...mf,
+            function: fRaw ? {
+              ...fRaw,
+              updated_at: (fRaw as any).updated_at || (fRaw as any).update_at
+            } : null
+          };
+        }) || [];
+
+        return {
+          ...m,
+          primary_function: primaryFunction,
+          secondary_functions: secondary
+        } as WorshipMember;
+      });
     },
+    retry: 1
   });
 }
 
@@ -453,23 +489,37 @@ export function useDeleteWorshipMinister() {
   });
 }
 
-// Song Minister Assignments Hooks
+// Fixed alias for update_at/updated_at and relationship issues
 export function useSongMinisterAssignments() {
   return useQuery({
     queryKey: ["song-minister-assignments"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("song_minister_assignments")
-        .select(`
-          *,
-          song:worship_songs(*),
-          minister:worship_ministers(*)
-        `);
-      if (error) {
-        console.warn("song_minister_assignments might be missing", error);
-        return [];
+      try {
+        const { data, error } = await supabase
+          .from("song_minister_assignments")
+          .select(`
+            *,
+            song:worship_songs(*),
+            minister:worship_ministers(*)
+          `);
+
+        if (!error && data) return data as SongMinisterAssignment[];
+      } catch (e) {
+        console.warn("Relational fetch for assignments failed, falling back");
       }
-      return data as SongMinisterAssignment[];
+
+      // Fallback
+      const { data: assignments, error: aError } = await supabase.from("song_minister_assignments").select("*");
+      if (aError) return [];
+
+      const { data: songs } = await supabase.from("worship_songs").select("*");
+      const { data: ministers } = await supabase.from("worship_ministers").select("*");
+
+      return assignments.map(a => ({
+        ...a,
+        song: songs?.find(s => s.id === a.song_id),
+        minister: ministers?.find(m => m.id === a.minister_id)
+      })) as SongMinisterAssignment[];
     },
   });
 }

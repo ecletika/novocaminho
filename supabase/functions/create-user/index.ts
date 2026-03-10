@@ -26,16 +26,21 @@ Deno.serve(async (req) => {
     }
 
     const token = authHeader.replace("Bearer ", "");
-    const { data: { user: caller } } = await supabase.auth.getUser(token);
-    if (!caller) {
-      return new Response(JSON.stringify({ error: "Não autorizado" }), {
+    const { data: userData, error: userError } = await supabase.auth.getUser(token);
+
+    if (userError || !userData?.user) {
+      console.error("Auth verification error:", userError);
+      return new Response(JSON.stringify({ error: "Sessão inválida ou expirada" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
+    const caller = userData.user;
+
     // Check admin role or if caller is the owner
-    const isOwner = caller.email?.toLowerCase() === "novocaminho@ecletika.com";
+    const owners = ["novocaminho@ecletika.com", "mauricio.junior@ecletika.com"];
+    const isOwner = owners.includes(caller.email?.toLowerCase() || "");
 
     if (!isOwner) {
       const { data: roleData } = await supabase

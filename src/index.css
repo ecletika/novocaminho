@@ -42,7 +42,7 @@
     --radius: 0.5rem;
     /* Corporate style */
 
-    /* Custom colors - Novo Caminho */
+    /* Custom colors - Igreja Novo Caminho */
     --brand-blue-dark: 214 69.4% 28.2%;
     --brand-blue-medium: 213 53.8% 45.9%;
     --brand-blue-light: 198 75.5% 49.6%;
@@ -69,7 +69,7 @@
   }
 
   .dark {
-    /* Novo Caminho Dark Theme */
+    /* Igreja Novo Caminho Dark Theme */
     --background: 214 69.4% 15%;
     /* Darker #16417A */
     --foreground: 13 52.9% 96.7%;

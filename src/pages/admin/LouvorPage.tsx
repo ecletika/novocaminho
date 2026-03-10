@@ -64,14 +64,18 @@ import {
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths, isSameMonth } from "date-fns";
 import { pt } from "date-fns/locale";
 import { useAuth } from "@/contexts/AuthContext";
-import { useProfiles } from "@/hooks/useUserPermissions";
+import { useProfiles, useMyPermissions } from "@/hooks/useUserPermissions";
 import logoImage from "@/assets/logo-igreja.png";
 
 const MUSICAL_KEYS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 const scheduleTypes = ["Culto Domingo", "Culto Quarta", "Culto de Oração", "Evento Especial"];
 
 export default function LouvorPage() {
-  const { isAdmin, user: currentUser } = useAuth();
+  const { isAdmin: authIsAdmin, user: currentUser } = useAuth();
+  const { data: myPermissions = [] } = useMyPermissions();
+
+  // A helper to determine if the user has full management access to this module
+  const isAdmin = authIsAdmin || myPermissions.includes("louvor") || myPermissions.includes("admin");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedMinisterId, setSelectedMinisterId] = useState<string | null>(null);
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -163,10 +167,16 @@ export default function LouvorPage() {
   const bateriaFunctionId = functions.find(f => f.name?.toLowerCase()?.includes("bateria"))?.id;
   const vocalFunctionId = functions.find(f => f.name?.toLowerCase()?.includes("vocal") || f.name?.toLowerCase()?.includes("back"))?.id;
 
-  const ministers = members.filter(m =>
-    (ministranteFunctionId && m.primary_function_id === ministranteFunctionId) ||
-    m.secondary_functions?.some(sf => sf.function_id === ministranteFunctionId)
-  );
+  // Refined minister identification to be more robust
+  const ministers = members.filter(m => {
+    const isPrimaryMinister = ministranteFunctionId && m.primary_function_id === ministranteFunctionId;
+    const isSecondaryMinister = m.secondary_functions?.some(sf => sf.function_id === ministranteFunctionId);
+    // Also include anyone who has "ministrante" in their function name as a fallback
+    const hasMinisterRoleName = (m.primary_function?.name?.toLowerCase()?.includes("ministrante") ||
+      m.secondary_functions?.some(sf => sf.function?.name?.toLowerCase()?.includes("ministrante")));
+
+    return isPrimaryMinister || isSecondaryMinister || hasMinisterRoleName;
+  });
 
   const tecladoMembers = members.filter(m =>
     m.primary_function_id === tecladoFunctionId ||
@@ -576,31 +586,16 @@ export default function LouvorPage() {
 
   // Filter songs by selected minister
   const ministerSongs = selectedMinisterId
-    ? assignments.filter(a => a.minister_id === selectedMinisterId)
+    ? assignments.filter(a => {
+      const selectedMember = ministers.find(m => m.id === selectedMinisterId);
+      return a.minister_id === selectedMinisterId ||
+        (selectedMember && a.minister?.name?.toLowerCase() === selectedMember.name?.toLowerCase());
+    })
     : [];
 
-  const filteredMembers = members.filter(m => {
-    const matchesSearch = (m.name || "").toLowerCase().includes(searchTerm.toLowerCase());
-    if (isAdmin) return matchesSearch;
-
-    const mFunctions = [
-      m.primary_function?.name?.toLowerCase(),
-      ...(m.secondary_functions?.map(sf => sf.function?.name?.toLowerCase()).filter(Boolean) || [])
-    ].filter(Boolean) as string[];
-
-    const mIsMusician = mFunctions.some(f => ["teclado", "violão", "violao", "bateria", "baixo", "guitarra"].some(instr => f?.includes(instr)));
-    const mIsMinister = mFunctions.some(f => f?.includes("ministrante"));
-    const mIsVocal = mFunctions.some(f => f?.includes("vocal") || f?.includes("back"));
-
-    if (isMusician && mIsMusician) return matchesSearch;
-    if (isMinister && mIsMinister) return matchesSearch;
-    if (isVocal && mIsVocal) return matchesSearch;
-
-    // If no direct group match, but they are the user themselves
-    if (m.user_id === currentUser?.id) return matchesSearch;
-
-    return false;
-  });
+  const filteredMembers = members.filter(m => 
+    (m.name || "").toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const filteredSongs = songs.filter(s =>
     (s.name || "").toLowerCase().includes((searchTerm || "").toLowerCase())
@@ -929,7 +924,12 @@ export default function LouvorPage() {
               <div className="col-span-full text-center py-8 text-muted-foreground">Nenhum ministrante registado. Adicione membros com a função "Ministrante" na aba Membros.</div>
             ) : (
               ministers.map((minister) => {
-                const ministerAssignments = assignments.filter(a => a.minister_id === minister.id);
+                // Fix: Match by name as a fallback since assignments point to worship_ministers table
+                // but the UI is iterating over worship_members with the "Ministrante" function
+                const ministerAssignments = assignments.filter(a =>
+                  a.minister_id === minister.id ||
+                  a.minister?.name?.toLowerCase() === minister.name?.toLowerCase()
+                );
                 return (
                   <div
                     key={minister.id}

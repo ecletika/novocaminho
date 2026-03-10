@@ -168,7 +168,7 @@ export default function AdminEscalasPage() {
 
     const shareWhatsApp = (schedule: GeneralSchedule) => {
         const dateStr = format(new Date(schedule.date), "EEEE, d 'de' MMMM", { locale: pt });
-        let msg = `📅 *Escala Novo Caminho*\n📍 ${schedule.type}\n🗓️ ${dateStr}\n`;
+        let msg = `📅 *Escala Igreja Novo Caminho*\n📍 ${schedule.type}\n🗓️ ${dateStr}\n`;
 
         const team = schedule.team_members || [];
 

@@ -61,7 +61,7 @@ export default function RadioPlayer() {
         {/* Info */}
         <div className="flex-1 min-w-0">
           <h3 className="font-display text-lg font-semibold text-foreground truncate">
-            Rádio Um Novo Caminho
+            Rádio Igreja Novo Caminho
           </h3>
           <p className="text-sm text-muted-foreground">
             {isPlaying ? (

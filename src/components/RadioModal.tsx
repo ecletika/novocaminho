@@ -16,7 +16,7 @@ export default function RadioModal({ open, onOpenChange }: RadioModalProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-center font-display">Rádio Novo Caminho</DialogTitle>
+          <DialogTitle className="text-center font-display">Rádio Igreja Novo Caminho</DialogTitle>
         </DialogHeader>
         <div className="py-4">
           <RadioPlayer />

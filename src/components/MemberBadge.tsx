@@ -37,7 +37,7 @@ export default function MemberBadge({ name, photo_url, role, variant = "blue" }:
                 </div>
                 <h2 className={`text-xl font-black uppercase tracking-[0.2em] leading-tight font-display ${isBlue ? "text-white" : "text-[#16417A]"
                     }`}>
-                    NOVO CAMINHO
+                    IGREJA NOVO CAMINHO
                 </h2>
                 <span className={`text-[9px] font-bold uppercase tracking-[0.5em] opacity-80 font-display ${isBlue ? "text-white/80" : "text-[#16417A]/80"
                     }`}>
