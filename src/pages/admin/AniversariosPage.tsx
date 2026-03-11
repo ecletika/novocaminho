@@ -209,8 +209,12 @@ export default function AniversariosPage() {
   };
 
   const filteredBirthdays = birthdays.filter((b) => {
-    const name = b.woman_name || b.man_name || "";
-    return name.toLowerCase().includes(searchTerm.toLowerCase());
+    const name = (b.woman_name || "") + " " + (b.man_name || "");
+    const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (b.phone || "").includes(searchTerm) ||
+      (b.woman_phone || "").includes(searchTerm) ||
+      (b.man_phone || "").includes(searchTerm);
+    return matchesSearch;
   });
 
   const reportBirthdays = birthdays.filter((b) => {
@@ -329,6 +333,16 @@ export default function AniversariosPage() {
                     {(birthday as any).phone && (
                       <span className="text-xs text-muted-foreground flex items-center gap-1">
                         <Phone className="w-3 h-3" /> {(birthday as any).phone}
+                      </span>
+                    )}
+                    {(birthday as any).man_phone && (birthday as any).man_phone !== (birthday as any).phone && (
+                      <span className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Phone className="w-3 h-3 text-blue-500" /> {(birthday as any).man_phone} (M)
+                      </span>
+                    )}
+                    {(birthday as any).woman_phone && (birthday as any).woman_phone !== (birthday as any).phone && (
+                      <span className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Phone className="w-3 h-3 text-pink-500" /> {(birthday as any).woman_phone} (F)
                       </span>
                     )}
                     {(birthday as any).email && (

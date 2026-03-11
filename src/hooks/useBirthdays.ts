@@ -46,14 +46,16 @@ export function useBirthdays() {
       const { data: bData, error: bError } = await supabase
         .from("birthdays")
         .select("*")
-        .order("birthday_date", { ascending: true });
+        .order("birthday_date", { ascending: true })
+        .limit(5000); // Garante que buscamos todos mesmo se houver > 1000
 
       if (bError) throw bError;
 
       // 2. Fetch ministries mapping
       const { data: mData, error: mError } = await supabase
         .from("birthday_ministries")
-        .select("birthday_id, ministry_id, is_leader");
+        .select("birthday_id, ministry_id, is_leader")
+        .limit(10000); // Garante o mapeamento de todos os integrantes
 
       // Se a tabela der erro (e.g. se não existir), não parte o site, retorna vazio
       if (mError) {
@@ -89,14 +91,55 @@ export function useMonthlyBirthdays() {
       const { data, error } = await supabase
         .from("birthdays")
         .select("*")
-        .order("birthday_date", { ascending: true });
+        .limit(2000);
 
       if (error) throw error;
 
-      // Filter by current month
-      return (data as Birthday[]).filter((b) => {
-        const month = new Date(b.birthday_date + "T00:00:00").getMonth() + 1;
-        return month === currentMonth;
+      const allMonthly: (Birthday & { displayDate: string; displayName: string; iconType: 'cake' | 'heart' })[] = [];
+
+      data?.forEach((b) => {
+        const getMonth = (dateStr: string | null) => {
+          if (!dateStr) return null;
+          return parseInt(dateStr.split('-')[1], 10);
+        };
+
+        // 1. Check main date (Birthday or Wedding Anniversary)
+        if (getMonth(b.birthday_date) === currentMonth) {
+          const isWedding = b.birthday_type === 'wedding';
+          allMonthly.push({
+            ...(b as Birthday),
+            displayDate: b.birthday_date,
+            displayName: isWedding ? `${b.man_name || ''} & ${b.woman_name || ''}` : (b.woman_name || b.man_name || ''),
+            iconType: isWedding ? 'heart' : 'cake'
+          });
+        }
+
+        // 2. For wedding records, also check individual birthdays
+        if (b.birthday_type === 'wedding') {
+          if (b.man_birthday && getMonth(b.man_birthday) === currentMonth) {
+            allMonthly.push({
+              ...(b as Birthday),
+              displayDate: b.man_birthday,
+              displayName: `${b.man_name || ''} (Aniversário)`,
+              iconType: 'cake'
+            });
+          }
+          if (b.woman_birthday && getMonth(b.woman_birthday) === currentMonth) {
+            allMonthly.push({
+              ...(b as Birthday),
+              displayDate: b.woman_birthday,
+              displayName: `${b.woman_name || ''} (Aniversário)`,
+              iconType: 'cake'
+            });
+          }
+        }
+      });
+
+      // Sort by day
+      return allMonthly.sort((a, b) => {
+        const dayA = parseInt(a.displayDate.split('-')[2], 10);
+        const dayB = parseInt(b.displayDate.split('-')[2], 10);
+        return dayA - dayB;
       });
     },
   });

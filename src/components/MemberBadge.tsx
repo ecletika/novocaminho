@@ -23,7 +23,7 @@ export default function MemberBadge({ name, photo_url, role, variant = "blue" }:
 
     return (
         <div 
-            className={`relative w-[320px] h-[520px] rounded-[32px] overflow-hidden flex flex-col items-center shadow-2xl transition-all duration-500 hover:scale-[1.02] ${
+            className={`relative w-full max-w-[320px] h-[520px] rounded-[32px] overflow-hidden flex flex-col items-center shadow-2xl transition-all duration-500 hover:scale-[1.02] ${
                 isBlue ? "bg-[#29ABE2] text-white" : "bg-[#FBF4F2] text-[#16417A]"
             }`}
             style={{ 
