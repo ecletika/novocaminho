@@ -35,7 +35,7 @@ export default function MemberBadge({ name, photo_url, role, variant = "blue" }:
                         alt="Church Icon"
                     />
                 </div>
-                <h2 className={`text-xl font-black uppercase tracking-[0.2em] leading-tight font-display ${isBlue ? "text-white" : "text-[#16417A]"
+                <h2 className={`text-xl font-black uppercase tracking-[0.2em] leading-tight font-display text-center ${isBlue ? "text-white" : "text-[#16417A]"
                     }`}>
                     IGREJA NOVO CAMINHO
                 </h2>
