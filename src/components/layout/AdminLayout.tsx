@@ -26,8 +26,8 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMyPermissions } from "@/hooks/useUserPermissions";
 import { useUserWorshipSkills } from "@/hooks/useWorship";
-import logoImage from "@/assets/logo-igreja.png";
-import logoAdmin from "@/assets/logo-admin.png";
+import logoImage from "@/assets/logos/10 - Fresh Sky.png";
+import logoAdmin from "@/assets/logos/10 - Fresh Sky.png";
 
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard, perm: null },

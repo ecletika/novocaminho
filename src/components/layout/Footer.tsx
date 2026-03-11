@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { MapPin, Phone, Mail, Facebook, Instagram, Youtube, Heart } from "lucide-react";
-import logoImage from "@/assets/logo-igreja.png";
+import logoImage from "@/assets/logos/10 - Fresh Sky.png";
 
 export default function Footer() {
   return (

@@ -272,7 +272,7 @@ function MinistryDetailModal({ ministry, isOpen, onClose }: { ministry: Ministry
                   <div className="flex flex-wrap justify-center gap-10">
                     {leaders.length > 0 ? (
                       leaders.map(leader => (
-                        <div key={leader.id} className="scale-90 sm:scale-100">
+                        <div key={leader.id} className="animate-fade-up">
                           <MemberBadge
                             name={leader.man_name || leader.woman_name || "Líder"}
                             photo_url={leader.photo_url}
@@ -299,9 +299,9 @@ function MinistryDetailModal({ ministry, isOpen, onClose }: { ministry: Ministry
                       <Loader2 className="w-6 h-6 animate-spin text-muted-foreground/30" />
                     </div>
                   ) : regularMembers.length > 0 ? (
-                    <div className="flex flex-wrap justify-center gap-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-12 gap-x-8 justify-items-center">
                       {regularMembers.map(member => (
-                        <div key={member.id} className="scale-75 sm:scale-90 -m-4">
+                        <div key={member.id} className="animate-fade-up">
                           <MemberBadge
                             name={member.man_name || member.woman_name || "Membro"}
                             photo_url={member.photo_url}

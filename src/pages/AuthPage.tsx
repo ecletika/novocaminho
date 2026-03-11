@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, ArrowLeft, Loader2 } from "lucide-react";
 import { z } from "zod";
-import logoImage from "@/assets/logo-igreja.png";
+import logoImage from "@/assets/logos/10 - Fresh Sky.png";
 
 const loginSchema = z.object({
   email: z.string().trim().min(3, { message: "Identificador muito curto" }),

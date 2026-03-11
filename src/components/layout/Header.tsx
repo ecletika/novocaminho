@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X, ChevronDown } from "lucide-react";
 import { useMinistries } from "@/hooks/useMinistries";
-import logoImage from "@/assets/logo-igreja.png";
+import logoImage from "@/assets/logos/10 - Fresh Sky.png";
 
 const baseNavigation = [
   { name: "Início", href: "/" },

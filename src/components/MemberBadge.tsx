@@ -1,5 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import logoImage from "@/assets/logo-igreja.png";
+import logoImage from "@/assets/logos/10 - Fresh Sky.png";
+import { Church } from "lucide-react";
 
 interface MemberBadgeProps {
     name: string;
@@ -10,92 +11,115 @@ interface MemberBadgeProps {
 
 export default function MemberBadge({ name, photo_url, role, variant = "blue" }: MemberBadgeProps) {
     const isBlue = variant === "blue";
+    
+    // Exact requested color for Blue variant
+    const brandBlue = "#29ABE2";
+    const brandWhite = "#FFFFFF";
+    const brandCreme = "#FBF4F2";
 
     const nameParts = name.trim().split(' ');
     const firstName = nameParts[0];
     const lastName = nameParts.slice(1).join(' ');
 
     return (
-        <div className={`relative w-72 h-[460px] rounded-[40px] shadow-[0_20px_60px_rgba(0,0,0,0.15)] overflow-hidden flex flex-col items-center border transition-all duration-500 hover:scale-[1.03] ${isBlue
-            ? "bg-[#1FA6DE] text-white border-white/20"
-            : "bg-white text-[#16417A] border-black/5"
-            }`}>
+        <div 
+            className={`relative w-[320px] h-[520px] rounded-[32px] overflow-hidden flex flex-col items-center shadow-2xl transition-all duration-500 hover:scale-[1.02] ${
+                isBlue ? "bg-[#29ABE2] text-white" : "bg-[#FBF4F2] text-[#16417A]"
+            }`}
+            style={{ 
+                border: "8px solid #111", // Dark physical frame look
+                boxShadow: "0 25px 50px -12px rgba(0,0,0,0.5)"
+            }}
+        >
+            {/* The Badge Frame Overlay (physical look) */}
+            <div className="absolute inset-0 border-[12px] border-black/10 pointer-events-none rounded-[24px]" />
 
-            {/* Background Pattern - Circles */}
-            <div className={`absolute top-20 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full border border-current opacity-5 pointer-events-none ${isBlue ? "text-white" : "text-[#1FA6DE]"}`} />
-            <div className={`absolute top-28 left-1/2 -translate-x-1/2 w-[400px] h-[400px] rounded-full border border-current opacity-10 pointer-events-none ${isBlue ? "text-white" : "text-[#1FA6DE]"}`} />
-
-            {/* Top Logo Section */}
-            <div className="flex flex-col items-center mt-12 relative z-10">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 mb-3 p-1.5 ${isBlue ? "border-white/30 bg-white/10" : "border-[#1FA6DE]/20 bg-[#1FA6DE]/5"
-                    }`}>
-                    <img
-                        src={logoImage}
-                        className={`w-full h-full object-contain rounded-full ${isBlue ? "brightness-0 invert" : ""}`}
-                        alt="Church Icon"
-                    />
+            {/* Top Decorative Wave Pattern */}
+            <div className={`absolute top-0 left-0 right-0 h-10 overflow-hidden flex ${isBlue ? "text-white/20" : "text-[#29ABE2]/10"}`}>
+                <div className="flex animate-pulse-glow" style={{ width: '200%' }}>
+                    {[...Array(20)].map((_, i) => (
+                        <svg key={i} width="40" height="20" viewBox="0 0 40 20" fill="currentColor" className="shrink-0">
+                            <path d="M0 20C10 20 10 0 20 0C30 0 30 20 40 20H0Z" />
+                        </svg>
+                    ))}
                 </div>
-                <h2 className={`text-xl font-black uppercase tracking-[0.2em] leading-tight font-display ${isBlue ? "text-white" : "text-[#16417A]"
-                    }`}>
-                    IGREJA NOVO CAMINHO
-                </h2>
-                <span className={`text-[9px] font-bold uppercase tracking-[0.5em] opacity-80 font-display ${isBlue ? "text-white/80" : "text-[#16417A]/80"
-                    }`}>
-                    Portugal
-                </span>
             </div>
 
-            {/* Main Photo Area */}
-            <div className="relative z-10 my-auto">
-                <div className="relative flex flex-col items-center">
-                    <div className={`w-44 h-44 rounded-full border-[8px] shadow-2xl overflow-hidden relative ${isBlue ? "border-white" : "border-white"
-                        }`}>
-                        <Avatar className="w-full h-full rounded-none">
+            {/* Inner Content Container */}
+            <div className="flex flex-col h-full w-full items-center z-10 pt-10 pb-8 px-6">
+                
+                {/* Header Icon */}
+                <div className={`mb-4 ${isBlue ? "text-white/80" : "text-[#29ABE2]"}`}>
+                    <div className={`w-8 h-8 rounded-full border flex items-center justify-center ${isBlue ? "border-white/40" : "border-[#29ABE2]/40"}`}>
+                        <Church className="w-4 h-4" />
+                    </div>
+                </div>
+
+                {/* Main Logo Container */}
+                <div className="w-full px-4 mb-6">
+                    <img
+                        src={logoImage}
+                        alt="Novo Caminho Portugal"
+                        className={`w-full h-auto object-contain ${isBlue ? "brightness-0 invert" : ""}`}
+                    />
+                </div>
+
+                {/* Photo Section */}
+                <div className="relative mb-8">
+                    <div className={`w-48 h-48 rounded-full border-[6px] shadow-xl overflow-hidden border-white ${isBlue ? "shadow-black/20" : "shadow-[#16417A]/10"}`}>
+                        <Avatar className="w-full h-full">
                             <AvatarImage
                                 src={photo_url}
                                 alt={name}
-                                className="object-cover transition-transform duration-700 group-hover:scale-110"
+                                className="object-cover w-full h-full"
                             />
-                            <AvatarFallback className={`bg-white text-primary flex items-center justify-center`}>
-                                <img
-                                    src={logoImage}
-                                    className="w-24 h-24 object-contain rounded-full opacity-20"
-                                    alt="Church Fallback"
-                                />
+                            <AvatarFallback className="bg-slate-50 flex items-center justify-center">
+                                <div className="text-[#29ABE2]/20 font-black text-6xl select-none">
+                                    NC
+                                </div>
                             </AvatarFallback>
                         </Avatar>
                     </div>
                 </div>
-            </div>
 
-            {/* Bottom Text Section */}
-            <div className="relative z-20 mt-auto text-center pb-12 w-full px-6 flex flex-col items-center">
-                <div className="mb-6">
-                    <h3 className={`font-display text-3xl font-black uppercase tracking-tight leading-none ${isBlue ? "text-white" : "text-[#16417A]"
-                        }`}>
+                {/* Member Info */}
+                <div className="text-center flex-1 w-full">
+                    <h3 className={`font-display text-4xl font-extrabold uppercase tracking-tight leading-tight ${isBlue ? "text-white" : "text-[#16417A]"}`}>
                         {firstName}
                     </h3>
-                    <p className={`font-display text-base font-medium uppercase tracking-[0.2em] mt-1 opacity-80 ${isBlue ? "text-white" : "text-[#16417A]"
-                        }`}>
-                        {lastName}
+                    <p className={`font-display text-lg font-medium uppercase tracking-widest opacity-80 mt-[-2px] ${isBlue ? "text-white/80" : "text-[#29ABE2]"}`}>
+                        {lastName || "Membro"}
                     </p>
                 </div>
 
+                {/* Role Badge (Bottom Pill) */}
                 {role && (
-                    <div className="w-full">
-                        <span className={`text-[10px] font-black uppercase tracking-[0.3em] py-3 px-8 rounded-full border backdrop-blur-sm ${isBlue
-                            ? "bg-white/10 text-white border-white/20"
-                            : "bg-[#1FA6DE]/5 text-[#16417A] border-[#16417A]/10"
-                            }`}>
-                            {role}
-                        </span>
+                    <div className={`mt-auto inline-flex items-center justify-center py-2 px-8 rounded-full border-2 text-xs font-black uppercase tracking-[0.2em] transition-all duration-300 ${
+                        isBlue 
+                        ? "bg-transparent text-white border-white hover:bg-white/10" 
+                        : "bg-transparent text-[#29ABE2] border-[#29ABE2] hover:bg-[#29ABE2]/5"
+                    }`}>
+                        {role === "ministrante" ? "LÍDER / SUPERVISOR" : role.toUpperCase().includes("LÍDER") || role.toUpperCase().includes("LIDER") ? "LÍDER" : "INTEGRANTE"}
                     </div>
                 )}
             </div>
 
-            {/* Wavy accents at top and bottom */}
-            <div className={`absolute top-0 left-0 right-0 h-10 opacity-20 ${isBlue ? "bg-white" : "bg-primary/20"}`} style={{ clipPath: 'ellipse(60% 40% at 50% 0%)' }} />
-            <div className={`absolute bottom-0 left-0 right-0 h-20 opacity-20 ${isBlue ? "bg-white/20" : "bg-[#16417A]/10"}`} style={{ clipPath: 'ellipse(70% 60% at 50% 100%)' }} />
+            {/* Bottom Decorative Wave Pattern (Inverted) */}
+            <div className={`absolute bottom-0 left-0 right-0 h-10 overflow-hidden flex rotate-180 ${isBlue ? "text-white/20" : "text-[#29ABE2]/10"}`}>
+                <div className="flex animate-pulse-glow" style={{ width: '200%' }}>
+                    {[...Array(20)].map((_, i) => (
+                        <svg key={i} width="40" height="20" viewBox="0 0 40 20" fill="currentColor" className="shrink-0">
+                            <path d="M0 20C10 20 10 0 20 0C30 0 30 20 40 20H0Z" />
+                        </svg>
+                    ))}
+                </div>
+            </div>
+            
+            {/* Fine watermark-like arc background lines */}
+            <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full border ${isBlue ? "border-white/5" : "border-[#29ABE2]/5"} pointer-events-none`} />
+            <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full border ${isBlue ? "border-white/5" : "border-[#29ABE2]/5"} pointer-events-none`} />
         </div>
     );
 }
+
+
