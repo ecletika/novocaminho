@@ -87,12 +87,14 @@ export default function MemberBadge({ name, photo_url, role, variant = "blue" }:
 
                 {/* Role Badge (Bottom Pill) */}
                 {role && (
-                    <div className={`mt-4 inline-flex items-center justify-center py-2 px-6 rounded-full border-2 text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-300 ${
-                        isBlue 
-                        ? "bg-transparent text-white border-white/50 hover:bg-white/10" 
-                        : "bg-transparent text-[#29ABE2] border-[#29ABE2]/50 hover:bg-[#29ABE2]/5"
-                    }`}>
-                        {role === "ministrante" ? "LÍDER / SUPERVISOR" : role.toUpperCase().includes("LÍDER") || role.toUpperCase().includes("LIDER") ? "LÍDER" : "INTEGRANTE"}
+                    <div className="w-full flex justify-center mt-auto">
+                        <div className={`py-2 px-6 rounded-full border-2 text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-300 ${
+                            isBlue 
+                            ? "bg-transparent text-white border-white/50 hover:bg-white/10" 
+                            : "bg-transparent text-[#29ABE2] border-[#29ABE2]/50 hover:bg-[#29ABE2]/5"
+                        }`}>
+                            {role === "ministrante" ? "LÍDER / SUPERVISOR" : role.toUpperCase().includes("LÍDER") || role.toUpperCase().includes("LIDER") ? "LÍDER" : "INTEGRANTE"}
+                        </div>
                     </div>
                 )}
             </div>
