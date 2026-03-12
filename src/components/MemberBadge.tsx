@@ -46,24 +46,14 @@ export default function MemberBadge({ name, photo_url, role, variant = "blue" }:
             </div>
 
             {/* Inner Content Container */}
-            <div className="flex flex-col h-full w-full items-center z-10 pt-6 pb-6 px-6">
+            <div className="flex flex-col h-full w-full items-center z-10 pt-10 pb-6 px-6">
                 
-                {/* Header Title */}
-                <div className="text-center mb-2">
-                    <h2 className={`text-sm font-black uppercase tracking-[0.2em] leading-tight font-display ${isBlue ? "text-white" : "text-[#16417A]"}`}>
-                        IGREJA NOVO CAMINHO
-                    </h2>
-                    <span className={`text-[8px] font-bold uppercase tracking-[0.4em] opacity-70 font-display ${isBlue ? "text-white/70" : "text-[#16417A]/70"}`}>
-                        Portugal
-                    </span>
-                </div>
-
                 {/* Main Logo Container */}
-                <div className="w-full px-8 mb-4">
+                <div className="w-full px-6 mb-8">
                     <img
                         src={logoImage}
-                        alt="Novo Caminho Portugal"
-                        className={`w-full h-8 object-contain ${isBlue ? "brightness-0 invert" : ""}`}
+                        alt="Novo Caminho Logo"
+                        className={`w-full h-20 object-contain transition-transform duration-700 ${isBlue ? "brightness-0 invert" : ""}`}
                     />
                 </div>
 
