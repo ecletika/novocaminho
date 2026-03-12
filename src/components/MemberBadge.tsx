@@ -46,27 +46,30 @@ export default function MemberBadge({ name, photo_url, role, variant = "blue" }:
             </div>
 
             {/* Inner Content Container */}
-            <div className="flex flex-col h-full w-full items-center z-10 pt-10 pb-8 px-6">
+            <div className="flex flex-col h-full w-full items-center z-10 pt-6 pb-6 px-6">
                 
-                {/* Header Icon */}
-                <div className={`mb-4 ${isBlue ? "text-white/80" : "text-[#29ABE2]"}`}>
-                    <div className={`w-8 h-8 rounded-full border flex items-center justify-center ${isBlue ? "border-white/40" : "border-[#29ABE2]/40"}`}>
-                        <Church className="w-4 h-4" />
-                    </div>
+                {/* Header Title */}
+                <div className="text-center mb-2">
+                    <h2 className={`text-sm font-black uppercase tracking-[0.2em] leading-tight font-display ${isBlue ? "text-white" : "text-[#16417A]"}`}>
+                        IGREJA NOVO CAMINHO
+                    </h2>
+                    <span className={`text-[8px] font-bold uppercase tracking-[0.4em] opacity-70 font-display ${isBlue ? "text-white/70" : "text-[#16417A]/70"}`}>
+                        Portugal
+                    </span>
                 </div>
 
                 {/* Main Logo Container */}
-                <div className="w-full px-4 mb-6">
+                <div className="w-full px-8 mb-4">
                     <img
                         src={logoImage}
                         alt="Novo Caminho Portugal"
-                        className={`w-full h-auto object-contain ${isBlue ? "brightness-0 invert" : ""}`}
+                        className={`w-full h-8 object-contain ${isBlue ? "brightness-0 invert" : ""}`}
                     />
                 </div>
 
                 {/* Photo Section */}
-                <div className="relative mb-8">
-                    <div className={`w-48 h-48 rounded-full border-[6px] shadow-xl overflow-hidden border-white ${isBlue ? "shadow-black/20" : "shadow-[#16417A]/10"}`}>
+                <div className="relative mb-6">
+                    <div className={`w-40 h-40 rounded-full border-[4px] shadow-xl overflow-hidden border-white ${isBlue ? "shadow-black/20" : "shadow-[#16417A]/10"}`}>
                         <Avatar className="w-full h-full">
                             <AvatarImage
                                 src={photo_url}
@@ -74,7 +77,7 @@ export default function MemberBadge({ name, photo_url, role, variant = "blue" }:
                                 className="object-cover w-full h-full"
                             />
                             <AvatarFallback className="bg-slate-50 flex items-center justify-center">
-                                <div className="text-[#29ABE2]/20 font-black text-6xl select-none">
+                                <div className="text-[#29ABE2]/20 font-black text-5xl select-none">
                                     NC
                                 </div>
                             </AvatarFallback>
@@ -83,21 +86,21 @@ export default function MemberBadge({ name, photo_url, role, variant = "blue" }:
                 </div>
 
                 {/* Member Info */}
-                <div className="text-center flex-1 w-full">
-                    <h3 className={`font-display text-4xl font-extrabold uppercase tracking-tight leading-tight ${isBlue ? "text-white" : "text-[#16417A]"}`}>
+                <div className="text-center flex-1 flex flex-col justify-center w-full min-h-[80px]">
+                    <h3 className={`font-display text-4xl font-extrabold uppercase tracking-tight leading-none ${isBlue ? "text-white" : "text-[#16417A]"}`}>
                         {firstName}
                     </h3>
-                    <p className={`font-display text-lg font-medium uppercase tracking-widest opacity-80 mt-[-2px] ${isBlue ? "text-white/80" : "text-[#29ABE2]"}`}>
+                    <p className={`font-display text-base font-medium uppercase tracking-[0.2em] opacity-80 mt-1 ${isBlue ? "text-white/80" : "text-[#29ABE2]"}`}>
                         {lastName || "Membro"}
                     </p>
                 </div>
 
                 {/* Role Badge (Bottom Pill) */}
                 {role && (
-                    <div className={`mt-auto inline-flex items-center justify-center py-2 px-8 rounded-full border-2 text-xs font-black uppercase tracking-[0.2em] transition-all duration-300 ${
+                    <div className={`mt-4 inline-flex items-center justify-center py-2 px-6 rounded-full border-2 text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-300 ${
                         isBlue 
-                        ? "bg-transparent text-white border-white hover:bg-white/10" 
-                        : "bg-transparent text-[#29ABE2] border-[#29ABE2] hover:bg-[#29ABE2]/5"
+                        ? "bg-transparent text-white border-white/50 hover:bg-white/10" 
+                        : "bg-transparent text-[#29ABE2] border-[#29ABE2]/50 hover:bg-[#29ABE2]/5"
                     }`}>
                         {role === "ministrante" ? "LÍDER / SUPERVISOR" : role.toUpperCase().includes("LÍDER") || role.toUpperCase().includes("LIDER") ? "LÍDER" : "INTEGRANTE"}
                     </div>

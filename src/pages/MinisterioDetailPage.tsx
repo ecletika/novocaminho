@@ -114,7 +114,7 @@ export default function MinisterioDetailPage() {
                 <span className="w-12 h-1 bg-primary rounded-full" />
               </h2>
             </div>
-            <div className="flex flex-wrap justify-center gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
               {leaders.length > 0 ? (
                 leaders.map((leader) => (
                   <div key={leader.id} className="animate-fade-up">
@@ -140,7 +140,7 @@ export default function MinisterioDetailPage() {
                 <span className="w-12 h-1 bg-secondary rounded-full" />
               </h2>
             </div>
-            <div className="flex flex-wrap justify-center gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
               {regularMembers.length > 0 ? (
                 regularMembers.map((member) => (
                   <div key={member.id} className="animate-fade-up">
