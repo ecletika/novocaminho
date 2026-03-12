@@ -144,6 +144,7 @@ export default function RegistoAniversarioPage() {
       };
 
       if (birthdayData.birthday_type === "wedding") {
+        payload.birthday_date = birthdayData.birthday_date; // Data do Casamento
         payload.man_name = birthdayData.man_name || null;
         payload.woman_name = birthdayData.woman_name || null;
         payload.man_birthday = birthdayData.man_birthday || null;
@@ -151,6 +152,7 @@ export default function RegistoAniversarioPage() {
         payload.man_phone = birthdayData.man_phone || null;
         payload.woman_phone = birthdayData.woman_phone || null;
       } else {
+        payload.birthday_date = null; // Não guarda em birthday_date se for pessoal
         const name = birthdayData.woman_name || birthdayData.man_name;
         if (gender === "male") {
           payload.man_name = name;

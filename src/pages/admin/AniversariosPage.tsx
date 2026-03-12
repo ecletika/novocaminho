@@ -155,11 +155,13 @@ export default function AniversariosPage() {
       };
 
       if (formData.birthday_type === "wedding") {
+        data.birthday_date = formData.birthday_date; // Data do Casamento
         data.man_name = formData.man_name || null;
         data.woman_name = formData.woman_name || null;
         data.man_birthday = formData.man_birthday || null;
         data.woman_birthday = formData.woman_birthday || null;
       } else {
+        data.birthday_date = null; // Não guarda a data aqui se for individual
         if (formData.gender === "male") {
           data.man_name = name;
           data.man_birthday = formData.birthday_date;

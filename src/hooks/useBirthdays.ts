@@ -107,35 +107,34 @@ export function useMonthlyBirthdays() {
           return parseInt(dateStr.split('-')[1], 10);
         };
 
-        // 1. Check main date (Birthday or Wedding Anniversary)
-        if (getMonth(b.birthday_date) === currentMonth) {
-          const isWedding = b.birthday_type === 'wedding';
+        const isWedding = b.birthday_type === 'wedding';
+
+        // 1. Check Wedding Anniversary (only if it's a wedding type)
+        if (isWedding && getMonth(b.birthday_date) === currentMonth) {
           allMonthly.push({
             ...(b as Birthday),
             displayDate: b.birthday_date,
-            displayName: isWedding ? `${b.man_name || ''} & ${b.woman_name || ''}` : (b.woman_name || b.man_name || ''),
-            iconType: isWedding ? 'heart' : 'cake'
+            displayName: `${b.man_name || ''} & ${b.woman_name || ''} (Bodas)`,
+            iconType: 'heart'
           });
         }
 
-        // 2. For wedding records, also check individual birthdays
-        if (b.birthday_type === 'wedding') {
-          if (b.man_birthday && getMonth(b.man_birthday) === currentMonth) {
-            allMonthly.push({
-              ...(b as Birthday),
-              displayDate: b.man_birthday,
-              displayName: `${b.man_name || ''} (Aniversário)`,
-              iconType: 'cake'
-            });
-          }
-          if (b.woman_birthday && getMonth(b.woman_birthday) === currentMonth) {
-            allMonthly.push({
-              ...(b as Birthday),
-              displayDate: b.woman_birthday,
-              displayName: `${b.woman_name || ''} (Aniversário)`,
-              iconType: 'cake'
-            });
-          }
+        // 2. Check individual birthdays (ALWAYS check for both personal and wedding)
+        if (b.man_birthday && getMonth(b.man_birthday) === currentMonth) {
+          allMonthly.push({
+            ...(b as Birthday),
+            displayDate: b.man_birthday,
+            displayName: `${b.man_name || ''} (Aniversário)`,
+            iconType: 'cake'
+          });
+        }
+        if (b.woman_birthday && getMonth(b.woman_birthday) === currentMonth) {
+          allMonthly.push({
+            ...(b as Birthday),
+            displayDate: b.woman_birthday,
+            displayName: `${b.woman_name || ''} (Aniversário)`,
+            iconType: 'cake'
+          });
         }
       });
 
