@@ -14,6 +14,8 @@ export interface Birthday {
   leader_name: string | null;
   woman_birthday?: string | null;
   man_birthday?: string | null;
+  woman_phone?: string | null;
+  man_phone?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -34,6 +36,8 @@ export interface BirthdayInsert {
   leader_name?: string | null;
   woman_birthday?: string | null;
   man_birthday?: string | null;
+  woman_phone?: string | null;
+  man_phone?: string | null;
   ministry_selections?: { ministry_id: string; is_leader: boolean; leader_id?: string | null }[];
 }
 

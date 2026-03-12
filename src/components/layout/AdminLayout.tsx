@@ -183,9 +183,10 @@ export default function AdminLayout() {
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="lg:hidden p-2 rounded-lg hover:bg-muted"
+                className="lg:hidden p-3 -ml-2 rounded-lg hover:bg-muted transition-colors"
+                aria-label="Abrir menu"
               >
-                <Menu className="w-5 h-5" />
+                <Menu className="w-6 h-6" />
               </button>
               <div className="relative hidden sm:block">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -210,7 +211,7 @@ export default function AdminLayout() {
         </header>
 
         {/* Page Content */}
-        <main className="p-4 lg:p-8">
+        <main className="p-3 sm:p-4 lg:p-8 overflow-x-hidden">
           <Outlet />
         </main>
       </div>

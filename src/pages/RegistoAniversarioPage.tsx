@@ -34,6 +34,7 @@ const initialForm = {
   man_name: "",
   birthday_date: "",
   birthday_type: "personal" as "personal" | "wedding",
+  gender: "" as "male" | "female" | "",
   photo_url: "",
   phone: "",
   email: "",
@@ -70,9 +71,9 @@ export default function RegistoAniversarioPage() {
       const casaisIds = ministries
         .filter((m) => m.is_active && isCasaisMinistry(m))
         .map((m) => m.id);
-      setFormData((prev) => ({ ...prev, birthday_type: v, ministry_ids: casaisIds }));
+      setFormData((prev) => ({ ...prev, birthday_type: v, ministry_ids: casaisIds, gender: "" }));
     } else {
-      setFormData((prev) => ({ ...prev, birthday_type: v, ministry_ids: [] }));
+      setFormData((prev) => ({ ...prev, birthday_type: v, ministry_ids: [], gender: "" }));
     }
   };
 
@@ -113,36 +114,61 @@ export default function RegistoAniversarioPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validação extra para garantir que temos pelo menos um nome
-    if (formData.birthday_type === "personal" && !formData.woman_name && !formData.man_name) {
-      toast.error("Por favor, preencha o seu nome.");
-      return;
+    // Validação extra conforme tipo e género
+    if (formData.birthday_type === "personal") {
+      if (!formData.gender) {
+        toast.error("Por favor, selecione o género.");
+        return;
+      }
+      if (!formData.woman_name && !formData.man_name) {
+        toast.error("Por favor, preencha o seu nome.");
+        return;
+      }
     }
 
     setIsSubmitting(true);
     try {
       console.log("Submitting directly to tables:", formData);
 
-      const { ministry_ids, ...birthdayData } = formData;
+      const { ministry_ids, gender, ...birthdayData } = formData;
+
+      // Montar payload conforme o tipo e género
+      const payload: any = {
+        photo_url: birthdayData.photo_url || null,
+        birthday_date: birthdayData.birthday_date,
+        birthday_type: birthdayData.birthday_type,
+        phone: birthdayData.phone || null,
+        email: birthdayData.email || null,
+        address: birthdayData.address || null,
+        leader_name: birthdayData.leader_name || null,
+      };
+
+      if (birthdayData.birthday_type === "wedding") {
+        payload.man_name = birthdayData.man_name || null;
+        payload.woman_name = birthdayData.woman_name || null;
+        payload.man_birthday = birthdayData.man_birthday || null;
+        payload.woman_birthday = birthdayData.woman_birthday || null;
+        payload.man_phone = birthdayData.man_phone || null;
+        payload.woman_phone = birthdayData.woman_phone || null;
+      } else {
+        const name = birthdayData.woman_name || birthdayData.man_name;
+        if (gender === "male") {
+          payload.man_name = name;
+          payload.man_birthday = birthdayData.birthday_date;
+          payload.woman_name = null;
+          payload.woman_birthday = null;
+        } else {
+          payload.woman_name = name;
+          payload.woman_birthday = birthdayData.birthday_date;
+          payload.man_name = null;
+          payload.man_birthday = null;
+        }
+      }
 
       // 1. Inserir na tabela birthdays
       const { data: birthday, error: insertError } = await supabase
         .from("birthdays")
-        .insert({
-          woman_name: birthdayData.woman_name || null,
-          man_name: birthdayData.man_name || null,
-          photo_url: birthdayData.photo_url || null,
-          birthday_date: birthdayData.birthday_date,
-          birthday_type: birthdayData.birthday_type,
-          phone: birthdayData.phone || null,
-          email: birthdayData.email || null,
-          address: birthdayData.address || null,
-          woman_birthday: birthdayData.woman_birthday || null,
-          man_birthday: birthdayData.man_birthday || null,
-          leader_name: birthdayData.leader_name || null,
-          man_phone: birthdayData.man_phone || null,
-          woman_phone: birthdayData.woman_phone || null,
-        })
+        .insert(payload)
         .select()
         .single();
 
@@ -255,6 +281,37 @@ export default function RegistoAniversarioPage() {
               </p>
             )}
           </div>
+
+          {/* ── Género (Apenas para Pessoal) ── */}
+          {!isWedding && (
+            <div className="space-y-2 animate-in fade-in slide-in-from-top-4 duration-300">
+              <Label>Género *</Label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, gender: "male" })}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${formData.gender === "male"
+                    ? "border-primary bg-primary/5 text-primary"
+                    : "border-border text-muted-foreground hover:border-muted-foreground/50"
+                    }`}
+                >
+                  <span className="text-2xl">👨</span>
+                  <span className="text-sm font-medium">Homem</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, gender: "female" })}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${formData.gender === "female"
+                    ? "border-primary bg-primary/5 text-primary"
+                    : "border-border text-muted-foreground hover:border-muted-foreground/50"
+                    }`}
+                >
+                  <span className="text-2xl">👩</span>
+                  <span className="text-sm font-medium">Mulher</span>
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* ── Campos por tipo ── */}
           {isWedding ? (

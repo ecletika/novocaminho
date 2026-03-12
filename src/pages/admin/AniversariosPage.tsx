@@ -62,6 +62,7 @@ export default function AniversariosPage() {
     man_birthday: "",
     leader_name: "",
     photo_url: "",
+    gender: "" as "male" | "female" | "",
     ministry_selections: [] as { ministry_id: string; is_leader: boolean; leader_id?: string | null }[],
   });
 
@@ -84,6 +85,7 @@ export default function AniversariosPage() {
       man_birthday: "",
       leader_name: "",
       photo_url: "",
+      gender: "",
       ministry_selections: [],
     });
     setSelectedBirthday(null);
@@ -103,6 +105,7 @@ export default function AniversariosPage() {
       woman_birthday: birthday.woman_birthday || "",
       man_birthday: birthday.man_birthday || "",
       photo_url: birthday.photo_url || "",
+      gender: birthday.man_name ? "male" : birthday.woman_name ? "female" : "" as "male" | "female" | "",
       // ✅ Preserva o is_leader real vindo da BD
       ministry_selections: birthday.ministries?.map((m) => ({
         ministry_id: m.ministry_id,
@@ -139,20 +142,36 @@ export default function AniversariosPage() {
     console.log("Iniciando submissão do formulário...");
 
     try {
-      const data = {
-        woman_name: formData.woman_name || (formData.birthday_type === "personal" ? formData.woman_name : null),
-        man_name: formData.man_name || null,
+      const name = formData.woman_name || formData.man_name;
+      const data: any = {
         birthday_date: formData.birthday_date,
         birthday_type: formData.birthday_type,
         phone: formData.phone || null,
         email: formData.email || null,
         address: formData.address || null,
-        woman_birthday: formData.woman_birthday || null,
-        man_birthday: formData.man_birthday || null,
         leader_name: formData.leader_name || null,
         photo_url: (formData as any).photo_url || null,
         ministry_selections: formData.ministry_selections,
       };
+
+      if (formData.birthday_type === "wedding") {
+        data.man_name = formData.man_name || null;
+        data.woman_name = formData.woman_name || null;
+        data.man_birthday = formData.man_birthday || null;
+        data.woman_birthday = formData.woman_birthday || null;
+      } else {
+        if (formData.gender === "male") {
+          data.man_name = name;
+          data.man_birthday = formData.birthday_date;
+          data.woman_name = null;
+          data.woman_birthday = null;
+        } else {
+          data.woman_name = name;
+          data.woman_birthday = formData.birthday_date;
+          data.man_name = null;
+          data.man_birthday = null;
+        }
+      }
 
       console.log("Dados formatados para envio:", data);
 
@@ -277,13 +296,13 @@ export default function AniversariosPage() {
         </div>
       </div>
 
-      <Tabs defaultValue="list">
-        <TabsList>
-          <TabsTrigger value="list">
+      <Tabs defaultValue="list" className="w-full">
+        <TabsList className="flex w-full overflow-x-auto no-scrollbar justify-start mb-4">
+          <TabsTrigger value="list" className="flex-1 sm:flex-none">
             <Cake className="w-4 h-4 mr-2" />
             Aniversários
           </TabsTrigger>
-          <TabsTrigger value="report">
+          <TabsTrigger value="report" className="flex-1 sm:flex-none">
             <FileText className="w-4 h-4 mr-2" />
             Relatório
           </TabsTrigger>
@@ -519,10 +538,40 @@ export default function AniversariosPage() {
                 </div>
               </>
             ) : (
-              <div className="space-y-2">
-                <Label>Nome *</Label>
-                <Input value={formData.woman_name || formData.man_name} onChange={(e) => setFormData({ ...formData, woman_name: e.target.value, man_name: "" })} placeholder="Nome da pessoa" required />
-              </div>
+              <>
+                {/* ── Género ── */}
+                <div className="space-y-2">
+                  <Label>Género *</Label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, gender: "male" })}
+                      className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all ${formData.gender === "male"
+                        ? "border-primary bg-primary/5 text-primary"
+                        : "border-border text-muted-foreground hover:border-muted-foreground/50"
+                        }`}
+                    >
+                      <span className="text-xl">👨</span>
+                      <span className="text-xs font-semibold">Homem</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, gender: "female" })}
+                      className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all ${formData.gender === "female"
+                        ? "border-primary bg-primary/5 text-primary"
+                        : "border-border text-muted-foreground hover:border-muted-foreground/50"
+                        }`}
+                    >
+                      <span className="text-xl">👩</span>
+                      <span className="text-xs font-semibold">Mulher</span>
+                    </button>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Nome *</Label>
+                  <Input value={formData.woman_name || formData.man_name} onChange={(e) => setFormData({ ...formData, woman_name: e.target.value, man_name: "" })} placeholder="Nome da pessoa" required />
+                </div>
+              </>
             )}
 
             <div className="space-y-4">

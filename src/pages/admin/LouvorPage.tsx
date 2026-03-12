@@ -662,25 +662,25 @@ export default function LouvorPage() {
       </div>
 
       <Tabs defaultValue="members" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 sm:grid-cols-5 lg:w-auto lg:inline-grid">
-          <TabsTrigger value="members" className="gap-2">
+        <TabsList className="flex w-full overflow-x-auto no-scrollbar justify-start mb-4 gap-2 bg-transparent h-auto p-1">
+          <TabsTrigger value="members" className="gap-2 flex-shrink-0">
             <Users className="w-4 h-4" />
             <span className="hidden sm:inline">Integrantes</span>
           </TabsTrigger>
-          <TabsTrigger value="songs" className="gap-2">
+          <TabsTrigger value="songs" className="gap-2 flex-shrink-0">
             <Music className="w-4 h-4" />
             <span className="hidden sm:inline">Músicas</span>
           </TabsTrigger>
-          <TabsTrigger value="ministers" className="gap-2">
+          <TabsTrigger value="ministers" className="gap-2 flex-shrink-0">
             <Mic className="w-4 h-4" />
             <span className="hidden sm:inline">Ministrantes</span>
           </TabsTrigger>
-          <TabsTrigger value="schedules" className="gap-2">
+          <TabsTrigger value="schedules" className="gap-2 flex-shrink-0">
             <Calendar className="w-4 h-4" />
             <span className="hidden sm:inline">Escalas</span>
           </TabsTrigger>
           {isAdmin && (
-            <TabsTrigger value="functions" className="gap-2">
+            <TabsTrigger value="functions" className="gap-2 flex-shrink-0">
               <Settings className="w-4 h-4" />
               <span className="hidden sm:inline">Funções</span>
             </TabsTrigger>
