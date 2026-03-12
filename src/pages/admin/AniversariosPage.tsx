@@ -258,9 +258,18 @@ export default function AniversariosPage() {
     return b.ministries?.some((m) => m.ministry_id === reportMinistryFilter);
   });
 
+  const getDisplayDate = (birthday: BirthdayWithMinistries) => {
+    if (birthday.birthday_type === "wedding") {
+      return birthday.birthday_date; // Data do Casamento
+    }
+    // Para pessoais, usamos a data individual correspondente
+    return birthday.man_birthday || birthday.woman_birthday || birthday.birthday_date;
+  };
+
   const formatDate = (dateStr: string | null | undefined) => {
     if (!dateStr) return "Data não definida";
     try {
+      // Forçar o fuso horário correto para o Brasil/Portugal às 12:00:00 para evitar que o dia mude por fuso horário.
       const date = new Date(dateStr + "T12:00:00");
       if (isNaN(date.getTime())) return "Data inválida";
       return format(date, "dd 'de' MMMM", { locale: pt });
@@ -361,7 +370,7 @@ export default function AniversariosPage() {
                   </div>
                   <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
                     <Calendar className="w-4 h-4" />
-                    {formatDate(birthday.birthday_date)}
+                    {formatDate(getDisplayDate(birthday))}
                   </p>
                   <div className="flex flex-wrap gap-2 mt-1">
                     {(birthday as any).phone && (
@@ -462,7 +471,7 @@ export default function AniversariosPage() {
                   {reportBirthdays.map((b) => (
                     <tr key={b.id} className="border-b border-border/50 hover:bg-muted/50">
                       <td className="p-3 font-medium text-foreground">{getName(b)}</td>
-                      <td className="p-3 text-muted-foreground">{formatDate(b.birthday_date)}</td>
+                      <td className="p-3 text-muted-foreground">{formatDate(getDisplayDate(b))}</td>
                       <td className="p-3">
                         <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${b.birthday_type === "wedding" ? "bg-pink-100 text-pink-700" : "bg-blue-100 text-blue-700"
                           }`}>

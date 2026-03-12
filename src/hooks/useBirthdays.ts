@@ -77,10 +77,21 @@ export function useBirthdays() {
         return acc;
       }, {} as Record<string, { ministry_id: string; is_leader: boolean }[]>);
 
-      return (bData as Birthday[]).map(b => ({
-        ...b,
-        ministries: ministriesMap[b.id] || []
-      })) as BirthdayWithMinistries[];
+      return (bData as Birthday[]).map(b => {
+        const sortedMinistries = ministriesMap[b.id] || [];
+        
+        // Se for pessoal e a data principal estiver vazia, pegamos a individual para manter compatibilidade
+        let effectiveDate = b.birthday_date;
+        if (b.birthday_type === "personal" && !effectiveDate) {
+          effectiveDate = b.man_birthday || b.woman_birthday || "";
+        }
+
+        return {
+          ...b,
+          birthday_date: effectiveDate,
+          ministries: sortedMinistries
+        };
+      }) as BirthdayWithMinistries[];
     },
   });
 }
@@ -114,6 +125,7 @@ export function useMonthlyBirthdays() {
           allMonthly.push({
             ...(b as Birthday),
             displayDate: b.birthday_date,
+            birthday_date: b.birthday_date, // Importante para componentes legados
             displayName: `${b.man_name || ''} & ${b.woman_name || ''} (Bodas)`,
             iconType: 'heart'
           });
@@ -124,6 +136,7 @@ export function useMonthlyBirthdays() {
           allMonthly.push({
             ...(b as Birthday),
             displayDate: b.man_birthday,
+            birthday_date: b.man_birthday, // Força a data individual no campo principal para exibição
             displayName: `${b.man_name || ''} (Aniversário)`,
             iconType: 'cake'
           });
@@ -132,6 +145,7 @@ export function useMonthlyBirthdays() {
           allMonthly.push({
             ...(b as Birthday),
             displayDate: b.woman_birthday,
+            birthday_date: b.woman_birthday, // Força a data individual no campo principal para exibição
             displayName: `${b.woman_name || ''} (Aniversário)`,
             iconType: 'cake'
           });
