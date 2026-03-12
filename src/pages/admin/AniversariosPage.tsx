@@ -227,31 +227,44 @@ export default function AniversariosPage() {
     }));
   };
 
-  const filteredBirthdays = birthdays.filter((b) => {
+  const filteredBirthdays = (birthdays || []).filter((b) => {
+    if (!b) return false;
     const name = (b.woman_name || "") + " " + (b.man_name || "");
-    const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const searchLower = (searchTerm || "").toLowerCase();
+    
+    return name.toLowerCase().includes(searchLower) ||
       (b.phone || "").includes(searchTerm) ||
       (b.woman_phone || "").includes(searchTerm) ||
       (b.man_phone || "").includes(searchTerm);
-    return matchesSearch;
   });
 
   const reportBirthdays = birthdays.filter((b) => {
+    if (reportSearch === "" && reportMinistryFilter === "all") return true;
+    
     const name = (b.woman_name || "") + " " + (b.man_name || "");
-    const matchesSearch = name.toLowerCase().includes(reportSearch.toLowerCase()) ||
+    const searchLower = (reportSearch || "").toLowerCase();
+    const matchesSearch = name.toLowerCase().includes(searchLower) ||
       ((b as any).phone || "").includes(reportSearch) ||
-      ((b as any).email || "").toLowerCase().includes(reportSearch.toLowerCase());
+      ((b as any).email || "").toLowerCase().includes(searchLower);
 
-    if (reportMinistryFilter === "all") return matchesSearch;
+    if (!matchesSearch) return false;
+    
+    if (reportMinistryFilter === "all") return true;
     if (reportMinistryFilter === "none") {
-      return matchesSearch && (!b.ministries || b.ministries.length === 0);
+      return !b.ministries || b.ministries.length === 0;
     }
-    return matchesSearch && b.ministries?.some((m) => m.ministry_id === reportMinistryFilter);
+    return b.ministries?.some((m) => m.ministry_id === reportMinistryFilter);
   });
 
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr + "T00:00:00");
-    return format(date, "dd 'de' MMMM", { locale: pt });
+  const formatDate = (dateStr: string | null | undefined) => {
+    if (!dateStr) return "Data não definida";
+    try {
+      const date = new Date(dateStr + "T12:00:00");
+      if (isNaN(date.getTime())) return "Data inválida";
+      return format(date, "dd 'de' MMMM", { locale: pt });
+    } catch (e) {
+      return "Erro na data";
+    }
   };
 
   const getName = (birthday: BirthdayWithMinistries) => {
