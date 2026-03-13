@@ -114,14 +114,18 @@ export default function MinisterioDetailPage() {
                 <span className="w-12 h-1 bg-primary rounded-full" />
               </h2>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
+            <div className={`lideres-container total-${leaders.length} flex flex-wrap items-center gap-4 w-full mx-auto justify-center ${leaders.length === 2 ? "max-w-[600px] sm:justify-between" :
+                leaders.length === 3 ? "max-w-[900px] sm:justify-between" :
+                  leaders.length >= 4 ? "max-w-[1200px] sm:justify-between" :
+                    ""
+              }`}>
               {leaders.length > 0 ? (
                 leaders.map((leader) => (
-                  <div key={leader.id} className="animate-fade-up">
+                  <div key={leader.id} className={`animate-fade-up card-lider ${leaders.length === 1 ? "mx-auto" : ""}`}>
                     <MemberBadge
                       name={leader.man_name || leader.woman_name || "Líder"}
                       photo_url={leader.photo_url}
-                      role="Líder / Supervisor"
+                      role="LÍDER / SUPERVISOR"
                       variant="blue"
                     />
                   </div>
