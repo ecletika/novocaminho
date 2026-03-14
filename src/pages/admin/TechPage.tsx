@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Search, Users, Calendar, Send, Tv, Monitor, Radio, Camera, Loader2, Trash2, Edit, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Search, Users, Calendar, Send, Tv, Monitor, Radio, Loader2, Trash2, Edit, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -49,7 +49,6 @@ const techRoles = [
   { id: "som", name: "Mesa de Som", icon: Radio },
   { id: "midia", name: "Media/Projeção", icon: Monitor },
   { id: "transmissao", name: "Transmissão/Live", icon: Tv },
-  { id: "camera", name: "Câmera", icon: Camera },
 ];
 
 export default function TechPage() {
@@ -73,7 +72,6 @@ export default function TechPage() {
   const [selectedSom, setSelectedSom] = useState<string[]>([]);
   const [selectedMidia, setSelectedMidia] = useState<string[]>([]);
   const [selectedTransmissao, setSelectedTransmissao] = useState<string[]>([]);
-  const [selectedCamera, setSelectedCamera] = useState<string[]>([]);
 
   // Form states
   const [newMemberName, setNewMemberName] = useState("");
@@ -129,7 +127,7 @@ export default function TechPage() {
 
   // Filter schedules that have any tech team members
   const techSchedules = schedules.filter(s =>
-    s.team_members?.some(tm => ["som", "midia", "transmissao", "camera"].includes(tm.role))
+    s.team_members?.some(tm => ["som", "midia", "transmissao"].includes(tm.role))
   );
 
   const scheduleTypes = ["Culto Domingo", "Culto Quarta", "Culto de Oração", "Evento Especial"];
@@ -157,11 +155,7 @@ export default function TechPage() {
     )
   );
 
-  const cameraMembers = techMembers.filter(m =>
-    m.primary_function?.name.toLowerCase().includes("câmera") ||
-    m.primary_function?.name.toLowerCase().includes("camera") ||
-    m.secondary_functions?.some(sf => sf.function?.name.toLowerCase().includes("câmera") || sf.function?.name.toLowerCase().includes("camera"))
-  );
+
 
   // Calendar helpers
   const monthStart = startOfMonth(currentMonth);
@@ -199,7 +193,6 @@ export default function TechPage() {
       case "som": return Radio;
       case "midia": return Monitor;
       case "transmissao": return Tv;
-      case "camera": return Camera;
       default: return Monitor;
     }
   };
@@ -208,8 +201,7 @@ export default function TechPage() {
     switch (role) {
       case "som": return "Mesa de Som";
       case "midia": return "Media/Projeção";
-      case "transmissao": return "Transmissão";
-      case "camera": return "Câmera";
+      case "transmissao": return "Transmissão/Live";
       default: return role;
     }
   };
@@ -230,7 +222,6 @@ export default function TechPage() {
     setSelectedSom([]);
     setSelectedMidia([]);
     setSelectedTransmissao([]);
-    setSelectedCamera([]);
     setSelectedSchedule(null);
     setIsEditing(false);
   };
@@ -242,7 +233,6 @@ export default function TechPage() {
     selectedSom.forEach(id => team_assignments.push({ member_id: id, role: "som" }));
     selectedMidia.forEach(id => team_assignments.push({ member_id: id, role: "midia" }));
     selectedTransmissao.forEach(id => team_assignments.push({ member_id: id, role: "transmissao" }));
-    selectedCamera.forEach(id => team_assignments.push({ member_id: id, role: "camera" }));
 
     if (isEditing && selectedSchedule) {
       await updateGeneralSchedule.mutateAsync({
@@ -272,7 +262,6 @@ export default function TechPage() {
     setSelectedSom(teamMembers.filter(tm => tm.role === "som").map(tm => tm.member_id));
     setSelectedMidia(teamMembers.filter(tm => tm.role === "midia").map(tm => tm.member_id));
     setSelectedTransmissao(teamMembers.filter(tm => tm.role === "transmissao").map(tm => tm.member_id));
-    setSelectedCamera(teamMembers.filter(tm => tm.role === "camera").map(tm => tm.member_id));
 
     setIsEditing(true);
     setIsDialogOpen(true);
@@ -397,7 +386,6 @@ export default function TechPage() {
     const somMembers = schedule.team_members?.filter(tm => tm.role === "som") || [];
     const midiaMembers = schedule.team_members?.filter(tm => tm.role === "midia") || [];
     const transmissaoMembers = schedule.team_members?.filter(tm => tm.role === "transmissao") || [];
-    const cameraMembers = schedule.team_members?.filter(tm => tm.role === "camera") || [];
 
     let assignments = "";
     if (somMembers.length > 0) {
@@ -407,10 +395,7 @@ export default function TechPage() {
       assignments += `📺 *Media:*\n${midiaMembers.map(tm => `• ${tm.member?.name || "N/A"}`).join("\n")}\n\n`;
     }
     if (transmissaoMembers.length > 0) {
-      assignments += `🎥 *Live:*\n${transmissaoMembers.map(tm => `• ${tm.member?.name || "N/A"}`).join("\n")}\n\n`;
-    }
-    if (cameraMembers.length > 0) {
-      assignments += `📸 *Câmera:*\n${cameraMembers.map(tm => `• ${tm.member?.name || "N/A"}`).join("\n")}`;
+      assignments += `🎥 *Transmissão/Live:*\n${transmissaoMembers.map(tm => `• ${tm.member?.name || "N/A"}`).join("\n")}\n\n`;
     }
 
     const message = `📅 *Escala Técnica*\n\n📆 Data: ${format(new Date(schedule.date), "EEEE, dd 'de' MMMM", { locale: pt })}\n🕐 Tipo: ${schedule.type}\n\n${assignments}\n\n🙏 Contamos com sua presença!`;
@@ -674,7 +659,6 @@ export default function TechPage() {
                   const somAssignments = schedule.team_members?.filter(tm => tm.role === "som") || [];
                   const midiaAssignments = schedule.team_members?.filter(tm => tm.role === "midia") || [];
                   const transmissaoAssignments = schedule.team_members?.filter(tm => tm.role === "transmissao") || [];
-                  const cameraAssignments = schedule.team_members?.filter(tm => tm.role === "camera") || [];
 
                   return (
                     <div
@@ -759,19 +743,7 @@ export default function TechPage() {
                             ))}
                           </div>
                         )}
-                        {cameraAssignments.length > 0 && (
-                          <div className="space-y-2">
-                            <span className="text-sm font-medium text-foreground flex items-center gap-2">
-                              <Camera className="w-4 h-4 text-green-500" />
-                              Câmera
-                            </span>
-                            {cameraAssignments.map((tm) => (
-                              <div key={tm.id} className="flex items-center gap-3 p-2 rounded-lg bg-muted/50 ml-6">
-                                <span className="text-sm text-foreground">{tm.member?.name}</span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
+
                       </div>
                     </div>
                   );
@@ -1172,14 +1144,14 @@ export default function TechPage() {
               </div>
             </div>
 
-            {/* Transmissão */}
+            {/* Transmissão/Live */}
             <div>
               <label className="block text-sm font-medium text-foreground mb-2 flex items-center gap-2">
                 <Tv className="w-4 h-4 text-purple-500" />
                 Transmissão/Live
               </label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-32 overflow-y-auto border rounded-md p-2">
-                {transmissaoMembers.map((member) => (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-40 overflow-y-auto border rounded-md p-2">
+                {techMembers.map((member) => (
                   <div key={member.id} className="flex items-center gap-2">
                     <Checkbox
                       id={`transmissao-${member.id}`}
@@ -1192,25 +1164,7 @@ export default function TechPage() {
               </div>
             </div>
 
-            {/* Câmera */}
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2 flex items-center gap-2">
-                <Camera className="w-4 h-4 text-green-500" />
-                Câmera
-              </label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-32 overflow-y-auto border rounded-md p-2">
-                {cameraMembers.map((member) => (
-                  <div key={member.id} className="flex items-center gap-2">
-                    <Checkbox
-                      id={`camera-${member.id}`}
-                      checked={selectedCamera.includes(member.id)}
-                      onCheckedChange={() => toggleTechMember(selectedCamera, setSelectedCamera, member.id)}
-                    />
-                    <label htmlFor={`camera-${member.id}`} className="text-sm">{member.name}</label>
-                  </div>
-                ))}
-              </div>
-            </div>
+
 
             <div className="flex gap-3 pt-4">
               <Button type="button" variant="outline" className="flex-1" onClick={() => { setIsDialogOpen(false); resetScheduleForm(); }}>

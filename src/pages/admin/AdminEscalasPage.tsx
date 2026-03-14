@@ -10,7 +10,9 @@ import {
     Trash2,
     Users,
     Music,
-    Tv
+    Tv,
+    Radio,
+    Monitor
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -65,6 +67,7 @@ export default function AdminEscalasPage() {
     const [selectedMusicos, setSelectedMusicos] = useState<{ member_id: string; instrument: string }[]>([]);
     const [selectedSom, setSelectedSom] = useState<string[]>([]);
     const [selectedMidia, setSelectedMidia] = useState<string[]>([]);
+    const [selectedTransmissao, setSelectedTransmissao] = useState<string[]>([]);
 
     // Queries
     const { data: schedules = [], isLoading: schedulesLoading } = useGeneralSchedules();
@@ -84,6 +87,7 @@ export default function AdminEscalasPage() {
         setSelectedMusicos([]);
         setSelectedSom([]);
         setSelectedMidia([]);
+        setSelectedTransmissao([]);
         setIsDialogOpen(true);
     };
 
@@ -98,6 +102,7 @@ export default function AdminEscalasPage() {
         setSelectedMusicos(team.filter(tm => tm.role === "musicos").map(tm => ({ member_id: tm.member_id, instrument: tm.instrument || "" })));
         setSelectedSom(team.filter(tm => tm.role === "som").map(tm => tm.member_id));
         setSelectedMidia(team.filter(tm => tm.role === "midia").map(tm => tm.member_id));
+        setSelectedTransmissao(team.filter(tm => tm.role === "transmissao").map(tm => tm.member_id));
 
         setIsDialogOpen(true);
     };
@@ -111,6 +116,7 @@ export default function AdminEscalasPage() {
         selectedMusicos.forEach(m => team_assignments.push({ member_id: m.member_id, role: "musicos", instrument: m.instrument }));
         selectedSom.forEach(id => team_assignments.push({ member_id: id, role: "som" }));
         selectedMidia.forEach(id => team_assignments.push({ member_id: id, role: "midia" }));
+        selectedTransmissao.forEach(id => team_assignments.push({ member_id: id, role: "transmissao" }));
 
         try {
             if (selectedSchedule) {
@@ -190,10 +196,22 @@ export default function AdminEscalasPage() {
             musicos.forEach(m => msg += `  • ${m.member?.name} (${m.instrument})\n`);
         }
 
-        const tech = team.filter(tm => ["som", "midia", "transmissao", "camera"].includes(tm.role));
-        if (tech.length > 0) {
-            msg += `\n📺 *Técnica:*\n`;
-            tech.forEach(m => msg += `  • ${m.role.toUpperCase()}: ${m.member?.name}\n`);
+        const somTech = team.filter(tm => tm.role === "som");
+        if (somTech.length > 0) {
+            msg += `\n🎛️ *Som:*\n`;
+            somTech.forEach(m => msg += `  • ${m.member?.name}\n`);
+        }
+
+        const midiaTech = team.filter(tm => tm.role === "midia");
+        if (midiaTech.length > 0) {
+            msg += `\n📺 *Media:*\n`;
+            midiaTech.forEach(m => msg += `  • ${m.member?.name}\n`);
+        }
+
+        const transmissaoTech = team.filter(tm => tm.role === "transmissao");
+        if (transmissaoTech.length > 0) {
+            msg += `\n🎥 *Transmissão/Live:*\n`;
+            transmissaoTech.forEach(m => msg += `  • ${m.member?.name}\n`);
         }
 
         msg += `\n_Deus abençoe o nosso serviço!_ 🙏`;
@@ -356,9 +374,9 @@ export default function AdminEscalasPage() {
                                 <h3 className="font-semibold flex items-center gap-2 text-primary border-b pb-1">
                                     <Tv className="w-4 h-4" /> Técnica
                                 </h3>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                     <div className="space-y-2">
-                                        <Label className="text-xs">Mesa de Som</Label>
+                                        <Label className="text-xs"><Radio className="w-3 h-3 inline mr-1 text-orange-500" />Mesa de Som</Label>
                                         <div className="border rounded-md p-3 space-y-2 bg-muted/20">
                                             {members.filter(m => m.primary_function?.name?.toLowerCase().includes("som")).map(m => (
                                                 <div key={m.id} className="flex items-center gap-2">
@@ -373,7 +391,7 @@ export default function AdminEscalasPage() {
                                         </div>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label className="text-xs">Media / Projeção</Label>
+                                        <Label className="text-xs"><Monitor className="w-3 h-3 inline mr-1 text-blue-500" />Media / Projeção</Label>
                                         <div className="border rounded-md p-3 space-y-2 bg-muted/20">
                                             {members.filter(m => m.primary_function?.name?.toLowerCase().includes("media") || m.primary_function?.name?.toLowerCase().includes("midia")).map(m => (
                                                 <div key={m.id} className="flex items-center gap-2">
@@ -383,6 +401,21 @@ export default function AdminEscalasPage() {
                                                         onCheckedChange={() => toggleMember(selectedMidia, setSelectedMidia, m.id)}
                                                     />
                                                     <Label htmlFor={`midia-${m.id}`} className="text-sm font-normal cursor-pointer">{m.name}</Label>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-xs"><Tv className="w-3 h-3 inline mr-1 text-purple-500" />Transmissão/Live</Label>
+                                        <div className="border rounded-md p-3 space-y-2 bg-muted/20 max-h-40 overflow-y-auto">
+                                            {members.map(m => (
+                                                <div key={m.id} className="flex items-center gap-2">
+                                                    <Checkbox
+                                                        id={`transmissao-${m.id}`}
+                                                        checked={selectedTransmissao.includes(m.id)}
+                                                        onCheckedChange={() => toggleMember(selectedTransmissao, setSelectedTransmissao, m.id)}
+                                                    />
+                                                    <Label htmlFor={`transmissao-${m.id}`} className="text-sm font-normal cursor-pointer">{m.name}</Label>
                                                 </div>
                                             ))}
                                         </div>
