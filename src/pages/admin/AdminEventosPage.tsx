@@ -174,7 +174,7 @@ export default function AdminEventosPage() {
               Novo Evento
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-md sm:max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="font-display text-xl">
                 {editingEvent ? "Editar Evento" : "Novo Evento"}

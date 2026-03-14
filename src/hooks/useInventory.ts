@@ -100,18 +100,17 @@ export function useDeleteInventoryItem() {
 // Photo upload helper
 export async function uploadInventoryPhoto(file: File): Promise<string> {
   const fileExt = file.name.split('.').pop();
-  const fileName = `${crypto.randomUUID()}.${fileExt}`;
-  const filePath = `${fileName}`;
+  const fileName = `inventory/${crypto.randomUUID()}.${fileExt}`;
 
   const { error: uploadError } = await supabase.storage
-    .from('inventory-items')
-    .upload(filePath, file);
+    .from('photos')
+    .upload(fileName, file);
 
   if (uploadError) throw uploadError;
 
   const { data } = supabase.storage
-    .from('inventory-items')
-    .getPublicUrl(filePath);
+    .from('photos')
+    .getPublicUrl(fileName);
 
   return data.publicUrl;
 }

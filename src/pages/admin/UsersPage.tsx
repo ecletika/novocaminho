@@ -57,6 +57,8 @@ export default function UsersPage() {
   const [editingName, setEditingName] = useState("");
   const [editingEmail, setEditingEmail] = useState("");
   const [editingPassword, setEditingPassword] = useState("");
+  const [originalEmail, setOriginalEmail] = useState("");
+  const [originalName, setOriginalName] = useState("");
   const [showEditPassword, setShowEditPassword] = useState(false);
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
   const [selectedMinistries, setSelectedMinistries] = useState<string[]>([]);
@@ -144,6 +146,8 @@ export default function UsersPage() {
     setEditingUser(user.id);
     setEditingName(user.name);
     setEditingEmail(user.email || "");
+    setOriginalName(user.name);
+    setOriginalEmail(user.email || "");
     setEditingPassword("");
     setEditingRole(user.role || "member");
     setSelectedPermissions(getUserPermissions(user.id));
@@ -154,28 +158,33 @@ export default function UsersPage() {
     if (!editingUser) return;
     setIsSaving(true);
     try {
-      // 1. Update Auth and Profile via Edge Function (for email/password/name)
-      const { data: authData, error: authError } = await supabase.functions.invoke("create-user", {
-        body: {
-          action: "update",
-          user_id: editingUser,
-          email: editingEmail,
-          password: editingPassword || undefined,
-          full_name: editingName
-        },
-      });
-      if (authError || authData?.error) throw new Error(authError?.message || authData?.error);
+      // 1. Only call Edge Function if email, password, or name actually changed
+      const emailChanged = editingEmail !== originalEmail;
+      const nameChanged = editingName !== originalName;
+      const needsAuthUpdate = emailChanged || nameChanged || !!editingPassword;
+      if (needsAuthUpdate) {
+        const { data: authData, error: authError } = await supabase.functions.invoke("create-user", {
+          body: {
+            action: "update",
+            user_id: editingUser,
+            email: editingEmail || undefined,
+            password: editingPassword || undefined,
+            full_name: editingName || undefined,
+          },
+        });
+        if (authError || authData?.error) throw new Error(authError?.message || authData?.error);
+      }
 
-      // 2. Update Role
+      // 2. Update Role (direct DB, no Edge Function needed)
       await supabase.from("user_roles").upsert({
         user_id: editingUser,
         role: editingRole as any
       }, { onConflict: "user_id,role" });
 
-      // 3. Update Permissions
+      // 3. Update Permissions (direct DB)
       await setPerms.mutateAsync({ userId: editingUser, permissions: selectedPermissions });
 
-      // 4. Save ministries
+      // 4. Save ministries (direct DB)
       await supabase.from("user_ministries").delete().eq("user_id", editingUser);
       if (selectedMinistries.length > 0) {
         await supabase.from("user_ministries").insert(
