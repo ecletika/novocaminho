@@ -34,17 +34,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, setView, user, onAuthClick
   }, [user]);
 
   const navItems = [
-    { id: AppView.HOME, label: 'Início', icon: Home },
     { id: AppView.BIBLE, label: 'Bíblia', icon: Book },
-    { id: AppView.PURPOSES, label: 'Planos', icon: Compass },
-    { id: AppView.COUPLES, label: 'Casais', icon: HeartHandshake },
-    { id: AppView.LIVRARIA, label: 'Livraria', icon: LibraryIcon },
-    { id: AppView.PRAYER, label: 'Orações', icon: Heart },
-    { id: AppView.DEVOTIONALS, label: 'Estudos', icon: BookOpen },
-    { id: AppView.DICTIONARY, label: 'Léxico', icon: Search },
-    { id: AppView.REFLECTIONS, label: 'Notas', icon: NotebookPen },
-    { id: AppView.SHOP, label: 'Loja', icon: ShoppingBag },
-    { id: AppView.COMMUNITY, label: 'Social', icon: Users },
   ];
 
   const handleSignOut = async () => {
@@ -167,17 +157,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, setView, user, onAuthClick
         </div>
       </nav>
 
-      {/* Barra Inferior - Só aparece em ecrãs muito pequenas */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-gray-950/95 backdrop-blur-lg border-t border-gray-100 dark:border-gray-800 z-[100] pb-safe">
-        <div className="flex items-center justify-around h-16 px-0.5">
-          <button onClick={() => setView(AppView.HOME)} className={`flex flex-col items-center gap-1 transition-all flex-1 ${currentView === AppView.HOME ? 'text-[#1E40AF]' : 'text-gray-400 hover:text-gray-600'}`}><Home size={20} /><span className="text-[9px] font-bold">Início</span></button>
-          <button onClick={() => setView(AppView.BIBLE)} className={`flex flex-col items-center gap-1 transition-all flex-1 ${currentView === AppView.BIBLE ? 'text-[#1E40AF]' : 'text-gray-400 hover:text-gray-600'}`}><Book size={20} /><span className="text-[9px] font-bold">Bíblia</span></button>
-          <button onClick={() => setView(AppView.COUPLES)} className={`flex flex-col items-center gap-1 transition-all flex-1 ${currentView === AppView.COUPLES ? 'text-[#1E40AF]' : 'text-gray-400 hover:text-gray-600'}`}><HeartHandshake size={20} /><span className="text-[9px] font-bold">Casais</span></button>
-          <button onClick={() => setView(AppView.PRAYER)} className={`flex flex-col items-center gap-1 transition-all flex-1 ${currentView === AppView.PRAYER ? 'text-[#1E40AF]' : 'text-gray-400 hover:text-gray-600'}`}><Heart size={20} /><span className="text-[9px] font-bold">Oração</span></button>
-          <button onClick={() => setView(AppView.DEVOTIONALS)} className={`flex flex-col items-center gap-1 transition-all flex-1 ${currentView === AppView.DEVOTIONALS ? 'text-[#1E40AF]' : 'text-gray-400 hover:text-gray-600'}`}><BookOpen size={20} /><span className="text-[9px] font-bold">Estudo</span></button>
-          <button onClick={() => setView(AppView.COMMUNITY)} className={`flex flex-col items-center gap-1 transition-all flex-1 ${currentView === AppView.COMMUNITY ? 'text-[#1E40AF]' : 'text-gray-400 hover:text-gray-600'}`}><Users size={20} /><span className="text-[9px] font-bold">Social</span></button>
-        </div>
-      </div>
+      {/* Barra Inferior removida para simplificação */}
     </>
   );
 };

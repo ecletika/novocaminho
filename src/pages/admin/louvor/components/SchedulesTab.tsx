@@ -1,6 +1,7 @@
 import { Plus, ChevronLeft, ChevronRight, Calendar, Share2, Edit, Trash2, Mic, Music } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { format, isSameDay, pt, subMonths, addMonths } from "date-fns";
+import { format, isSameDay, subMonths, addMonths } from "date-fns";
+import { pt } from "date-fns/locale";
 import { GeneralSchedule } from "@/hooks/useGeneralSchedules";
 
 interface SchedulesTabProps {

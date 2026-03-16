@@ -21,7 +21,7 @@ import { User } from '@supabase/supabase-js';
 import { ArrowLeft } from 'lucide-react';
 
 const BibliaPage: React.FC = () => {
-    const [view, setView] = useState<AppView>(AppView.HOME);
+    const [view, setView] = useState<AppView>(AppView.BIBLE);
     const [history, setHistory] = useState<AppView[]>([]);
     const [dailyVerse, setDailyVerse] = useState<Verse | null>(null);
     const [dailyDevo, setDailyDevo] = useState<Devotional | null>(null);
@@ -38,7 +38,7 @@ const BibliaPage: React.FC = () => {
         return 'light';
     });
 
-    const [bibleNav, setBibleNav] = useState<{ book: string, chapter: number, verse?: number }>({ book: 'Salmos', chapter: 1 });
+    const [bibleNav, setBibleNav] = useState<{ book: string, chapter: number, verse?: number }>({ book: 'Atos', chapter: 2, verse: 42 });
     const [selectedDevoFromRef, setSelectedDevoFromRef] = useState<Devotional | null>(null);
 
     // Efeito para rolar para o topo sempre que a visualização mudar
@@ -62,21 +62,7 @@ const BibliaPage: React.FC = () => {
                 if (u) updateUserStreak(u.id);
             });
 
-            try {
-                const [verse, devo, bread] = await Promise.all([
-                    getRandomWisdomVerse(),
-                    getDailyDevotional(),
-                    getDailyBread()
-                ]);
-
-                setDailyVerse(verse);
-                setDailyDevo(devo);
-                setDailyBread(bread);
-            } catch (err) {
-                console.error("Erro ao carregar dados iniciais:", err);
-            } finally {
-                setLoading(false);
-            }
+            setLoading(false);
 
             return () => {
                 subscription.unsubscribe();
@@ -99,21 +85,7 @@ const BibliaPage: React.FC = () => {
             setHistory(prev => prev.slice(0, -1));
             setView(prevView);
         } else {
-            setView(AppView.HOME);
-        }
-    };
-
-    const handleRefreshVerse = async () => {
-        setIsRefreshingVerse(true);
-        try {
-            const newVerse = await getRandomWisdomVerse();
-            if (newVerse) {
-                setDailyVerse(newVerse);
-            }
-        } catch (e) {
-            console.error("Erro ao trocar versículo:", e);
-        } finally {
-            setIsRefreshingVerse(false);
+            setView(AppView.BIBLE);
         }
     };
 
@@ -178,8 +150,6 @@ const BibliaPage: React.FC = () => {
                         onViewDevotional={handleViewDevotional}
                         onAuthRequired={() => setShowAuth(true)}
                         setView={navigateTo}
-                        onRefreshVerse={handleRefreshVerse}
-                        isRefreshingVerse={isRefreshingVerse}
                     />
                 );
             case AppView.BIBLE:
