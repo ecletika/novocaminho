@@ -790,9 +790,9 @@ export default function TechPage() {
         </TabsContent>
       </Tabs>
 
-      {/* Add Member Dialog */}
+      {/* New Member Dialog */}
       <Dialog open={isNewMemberDialogOpen} onOpenChange={(open) => { setIsNewMemberDialogOpen(open); if (!open) resetMemberForm(); }}>
-        <DialogContent>
+        <DialogContent className="w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-display text-xl">
               Adicionar Integrante
@@ -908,7 +908,7 @@ export default function TechPage() {
 
       {/* Edit Member Dialog */}
       <Dialog open={isEditMemberDialogOpen} onOpenChange={(open) => { setIsEditMemberDialogOpen(open); if (!open) resetMemberForm(); }}>
-        <DialogContent>
+        <DialogContent className="w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-display text-xl">
               Editar Integrante
@@ -1022,9 +1022,9 @@ export default function TechPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Add Function Dialog */}
+      {/* New Function Dialog */}
       <Dialog open={isNewFunctionDialogOpen} onOpenChange={setIsNewFunctionDialogOpen}>
-        <DialogContent>
+        <DialogContent className="w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-display text-xl">
               Nova Função
@@ -1072,7 +1072,7 @@ export default function TechPage() {
 
       {/* Add/Edit Schedule Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if (!open) resetScheduleForm(); }}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-display text-xl">
               {isEditing ? "Editar Escala Técnica" : "Nova Escala Técnica"}

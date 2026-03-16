@@ -286,7 +286,7 @@ export function LouvorDialogs({
 
       {/* Edit Song Dialog */}
       <Dialog open={isEditSongDialogOpen} onOpenChange={setIsEditSongDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-display text-xl">Editar Música</DialogTitle>
           </DialogHeader>
@@ -364,7 +364,7 @@ export function LouvorDialogs({
           resetGeneralScheduleForm();
         }
       }}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-display text-xl">
               {selectedSchedule ? "Editar Escala" : "Criar Nova Escala"}
@@ -521,7 +521,7 @@ export function LouvorDialogs({
 
       {/* New Member Dialog */}
       <Dialog open={isNewMemberDialogOpen} onOpenChange={setIsNewMemberDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-display text-xl">Adicionar Integrante</DialogTitle>
           </DialogHeader>
@@ -660,7 +660,7 @@ export function LouvorDialogs({
 
       {/* Edit Member Dialog */}
       <Dialog open={isEditMemberDialogOpen} onOpenChange={(open) => { setIsEditMemberDialogOpen(open); if (!open) resetMemberForm(); }}>
-        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+        <DialogContent className="w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-display text-xl">Editar Integrante</DialogTitle>
           </DialogHeader>
@@ -817,7 +817,7 @@ export function LouvorDialogs({
 
       {/* Assign Song Dialog */}
       <Dialog open={isAssignSongDialogOpen} onOpenChange={setIsAssignSongDialogOpen}>
-        <DialogContent>
+        <DialogContent className="w-[95vw] sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-display text-xl">Associar Música a Ministrante</DialogTitle>
           </DialogHeader>
@@ -875,7 +875,7 @@ export function LouvorDialogs({
 
       {/* New Song Dialog */}
       <Dialog open={isNewSongDialogOpen} onOpenChange={setIsNewSongDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-display text-xl">Adicionar Música</DialogTitle>
           </DialogHeader>
@@ -978,7 +978,7 @@ export function LouvorDialogs({
 
       {/* New Function Dialog */}
       <Dialog open={isNewFunctionDialogOpen} onOpenChange={setIsNewFunctionDialogOpen}>
-        <DialogContent>
+        <DialogContent className="w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-display text-xl">Adicionar Função</DialogTitle>
           </DialogHeader>

@@ -185,7 +185,7 @@ export default function AdminMinisteriosPage() {
               Novo Ministério
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-lg">
+          <DialogContent className="w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 {editingMinistry ? "Editar Ministério" : "Novo Ministério"}
@@ -438,7 +438,7 @@ export default function AdminMinisteriosPage() {
 
       {/* Delete Confirmation */}
       <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
-        <AlertDialogContent>
+        <AlertDialogContent className="w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
           <AlertDialogHeader>
             <AlertDialogTitle>Excluir ministério?</AlertDialogTitle>
             <AlertDialogDescription>

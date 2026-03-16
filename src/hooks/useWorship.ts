@@ -296,7 +296,12 @@ export function useUpdateWorshipMember() {
       // Update secondary functions if provided
       if (secondary_function_ids !== undefined) {
         // Delete existing
-        await supabase.from("member_functions").delete().eq("member_id", id);
+        const { error: deleteError } = await supabase
+          .from("member_functions")
+          .delete()
+          .eq("member_id", id);
+        
+        if (deleteError) throw deleteError;
 
         // Add new
         if (secondary_function_ids.length > 0) {

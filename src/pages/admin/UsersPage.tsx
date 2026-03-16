@@ -316,97 +316,33 @@ export default function UsersPage() {
                     </span>
                   </div>
                   <div className="flex-1">
-                    {isEditing ? (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-1">
-                          <Label className="text-xs">Nome Completo</Label>
-                          <Input
-                            value={editingName}
-                            onChange={(e) => setEditingName(e.target.value)}
-                            className="h-9"
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <Label className="text-xs">Email de Acesso</Label>
-                          <Input
-                            value={editingEmail}
-                            onChange={(e) => setEditingEmail(e.target.value)}
-                            className="h-9"
-                          />
-                        </div>
-                        <div className="space-y-1 md:col-span-2">
-                          <Label className="text-xs">Nova Palavra-passe (deixe em branco para não alterar)</Label>
-                          <div className="relative">
-                            <Input
-                              type={showEditPassword ? "text" : "password"}
-                              value={editingPassword}
-                              onChange={(e) => setEditingPassword(e.target.value)}
-                              className="h-9 pr-10"
-                              placeholder="••••••••"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => setShowEditPassword(!showEditPassword)}
-                              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                            >
-                              {showEditPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                            </button>
-                          </div>
-                        </div>
+                    <h3 className="font-semibold text-foreground">{user.name}</h3>
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <Mail className="w-3 h-3" />
+                        {user.email || "Sem email"}
                       </div>
-                    ) : (
-                      <>
-                        <h3 className="font-semibold text-foreground">{user.name}</h3>
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                            <Mail className="w-3 h-3" />
-                            {user.email || "Sem email"}
-                          </div>
-                          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                            <Shield className="w-3 h-3" />
-                            <span className="capitalize">{user.role}</span>
-                          </div>
-                        </div>
-                      </>
-                    )}
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <Shield className="w-3 h-3" />
+                        <span className="capitalize">{user.role}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <div className="flex gap-2 ml-4">
-                  {isEditing ? (
-                    <div className="flex items-center gap-2">
-                      <Select value={editingRole} onValueChange={setEditingRole}>
-                        <SelectTrigger className="w-32 h-9">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="member">Membro</SelectItem>
-                          <SelectItem value="material_online">Material Online</SelectItem>
-                          <SelectItem value="admin">Admin</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Button size="sm" onClick={handleSave} disabled={isSaving}>
-                        {isSaving ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Save className="w-4 h-4 mr-1" />}
-                        Guardar
-                      </Button>
-                      <Button size="sm" variant="ghost" onClick={() => setEditingUser(null)} disabled={isSaving}>
-                        Cancelar
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline" onClick={() => startEditing(user)}>
-                        Editar Perfil
-                      </Button>
-                      <Button size="sm" variant="ghost" className="text-destructive hover:bg-destructive/10" onClick={() => setDeleteUserId(user.id)}>
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  )}
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline" onClick={() => startEditing(user)}>
+                      Editar Perfil
+                    </Button>
+                    <Button size="sm" variant="ghost" className="text-destructive hover:bg-destructive/10" onClick={() => setDeleteUserId(user.id)}>
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
 
               <div className="space-y-4 pt-4 border-t border-border">
-                {isAdmin && !isEditing && (
+                {isAdmin && (
                   <div className="bg-primary/5 p-3 rounded-lg border border-primary/20 mb-2">
                     <p className="text-sm text-primary font-medium flex items-center gap-2">
                       <Shield className="w-4 h-4" /> Administrador — acesso total a todas as áreas.
@@ -420,33 +356,16 @@ export default function UsersPage() {
                     <h4 className="text-sm font-medium text-foreground mb-3 flex items-center gap-2">
                       <Church className="w-4 h-4 text-primary" /> Ministérios Atribuídos
                     </h4>
-                    {isEditing ? (
-                      <div className="grid grid-cols-2 gap-2 p-3 border rounded-lg bg-muted/20">
-                        {ministries.filter(m => m.is_active).map((m) => (
-                          <div key={m.id} className="flex items-center gap-2">
-                            <Checkbox
-                              id={`min-${user.id}-${m.id}`}
-                              checked={userMins.includes(m.id)}
-                              onCheckedChange={() => toggleMinistry(m.id, selectedMinistries, setSelectedMinistries)}
-                            />
-                            <Label htmlFor={`min-${user.id}-${m.id}`} className="text-sm cursor-pointer truncate">
-                              {m.title}
-                            </Label>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="flex flex-wrap gap-1.5">
-                        {userMins.length === 0 ? (
-                          <span className="text-xs text-muted-foreground italic">Nenhum ministério atribuído</span>
-                        ) : (
-                          userMins.map((mid) => {
-                            const m = ministries.find((x) => x.id === mid);
-                            return m ? <Badge key={mid} variant="secondary" className="text-[10px] px-2 py-0">{m.title}</Badge> : null;
-                          })
-                        )}
-                      </div>
-                    )}
+                    <div className="flex flex-wrap gap-1.5">
+                      {userMins.length === 0 ? (
+                        <span className="text-xs text-muted-foreground italic">Nenhum ministério atribuído</span>
+                      ) : (
+                        userMins.map((mid) => {
+                          const m = ministries.find((x) => x.id === mid);
+                          return m ? <Badge key={mid} variant="secondary" className="text-[10px] px-2 py-0">{m.title}</Badge> : null;
+                        })
+                      )}
+                    </div>
                   </div>
 
                   {/* Permissions */}
@@ -454,16 +373,15 @@ export default function UsersPage() {
                     <h4 className="text-sm font-medium text-foreground mb-3 flex items-center gap-2">
                       <Shield className="w-4 h-4 text-primary" /> Permissões de Acesso
                     </h4>
-                    <div className={`grid grid-cols-2 gap-3 p-3 border rounded-lg ${isEditing ? 'bg-muted/20' : 'bg-transparent'}`}>
+                    <div className="grid grid-cols-2 gap-3 p-3 border rounded-lg bg-transparent">
                       {ALL_PERMISSIONS.map((perm) => (
                         <div key={perm.key} className="flex items-center gap-2">
                           <Checkbox
                             id={`${user.id}-${perm.key}`}
                             checked={userPerms.includes(perm.key)}
-                            onCheckedChange={() => isEditing && togglePermission(perm.key)}
-                            disabled={!isEditing}
+                            disabled={true}
                           />
-                          <Label htmlFor={`${user.id}-${perm.key}`} className="text-sm cursor-pointer whitespace-nowrap">
+                          <Label htmlFor={`${user.id}-${perm.key}`} className="text-sm">
                             {perm.label}
                           </Label>
                         </div>
@@ -484,9 +402,119 @@ export default function UsersPage() {
         )}
       </div>
 
+      {/* Edit User Dialog */}
+      <Dialog open={!!editingUser} onOpenChange={(open) => !open && setEditingUser(null)}>
+        <DialogContent className="w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-display text-xl">Editar Utilizador</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 mt-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Nome Completo</Label>
+                <Input
+                  value={editingName}
+                  onChange={(e) => setEditingName(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Email de Acesso</Label>
+                <Input
+                  value={editingEmail}
+                  onChange={(e) => setEditingEmail(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Cargo no Sistema</Label>
+              <Select value={editingRole} onValueChange={setEditingRole}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="member">Membro / Utilizador Comum</SelectItem>
+                  <SelectItem value="material_online">Acesso Material Online Only</SelectItem>
+                  <SelectItem value="admin">Administrador Geral</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Alterar Palavra-passe (opcional)</Label>
+              <div className="relative">
+                <Input
+                  type={showEditPassword ? "text" : "password"}
+                  value={editingPassword}
+                  onChange={(e) => setEditingPassword(e.target.value)}
+                  placeholder="Deixe em branco para não alterar"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
+                  onClick={() => setShowEditPassword(!showEditPassword)}
+                >
+                  {showEditPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </Button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t">
+              <div>
+                <Label className="mb-3 block text-sm font-semibold">Ministérios</Label>
+                <div className="grid grid-cols-1 gap-2 p-3 border rounded-lg bg-muted/10 max-h-48 overflow-y-auto">
+                  {ministries.filter(m => m.is_active).map((m) => (
+                    <div key={m.id} className="flex items-center gap-2">
+                      <Checkbox
+                        id={`edit-min-${m.id}`}
+                        checked={selectedMinistries.includes(m.id)}
+                        onCheckedChange={() => toggleMinistry(m.id, selectedMinistries, setSelectedMinistries)}
+                      />
+                      <Label htmlFor={`edit-min-${m.id}`} className="text-sm cursor-pointer">
+                        {m.title}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <Label className="mb-3 block text-sm font-semibold">Permissões Específicas</Label>
+                <div className="grid grid-cols-1 gap-2 p-3 border rounded-lg bg-muted/10 max-h-48 overflow-y-auto">
+                  {ALL_PERMISSIONS.map((perm) => (
+                    <div key={perm.key} className="flex items-center gap-2">
+                      <Checkbox
+                        id={`edit-perm-${perm.key}`}
+                        checked={selectedPermissions.includes(perm.key)}
+                        onCheckedChange={() => togglePermission(perm.key)}
+                      />
+                      <Label htmlFor={`edit-perm-${perm.key}`} className="text-sm cursor-pointer">
+                        {perm.label}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3 pt-6 border-t">
+              <Button variant="outline" className="flex-1" onClick={() => setEditingUser(null)} disabled={isSaving}>
+                Cancelar
+              </Button>
+              <Button className="flex-1" onClick={handleSave} disabled={isSaving}>
+                {isSaving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                Guardar Alterações
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Create User Dialog */}
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+        <DialogContent className="w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-display text-xl">Novo Utilizador</DialogTitle>
           </DialogHeader>

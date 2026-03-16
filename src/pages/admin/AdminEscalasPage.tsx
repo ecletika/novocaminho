@@ -309,7 +309,7 @@ export default function AdminEscalasPage() {
 
             {/* Form Dialog */}
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+                <DialogContent className="w-[95vw] sm:max-w-3xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle>{selectedSchedule ? "Editar Escala" : "Criar Nova Escala"}</DialogTitle>
                     </DialogHeader>

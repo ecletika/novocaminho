@@ -391,7 +391,7 @@ export default function DocsPage() {
               Novo Artigo
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="font-display text-xl">
                 Criar Novo Artigo

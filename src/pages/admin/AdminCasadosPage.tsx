@@ -537,7 +537,7 @@ export default function AdminCasadosPage() {
 
       {/* Post Dialog */}
       <Dialog open={isPostDialogOpen} onOpenChange={(open) => { setIsPostDialogOpen(open); if (!open) resetForm(); }}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="w-[95vw] sm:max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-display text-xl">
               {selectedPost ? "Editar Palavra" : "Nova Palavra"}
@@ -628,7 +628,7 @@ export default function AdminCasadosPage() {
 
       {/* Course Dialog */}
       <Dialog open={isCourseDialogOpen} onOpenChange={setIsCourseDialogOpen}>
-        <DialogContent>
+        <DialogContent className="w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingCourseId ? "Editar Curso" : "Novo Curso"}</DialogTitle>
           </DialogHeader>
@@ -675,7 +675,7 @@ export default function AdminCasadosPage() {
 
       {/* Student Dialog */}
       <Dialog open={isStudentDialogOpen} onOpenChange={setIsStudentDialogOpen}>
-        <DialogContent>
+        <DialogContent className="w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingStudentId ? "Editar Aluno" : "Novo Aluno"}</DialogTitle>
           </DialogHeader>
