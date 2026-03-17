@@ -39,6 +39,7 @@ export interface WorshipSong {
   has_chords: boolean;
   content_type: "cifra" | "letra";
   youtube_url: string | null;
+  chords_url: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -58,7 +59,7 @@ export interface SongMinisterAssignment {
   key: string;
   created_at: string;
   song?: WorshipSong;
-  minister?: WorshipMinister;
+  minister?: WorshipMember;
 }
 
 export interface ScheduleVocalist {
@@ -156,48 +157,44 @@ export function useWorshipMembers() {
   return useQuery({
     queryKey: ["worship-members"],
     queryFn: async () => {
-      // 1. First, try to fetch with the relationship (ideal)
       try {
         const { data, error } = await supabase
           .from("worship_members")
           .select(`
             *,
-            primary_function:worship_functions(*)
+            primary_function:worship_functions(*),
+            secondary_functions:member_functions(
+              id,
+              member_id,
+              function_id,
+              function:worship_functions(*)
+            )
           `)
           .order("name");
 
-        if (!error && data) {
-          // Fetch secondary functions separately since they are a many-to-many
-          const memberIds = data.map(m => m.id);
-          const { data: secondaryFunctions } = await supabase
-            .from("member_functions")
-            .select(`*, function:worship_functions(*)`)
-            .in("member_id", memberIds);
-
-          return data.map(member => ({
-            ...member,
-            secondary_functions: secondaryFunctions?.filter(sf => sf.member_id === member.id) || []
-          })) as WorshipMember[];
+        if (error) {
+          console.error("Error with joined fetch, falling back:", error);
+          throw error;
         }
+
+        return data as WorshipMember[];
       } catch (e) {
         console.warn("Failed to fetch with join, falling back to sequential fetch", e);
       }
 
       // 2. Fallback: Fetch members first, then functions manually
-      const { data: members, error: mError } = await supabase.from("worship_members").select("*").order("name");
-      if (mError) throw mError;
-      if (!members || members.length === 0) return [];
+      const { data: membersRaw } = await supabase.from("worship_members").select("*").order("name");
+      if (!membersRaw) return [];
 
       const { data: functions } = await supabase.from("worship_functions").select("*");
       const { data: memberFunctions } = await supabase.from("member_functions").select("*");
 
-      return members.map(m => {
+      return membersRaw.map(m => {
         const primaryFunctionRaw = functions?.find(f => f.id === m.primary_function_id);
-        // Map update_at to updated_at if necessary
         const primaryFunction = primaryFunctionRaw ? {
           ...primaryFunctionRaw,
           updated_at: (primaryFunctionRaw as any).updated_at || (primaryFunctionRaw as any).update_at
-        } : null;
+        } : undefined;
 
         const secondary = memberFunctions?.filter(mf => mf.member_id === m.id).map(mf => {
           const fRaw = functions?.find(f => f.id === mf.function_id);
@@ -206,7 +203,7 @@ export function useWorshipMembers() {
             function: fRaw ? {
               ...fRaw,
               updated_at: (fRaw as any).updated_at || (fRaw as any).update_at
-            } : null
+            } : undefined
           };
         }) || [];
 
@@ -296,7 +293,12 @@ export function useUpdateWorshipMember() {
       // Update secondary functions if provided
       if (secondary_function_ids !== undefined) {
         // Delete existing
-        await supabase.from("member_functions").delete().eq("member_id", id);
+        const { error: deleteError } = await supabase
+          .from("member_functions")
+          .delete()
+          .eq("member_id", id);
+        
+        if (deleteError) throw deleteError;
 
         // Add new
         if (secondary_function_ids.length > 0) {
@@ -356,6 +358,23 @@ export function useWorshipSongs() {
   });
 }
 
+export function useWorshipSong(id: string | undefined) {
+  return useQuery({
+    queryKey: ["worship-song", id],
+    queryFn: async () => {
+      if (!id) return null;
+      const { data, error } = await supabase
+        .from("worship_songs")
+        .select("*")
+        .eq("id", id)
+        .single();
+      if (error) throw error;
+      return data as WorshipSong;
+    },
+    enabled: !!id,
+  });
+}
+
 export function useCreateWorshipSong() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -368,6 +387,7 @@ export function useCreateWorshipSong() {
       has_chords?: boolean;
       content_type: "cifra" | "letra";
       youtube_url?: string;
+      chords_url?: string;
     }) => {
       const { data, error } = await supabase
         .from("worship_songs")
@@ -392,7 +412,16 @@ export function useUpdateWorshipSong() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ id, ...updates }: Partial<WorshipSong> & { id: string }) => {
+    mutationFn: async ({ id, ...updates }: { 
+      id: string;
+      name?: string;
+      original_key?: string;
+      lyrics?: string | null;
+      has_chords?: boolean;
+      content_type?: "cifra" | "letra";
+      youtube_url?: string | null;
+      chords_url?: string | null;
+    }) => {
       const { data, error } = await supabase
         .from("worship_songs")
         .update(updates)
@@ -500,7 +529,7 @@ export function useSongMinisterAssignments() {
           .select(`
             *,
             song:worship_songs(*),
-            minister:worship_ministers(*)
+            minister:worship_members(*)
           `);
 
         if (!error && data) return data as SongMinisterAssignment[];
