@@ -79,8 +79,11 @@ export function MembersTab({
                 )}
               </div>
               <h3 className="font-semibold text-foreground text-sm truncate">{member.name}</h3>
-              <p className="text-xs text-muted-foreground mt-1">
-                {member.primary_function?.name || "Sem função"}
+              <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                {[
+                  member.primary_function?.name,
+                  ...(member.secondary_functions?.map(sf => sf.function?.name) || [])
+                ].filter(Boolean).join(", ") || "Sem função"}
               </p>
               {member.phone && (
                 <a href={`https://wa.me/${member.phone.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-primary mt-1 hover:underline">

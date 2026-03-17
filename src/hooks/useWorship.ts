@@ -156,48 +156,44 @@ export function useWorshipMembers() {
   return useQuery({
     queryKey: ["worship-members"],
     queryFn: async () => {
-      // 1. First, try to fetch with the relationship (ideal)
       try {
         const { data, error } = await supabase
           .from("worship_members")
           .select(`
             *,
-            primary_function:worship_functions(*)
+            primary_function:worship_functions(*),
+            secondary_functions:member_functions(
+              id,
+              member_id,
+              function_id,
+              function:worship_functions(*)
+            )
           `)
           .order("name");
 
-        if (!error && data) {
-          // Fetch secondary functions separately since they are a many-to-many
-          const memberIds = data.map(m => m.id);
-          const { data: secondaryFunctions } = await supabase
-            .from("member_functions")
-            .select(`*, function:worship_functions(*)`)
-            .in("member_id", memberIds);
-
-          return data.map(member => ({
-            ...member,
-            secondary_functions: secondaryFunctions?.filter(sf => sf.member_id === member.id) || []
-          })) as WorshipMember[];
+        if (error) {
+          console.error("Error with joined fetch, falling back:", error);
+          throw error;
         }
+
+        return data as WorshipMember[];
       } catch (e) {
         console.warn("Failed to fetch with join, falling back to sequential fetch", e);
       }
 
       // 2. Fallback: Fetch members first, then functions manually
-      const { data: members, error: mError } = await supabase.from("worship_members").select("*").order("name");
-      if (mError) throw mError;
-      if (!members || members.length === 0) return [];
+      const { data: membersRaw } = await supabase.from("worship_members").select("*").order("name");
+      if (!membersRaw) return [];
 
       const { data: functions } = await supabase.from("worship_functions").select("*");
       const { data: memberFunctions } = await supabase.from("member_functions").select("*");
 
-      return members.map(m => {
+      return membersRaw.map(m => {
         const primaryFunctionRaw = functions?.find(f => f.id === m.primary_function_id);
-        // Map update_at to updated_at if necessary
         const primaryFunction = primaryFunctionRaw ? {
           ...primaryFunctionRaw,
           updated_at: (primaryFunctionRaw as any).updated_at || (primaryFunctionRaw as any).update_at
-        } : null;
+        } : undefined;
 
         const secondary = memberFunctions?.filter(mf => mf.member_id === m.id).map(mf => {
           const fRaw = functions?.find(f => f.id === mf.function_id);
@@ -206,7 +202,7 @@ export function useWorshipMembers() {
             function: fRaw ? {
               ...fRaw,
               updated_at: (fRaw as any).updated_at || (fRaw as any).update_at
-            } : null
+            } : undefined
           };
         }) || [];
 
