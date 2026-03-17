@@ -151,16 +151,16 @@ export function SchedulesTab({
                     </div>
                   </div>
 
-                  <div className="grid sm:grid-cols-3 gap-4 mt-4 pt-4 border-t border-border">
+                  <div className="grid sm:grid-cols-4 gap-4 mt-4 pt-4 border-t border-border">
                     {ministrantes.length > 0 && (
                       <div>
-                        <div className="flex items-center gap-2 text-sm font-medium text-foreground mb-2">
+                        <div className="flex items-center gap-2 text-sm font-medium text-foreground mb-2 underline decoration-primary/30 underline-offset-4">
                           <Mic className="w-4 h-4 text-primary" />
                           Ministrante
                         </div>
                         <div className="space-y-1">
                           {ministrantes.map((tm) => (
-                            <span key={tm.id} className="block text-sm text-muted-foreground">
+                            <span key={tm.id} className="block text-sm text-muted-foreground font-medium">
                               {tm.member?.name}
                             </span>
                           ))}
@@ -169,9 +169,9 @@ export function SchedulesTab({
                     )}
                     {louvor.length > 0 && (
                       <div>
-                        <div className="flex items-center gap-2 text-sm font-medium text-foreground mb-2">
+                        <div className="flex items-center gap-2 text-sm font-medium text-foreground mb-2 underline decoration-secondary/30 underline-offset-4">
                           <Music className="w-4 h-4 text-secondary" />
-                          Louvor
+                          Vocais
                         </div>
                         <div className="space-y-1">
                           {louvor.map((tm) => (
@@ -184,15 +184,40 @@ export function SchedulesTab({
                     )}
                     {musicos.length > 0 && (
                       <div>
-                        <div className="flex items-center gap-2 text-sm font-medium text-foreground mb-2">
+                        <div className="flex items-center gap-2 text-sm font-medium text-foreground mb-2 underline decoration-accent/30 underline-offset-4">
                           <Music className="w-4 h-4 text-accent" />
-                          Músicos
+                          Instrumental
                         </div>
                         <div className="space-y-1">
                           {musicos.map((tm) => (
                             <span key={tm.id} className="block text-sm text-muted-foreground">
-                              {tm.member?.name} {tm.instrument && `(${tm.instrument})`}
+                              {tm.member?.name} <span className="text-[10px] bg-muted px-1.5 py-0.5 rounded uppercase font-bold tracking-tight">{tm.instrument}</span>
                             </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {schedule.songs && schedule.songs.length > 0 && (
+                      <div className="col-span-1 sm:border-l sm:pl-4 border-border">
+                        <div className="flex items-center gap-2 text-sm font-medium text-foreground mb-2 underline decoration-primary/30 underline-offset-4">
+                          <Music className="w-4 h-4 text-primary" />
+                          Músicas
+                        </div>
+                        <div className="space-y-2">
+                          {schedule.songs.map((ss, idx) => (
+                            <div key={ss.id} className="flex items-center justify-between gap-2 bg-muted/30 p-1.5 rounded-lg border border-border/40 group">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <span className="text-[10px] font-bold text-primary bg-primary/10 w-4 h-4 flex items-center justify-center rounded-full shrink-0">
+                                  {idx + 1}
+                                </span>
+                                <span className="text-sm text-foreground font-medium truncate">
+                                  {ss.song?.name}
+                                </span>
+                              </div>
+                              <span className="text-[11px] font-black text-primary bg-background px-1.5 py-0.5 rounded shadow-sm border border-primary/10 whitespace-nowrap">
+                                {ss.key}
+                              </span>
+                            </div>
                           ))}
                         </div>
                       </div>

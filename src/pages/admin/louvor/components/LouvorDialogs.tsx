@@ -113,6 +113,9 @@ interface LouvorDialogsProps {
   setSelectedLouvor: (val: string[]) => void;
   selectedMusicos: { member_id: string; instrument: string }[];
   setSelectedMusicos: (val: { member_id: string; instrument: string }[]) => void;
+  selectedSongs: { song_id: string; key: string; sort_order: number }[];
+  setSelectedSongs: (val: { song_id: string; key: string; sort_order: number }[]) => void;
+  assignments: any[];
   toggleLouvorMember: (list: string[], setList: (val: string[]) => void, id: string) => void;
   members: WorshipMember[];
   vocalMembers: WorshipMember[];
@@ -237,6 +240,9 @@ export function LouvorDialogs({
   setSelectedLouvor,
   selectedMusicos,
   setSelectedMusicos,
+  selectedSongs,
+  setSelectedSongs,
+  assignments,
   toggleLouvorMember,
   members,
   vocalMembers,
@@ -438,6 +444,10 @@ export function LouvorDialogs({
 
             {/* Músicos */}
             <div>
+              <label className="block text-sm font-medium text-foreground mb-2 flex items-center gap-2">
+                <Music className="w-4 h-4 text-primary" />
+                Músicos
+              </label>
               <div className="space-y-2 max-h-48 overflow-y-auto border rounded-md p-2">
                 {members.filter(m => {
                   const skills = [
@@ -455,7 +465,7 @@ export function LouvorDialogs({
                   const hasSkill = (name: string) => skills.some(s => s?.includes(name));
 
                   return (
-                    <div key={member.id} className="flex items-center gap-4">
+                    <div key={member.id} className="flex items-center gap-4 py-1 border-b last:border-0 border-border/40">
                       <Checkbox
                         id={`musico-${member.id}`}
                         checked={!!selected}
@@ -475,7 +485,7 @@ export function LouvorDialogs({
                           }
                         }}
                       />
-                      <label htmlFor={`musico-${member.id}`} className="text-sm min-w-[120px]">{member.name}</label>
+                      <label htmlFor={`musico-${member.id}`} className="text-sm flex-1">{member.name}</label>
                       {selected && (
                         <Select
                           value={selected.instrument}
@@ -485,7 +495,7 @@ export function LouvorDialogs({
                             ));
                           }}
                         >
-                          <SelectTrigger className="w-32 h-8">
+                          <SelectTrigger className="w-28 h-7 text-xs">
                             <SelectValue placeholder="Instr." />
                           </SelectTrigger>
                           <SelectContent>
@@ -501,6 +511,96 @@ export function LouvorDialogs({
                   );
                 })}
               </div>
+            </div>
+
+            {/* Músicas */}
+            <div className="space-y-3">
+              <label className="block text-sm font-medium text-foreground flex items-center gap-2">
+                <Music className="w-4 h-4 text-primary" />
+                Músicas da Escala
+              </label>
+              
+              <div className="flex gap-2">
+                <Select onValueChange={(songId) => {
+                  const song = songs.find(s => s.id === songId);
+                  if (song && !selectedSongs.some(ss => ss.song_id === song.id)) {
+                    // Check if there is an assignment for the first selected ministrante
+                    const ministerId = selectedMinistrantes[0];
+                    const assignment = assignments.find(a => a.song_id === songId && a.minister_id === ministerId);
+                    const key = assignment?.key || song.original_key || "";
+                    setSelectedSongs([...selectedSongs, { song_id: song.id, key, sort_order: selectedSongs.length }]);
+                  }
+                }}>
+                  <SelectTrigger className="flex-1">
+                    <SelectValue placeholder="Adicionar música..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {/* Priority for Minister's Songs */}
+                    {selectedMinistrantes.length > 0 && assignments.filter(a => selectedMinistrantes.includes(a.minister_id)).length > 0 && (
+                      <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground bg-muted/30">
+                        Repertório do Ministrante
+                      </div>
+                    )}
+                    {selectedMinistrantes.length > 0 && assignments
+                      .filter(a => selectedMinistrantes.includes(a.minister_id))
+                      .map(a => (
+                        <SelectItem key={`dialog-song-rep-${a.id}`} value={a.song_id}>
+                          {a.song?.name} ({a.key})
+                        </SelectItem>
+                      ))
+                    }
+                    
+                    <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground bg-muted/30">
+                      Todas as Músicas
+                    </div>
+                    {songs.map(song => (
+                      <SelectItem key={`dialog-song-all-${song.id}`} value={song.id}>
+                        {song.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {selectedSongs.length > 0 && (
+                <div className="space-y-2 border rounded-md p-2 bg-muted/10">
+                  {selectedSongs.map((ss, index) => {
+                    const song = songs.find(s => s.id === ss.song_id);
+                    return (
+                      <div key={`sel-song-${ss.song_id}`} className="flex items-center gap-3 bg-background p-2 rounded border border-border/50 group">
+                        <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary">
+                          {index + 1}
+                        </div>
+                        <span className="text-sm font-medium flex-1 truncate">{song?.name}</span>
+                        <Select
+                          value={ss.key}
+                          onValueChange={(newKey) => {
+                            setSelectedSongs(selectedSongs.map((item, i) => 
+                              i === index ? { ...item, key: newKey } : item
+                            ));
+                          }}
+                        >
+                          <SelectTrigger className="w-20 h-7 text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {MUSICAL_KEYS.map(k => <SelectItem key={k} value={k}>{k}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="w-7 h-7 text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => setSelectedSongs(selectedSongs.filter((_, i) => i !== index))}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             <div className="flex gap-3 pt-4">

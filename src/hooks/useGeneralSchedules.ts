@@ -12,6 +12,20 @@ export interface ScheduleTeamMember {
   member?: WorshipMember;
 }
 
+export interface ScheduleSong {
+  id: string;
+  schedule_id: string;
+  song_id: string;
+  key: string;
+  sort_order: number;
+  song?: {
+    id: string;
+    name: string;
+    youtube_url: string | null;
+    lyrics: string | null;
+  };
+}
+
 export interface GeneralSchedule {
   id: string;
   date: string;
@@ -19,6 +33,7 @@ export interface GeneralSchedule {
   created_at: string;
   updated_at: string;
   team_members?: ScheduleTeamMember[];
+  songs?: ScheduleSong[];
 }
 
 export function useGeneralSchedules() {
@@ -34,13 +49,13 @@ export function useGeneralSchedules() {
         return [];
       }
 
-      // If no schedules, return empty array
       if (!data || data.length === 0) {
         return [] as GeneralSchedule[];
       }
 
-      // Fetch team members
       const scheduleIds = data.map(s => s.id);
+      
+      // Fetch team members
       const { data: teamMembers } = await supabase
         .from("schedule_team_members")
         .select(`
@@ -49,9 +64,20 @@ export function useGeneralSchedules() {
         `)
         .in("schedule_id", scheduleIds);
 
+      // Fetch songs - Note: using schedule_songs table
+      const { data: scheduleSongs } = await supabase
+        .from("schedule_songs")
+        .select(`
+          *,
+          song:worship_songs(*)
+        `)
+        .in("schedule_id", scheduleIds);
+
       return data.map(schedule => ({
         ...schedule,
-        team_members: teamMembers?.filter(tm => tm.schedule_id === schedule.id) || []
+        team_members: teamMembers?.filter(tm => tm.schedule_id === schedule.id) || [],
+        songs: scheduleSongs?.filter(ss => ss.schedule_id === schedule.id)
+          .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0)) || []
       })) as GeneralSchedule[];
     },
   });
@@ -66,8 +92,9 @@ export function useCreateGeneralSchedule() {
       date: string;
       type: string;
       team_assignments: { member_id: string; role: string; instrument?: string }[];
+      song_assignments?: { song_id: string; key: string; sort_order: number }[];
     }) => {
-      const { team_assignments, ...scheduleData } = schedule;
+      const { team_assignments, song_assignments, ...scheduleData } = schedule;
 
       const { data, error } = await supabase
         .from("general_schedules")
@@ -87,6 +114,19 @@ export function useCreateGeneralSchedule() {
             instrument: ta.instrument || null
           })));
         if (teamError) throw teamError;
+      }
+
+      // Add songs
+      if (song_assignments && song_assignments.length > 0) {
+        const { error: songError } = await supabase
+          .from("schedule_songs")
+          .insert(song_assignments.map(sa => ({
+            schedule_id: data.id,
+            song_id: sa.song_id,
+            key: sa.key,
+            sort_order: sa.sort_order
+          })));
+        if (songError) throw songError;
       }
 
       return data;
@@ -109,20 +149,22 @@ export function useUpdateGeneralSchedule() {
     mutationFn: async ({
       id,
       team_assignments,
+      song_assignments,
       ...updates
     }: {
       id: string;
       date?: string;
       type?: string;
       team_assignments?: { member_id: string; role: string; instrument?: string }[];
+      song_assignments?: { song_id: string; key: string; sort_order: number }[];
     }) => {
-      const { data, error } = await supabase
-        .from("general_schedules")
-        .update(updates)
-        .eq("id", id)
-        .select()
-        .single();
-      if (error) throw error;
+      if (Object.keys(updates).length > 0) {
+        const { error } = await supabase
+          .from("general_schedules")
+          .update(updates)
+          .eq("id", id);
+        if (error) throw error;
+      }
 
       // Update team members if provided
       if (team_assignments !== undefined) {
@@ -143,7 +185,24 @@ export function useUpdateGeneralSchedule() {
         }
       }
 
-      return data;
+      // Update songs if provided
+      if (song_assignments !== undefined) {
+        // Delete existing
+        await supabase.from("schedule_songs").delete().eq("schedule_id", id);
+
+        // Add new
+        if (song_assignments.length > 0) {
+          const { error: songError } = await supabase
+            .from("schedule_songs")
+            .insert(song_assignments.map(sa => ({
+              schedule_id: id,
+              song_id: sa.song_id,
+              key: sa.key,
+              sort_order: sa.sort_order
+            })));
+          if (songError) throw songError;
+        }
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["general-schedules"] });

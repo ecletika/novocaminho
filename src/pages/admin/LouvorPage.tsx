@@ -110,6 +110,7 @@ export default function LouvorPage() {
   const [selectedMinistrantes, setSelectedMinistrantes] = useState<string[]>([]);
   const [selectedLouvor, setSelectedLouvor] = useState<string[]>([]);
   const [selectedMusicos, setSelectedMusicos] = useState<{ member_id: string; instrument: string }[]>([]);
+  const [selectedSongs, setSelectedSongs] = useState<{ song_id: string; key: string; sort_order: number }[]>([]);
 
   // Queries
   const { data: members = [], isLoading: membersLoading } = useWorshipMembers();
@@ -338,6 +339,7 @@ export default function LouvorPage() {
     setSelectedMinistrantes([]);
     setSelectedLouvor([]);
     setSelectedMusicos([]);
+    setSelectedSongs([]);
     setSelectedSchedule(null);
   };
 
@@ -348,18 +350,26 @@ export default function LouvorPage() {
     selectedLouvor.forEach(id => team_assignments.push({ member_id: id, role: "louvor" }));
     selectedMusicos.forEach(m => team_assignments.push({ member_id: m.member_id, role: "musicos", instrument: m.instrument }));
 
+    const song_assignments = selectedSongs.map((s, index) => ({
+      song_id: s.song_id,
+      key: s.key,
+      sort_order: index
+    }));
+
     if (selectedSchedule) {
       await updateGeneralSchedule.mutateAsync({
         id: selectedSchedule.id,
         date: formDate,
         type: formType,
-        team_assignments
+        team_assignments,
+        song_assignments
       });
     } else {
       await createGeneralSchedule.mutateAsync({
         date: formDate,
         type: formType,
-        team_assignments
+        team_assignments,
+        song_assignments
       });
     }
     setIsNewScheduleDialogOpen(false);
@@ -375,6 +385,7 @@ export default function LouvorPage() {
     setSelectedMinistrantes(teamMembers.filter(tm => tm.role === "ministrante").map(tm => tm.member_id));
     setSelectedLouvor(teamMembers.filter(tm => tm.role === "louvor").map(tm => tm.member_id));
     setSelectedMusicos(teamMembers.filter(tm => tm.role === "musicos").map(tm => ({ member_id: tm.member_id, instrument: tm.instrument || "" })));
+    setSelectedSongs(schedule.songs?.map(s => ({ song_id: s.song_id, key: s.key, sort_order: s.sort_order })) || []);
     setIsEditScheduleDialogOpen(true);
   };
 
@@ -411,21 +422,45 @@ export default function LouvorPage() {
   const shareScheduleWhatsApp = (schedule: GeneralSchedule) => {
     const dateStr = format(new Date(schedule.date), "EEEE, d 'de' MMMM", { locale: pt });
     let msg = `🎵 *Escala de Louvor*\n📅 ${dateStr}\n📍 ${schedule.type}\n`;
+    
     const ministrantes = schedule.team_members?.filter(tm => tm.role === "ministrante") || [];
     const louvor = schedule.team_members?.filter(tm => tm.role === "louvor") || [];
     const musicos = schedule.team_members?.filter(tm => tm.role === "musicos") || [];
+    
     if (ministrantes.length > 0) {
       msg += `\n🎤 *Ministrante(s):*\n`;
       ministrantes.forEach(m => { msg += `  • ${m.member?.name || ""}\n`; });
     }
+    
     if (louvor.length > 0) {
       msg += `\n🎶 *Vocais:*\n`;
       louvor.forEach(v => { msg += `  • ${v.member?.name || ""}\n`; });
     }
+    
     if (musicos.length > 0) {
-      msg += `\n🎸 *Músicos:*\n`;
+      msg += `\n🎸 *Instrumental:*\n`;
       musicos.forEach(m => { msg += `  • ${m.member?.name || ""} (${m.instrument || ""})\n`; });
     }
+
+    if (schedule.songs && schedule.songs.length > 0) {
+      msg += `\n🎼 *Repertório:*\n`;
+      schedule.songs.forEach((ss, idx) => {
+        msg += `${idx + 1}. *${ss.song?.name}* [Tom: ${ss.key}]\n`;
+        if (ss.song?.youtube_url) {
+          msg += `   🎬 YouTube: ${ss.song.youtube_url}\n`;
+        }
+        // Assume if lyrics has a link or exists, we can provide a link to the app's view
+        // Since we don't have a public link easily, we'll just mention it or use the youtube link
+        // User specifically asked for "link externo da cifra"
+        // I will add a placeholder if no link is found or just use the youtube link if that's what they mean.
+        // Actually, I'll check if the song has an external link in the lyrics field (detecting URL)
+        const urlMatch = ss.song?.lyrics?.match(/https?:\/\/[^\s]+/);
+        if (urlMatch) {
+          msg += `   📝 Cifra: ${urlMatch[0]}\n`;
+        }
+      });
+    }
+    
     msg += `\n_Deus abençoe o nosso louvor!_ 🙏`;
     window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
   };
@@ -467,12 +502,12 @@ export default function LouvorPage() {
       </div>
 
       <Tabs defaultValue="members" className="w-full">
-        <TabsList className="grid w-full grid-cols-5 mb-8 bg-muted/50 p-1.5 rounded-2xl">
-          <TabsTrigger value="members" className="rounded-xl flex items-center gap-2 py-3"><Users className="w-4 h-4" /> Integrantes</TabsTrigger>
-          <TabsTrigger value="songs" className="rounded-xl flex items-center gap-2 py-3"><Music className="w-4 h-4" /> Músicas</TabsTrigger>
-          <TabsTrigger value="ministers" className="rounded-xl flex items-center gap-2 py-3"><Mic className="w-4 h-4" /> Ministrantes</TabsTrigger>
-          <TabsTrigger value="schedules" className="rounded-xl flex items-center gap-2 py-3"><Calendar className="w-4 h-4" /> Escalas</TabsTrigger>
-          <TabsTrigger value="functions" className="rounded-xl flex items-center gap-2 py-3"><Settings className="w-4 h-4" /> Funções</TabsTrigger>
+        <TabsList className="flex w-full overflow-x-auto gap-1 mb-8 bg-muted/50 p-1.5 rounded-2xl scrollbar-hide flex-nowrap min-h-[52px]">
+          <TabsTrigger value="members" className="flex-1 whitespace-nowrap rounded-xl flex items-center gap-2 py-3 px-4 data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"><Users className="w-4 h-4" /> Integrantes</TabsTrigger>
+          <TabsTrigger value="songs" className="flex-1 whitespace-nowrap rounded-xl flex items-center gap-2 py-3 px-4 data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"><Music className="w-4 h-4" /> Músicas</TabsTrigger>
+          <TabsTrigger value="ministers" className="flex-1 whitespace-nowrap rounded-xl flex items-center gap-2 py-3 px-4 data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"><Mic className="w-4 h-4" /> Ministrantes</TabsTrigger>
+          <TabsTrigger value="schedules" className="flex-1 whitespace-nowrap rounded-xl flex items-center gap-2 py-3 px-4 data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"><Calendar className="w-4 h-4" /> Escalas</TabsTrigger>
+          <TabsTrigger value="functions" className="flex-1 whitespace-nowrap rounded-xl flex items-center gap-2 py-3 px-4 data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"><Settings className="w-4 h-4" /> Funções</TabsTrigger>
         </TabsList>
 
         <TabsContent value="members">
