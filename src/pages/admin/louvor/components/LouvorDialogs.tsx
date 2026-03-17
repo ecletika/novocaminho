@@ -56,6 +56,8 @@ interface LouvorDialogsProps {
   setEditSongContentType: (val: "cifra" | "letra") => void;
   editSongYoutubeUrl: string;
   setEditSongYoutubeUrl: (val: string) => void;
+  editSongChordsUrl: string;
+  setEditSongChordsUrl: (val: string) => void;
   editSongLyrics: string;
   setEditSongLyrics: (val: string) => void;
   MUSICAL_KEYS: string[];
@@ -74,6 +76,8 @@ interface LouvorDialogsProps {
   setNewSongContentType: (val: "cifra" | "letra") => void;
   newSongYoutubeUrl: string;
   setNewSongYoutubeUrl: (val: string) => void;
+  newSongChordsUrl: string;
+  setNewSongChordsUrl: (val: string) => void;
   newSongMinisterId: string;
   setNewSongMinisterId: (val: string) => void;
   newSongMinisterKey: string;
@@ -183,6 +187,8 @@ export function LouvorDialogs({
   setEditSongContentType,
   editSongYoutubeUrl,
   setEditSongYoutubeUrl,
+  editSongChordsUrl,
+  setEditSongChordsUrl,
   editSongLyrics,
   setEditSongLyrics,
   MUSICAL_KEYS,
@@ -201,6 +207,8 @@ export function LouvorDialogs({
   setNewSongContentType,
   newSongYoutubeUrl,
   setNewSongYoutubeUrl,
+  newSongChordsUrl,
+  setNewSongChordsUrl,
   newSongMinisterId,
   setNewSongMinisterId,
   newSongMinisterKey,
@@ -339,6 +347,14 @@ export function LouvorDialogs({
                 placeholder="https://youtube.com/watch?v=..."
                 value={editSongYoutubeUrl}
                 onChange={(e) => setEditSongYoutubeUrl(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Link da Cifra (opcional)</label>
+              <Input
+                placeholder="Ex: https://cifraclub.com.br/..."
+                value={editSongChordsUrl}
+                onChange={(e) => setEditSongChordsUrl(e.target.value)}
               />
             </div>
             <div>
@@ -1053,6 +1069,14 @@ export function LouvorDialogs({
                 placeholder="https://youtube.com/watch?v=..."
                 value={newSongYoutubeUrl}
                 onChange={(e) => setNewSongYoutubeUrl(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Link da Cifra (opcional)</label>
+              <Input
+                placeholder="Ex: https://cifraclub.com.br/..."
+                value={newSongChordsUrl}
+                onChange={(e) => setNewSongChordsUrl(e.target.value)}
               />
             </div>
             <div>

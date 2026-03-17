@@ -22,6 +22,7 @@ export interface ScheduleSong {
     id: string;
     name: string;
     youtube_url: string | null;
+    chords_url: string | null;
     lyrics: string | null;
   };
 }

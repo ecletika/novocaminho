@@ -39,6 +39,7 @@ export interface WorshipSong {
   has_chords: boolean;
   content_type: "cifra" | "letra";
   youtube_url: string | null;
+  chords_url: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -58,7 +59,7 @@ export interface SongMinisterAssignment {
   key: string;
   created_at: string;
   song?: WorshipSong;
-  minister?: WorshipMinister;
+  minister?: WorshipMember;
 }
 
 export interface ScheduleVocalist {
@@ -369,6 +370,7 @@ export function useCreateWorshipSong() {
       has_chords?: boolean;
       content_type: "cifra" | "letra";
       youtube_url?: string;
+      chords_url?: string;
     }) => {
       const { data, error } = await supabase
         .from("worship_songs")
@@ -393,7 +395,16 @@ export function useUpdateWorshipSong() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ id, ...updates }: Partial<WorshipSong> & { id: string }) => {
+    mutationFn: async ({ id, ...updates }: { 
+      id: string;
+      name?: string;
+      original_key?: string;
+      lyrics?: string | null;
+      has_chords?: boolean;
+      content_type?: "cifra" | "letra";
+      youtube_url?: string | null;
+      chords_url?: string | null;
+    }) => {
       const { data, error } = await supabase
         .from("worship_songs")
         .update(updates)
@@ -501,7 +512,7 @@ export function useSongMinisterAssignments() {
           .select(`
             *,
             song:worship_songs(*),
-            minister:worship_ministers(*)
+            minister:worship_members(*)
           `);
 
         if (!error && data) return data as SongMinisterAssignment[];

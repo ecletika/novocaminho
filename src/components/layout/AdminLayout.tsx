@@ -130,24 +130,6 @@ export default function AdminLayout() {
             ))}
           </nav>
 
-          {/* Radio Player */}
-          <div className="p-4 border-t border-border">
-            <div className="bg-primary/5 rounded-xl p-4">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-lg gradient-gold flex items-center justify-center">
-                  <Radio className="w-5 h-5 text-foreground" />
-                </div>
-                <div>
-                  <span className="font-medium text-foreground text-sm">Rádio Igreja Novo Caminho</span>
-                  <span className="block text-xs text-muted-foreground">Ao vivo</span>
-                </div>
-              </div>
-              <Button variant="outline" size="sm" className="w-full">
-                Abrir Player
-              </Button>
-            </div>
-          </div>
-
           {/* User */}
           <div className="p-4 border-t border-border">
             <div className="flex items-center gap-3">

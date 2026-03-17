@@ -90,6 +90,7 @@ export default function LouvorPage() {
   const [newSongLyrics, setNewSongLyrics] = useState("");
   const [newSongContentType, setNewSongContentType] = useState<"cifra" | "letra">("cifra");
   const [newSongYoutubeUrl, setNewSongYoutubeUrl] = useState("");
+  const [newSongChordsUrl, setNewSongChordsUrl] = useState("");
   const [newSongMinisterId, setNewSongMinisterId] = useState("");
   const [newSongMinisterKey, setNewSongMinisterKey] = useState("");
 
@@ -98,6 +99,7 @@ export default function LouvorPage() {
   const [editSongLyrics, setEditSongLyrics] = useState("");
   const [editSongContentType, setEditSongContentType] = useState<"cifra" | "letra">("cifra");
   const [editSongYoutubeUrl, setEditSongYoutubeUrl] = useState("");
+  const [editSongChordsUrl, setEditSongChordsUrl] = useState("");
 
   const [assignSongId, setAssignSongId] = useState("");
   const [assignMinisterId, setAssignMinisterId] = useState("");
@@ -274,9 +276,10 @@ export default function LouvorPage() {
       name: newSongName.trim(),
       original_key: newSongKey,
       lyrics: newSongLyrics || undefined,
-      has_chords: newSongContentType === "cifra" && !!newSongLyrics,
+      has_chords: (newSongContentType === "cifra" && !!newSongLyrics) || !!newSongChordsUrl,
       content_type: newSongContentType,
-      youtube_url: newSongYoutubeUrl.trim() || undefined
+      youtube_url: newSongYoutubeUrl.trim() || undefined,
+      chords_url: newSongChordsUrl.trim() || undefined
     });
     if (newSongMinisterId && newSongMinisterId !== "none") {
       await createAssignment.mutateAsync({
@@ -290,6 +293,7 @@ export default function LouvorPage() {
     setNewSongKey("");
     setNewSongLyrics("");
     setNewSongYoutubeUrl("");
+    setNewSongChordsUrl("");
     setNewSongMinisterId("");
     setNewSongMinisterKey("");
   };
@@ -302,9 +306,10 @@ export default function LouvorPage() {
       name: editSongName.trim(),
       original_key: editSongKey,
       lyrics: editSongLyrics || null,
-      has_chords: editSongContentType === "cifra" && !!editSongLyrics,
+      has_chords: (editSongContentType === "cifra" && !!editSongLyrics) || !!editSongChordsUrl,
       content_type: editSongContentType,
-      youtube_url: editSongYoutubeUrl.trim() || null
+      youtube_url: editSongYoutubeUrl.trim() || null,
+      chords_url: editSongChordsUrl.trim() || null
     });
     setIsEditSongDialogOpen(false);
   };
@@ -316,6 +321,7 @@ export default function LouvorPage() {
     setEditSongLyrics(song.lyrics || "");
     setEditSongContentType(song.content_type);
     setEditSongYoutubeUrl((song as any).youtube_url || "");
+    setEditSongChordsUrl((song as any).chords_url || "");
     setIsEditSongDialogOpen(true);
   };
 
@@ -449,14 +455,13 @@ export default function LouvorPage() {
         if (ss.song?.youtube_url) {
           msg += `   🎬 YouTube: ${ss.song.youtube_url}\n`;
         }
-        // Assume if lyrics has a link or exists, we can provide a link to the app's view
-        // Since we don't have a public link easily, we'll just mention it or use the youtube link
-        // User specifically asked for "link externo da cifra"
-        // I will add a placeholder if no link is found or just use the youtube link if that's what they mean.
-        // Actually, I'll check if the song has an external link in the lyrics field (detecting URL)
-        const urlMatch = ss.song?.lyrics?.match(/https?:\/\/[^\s]+/);
-        if (urlMatch) {
-          msg += `   📝 Cifra: ${urlMatch[0]}\n`;
+        if (ss.song?.chords_url) {
+          msg += `   📝 Cifra: ${ss.song.chords_url}\n`;
+        } else {
+          const urlMatch = ss.song?.lyrics?.match(/https?:\/\/[^\s]+/);
+          if (urlMatch) {
+            msg += `   📝 Cifra: ${urlMatch[0]}\n`;
+          }
         }
       });
     }
@@ -627,6 +632,8 @@ export default function LouvorPage() {
         setEditSongContentType={setEditSongContentType}
         editSongYoutubeUrl={editSongYoutubeUrl}
         setEditSongYoutubeUrl={setEditSongYoutubeUrl}
+        editSongChordsUrl={editSongChordsUrl}
+        setEditSongChordsUrl={setEditSongChordsUrl}
         editSongLyrics={editSongLyrics}
         setEditSongLyrics={setEditSongLyrics}
         MUSICAL_KEYS={MUSICAL_KEYS}
@@ -644,6 +651,8 @@ export default function LouvorPage() {
         setNewSongContentType={setNewSongContentType}
         newSongYoutubeUrl={newSongYoutubeUrl}
         setNewSongYoutubeUrl={setNewSongYoutubeUrl}
+        newSongChordsUrl={newSongChordsUrl}
+        setNewSongChordsUrl={setNewSongChordsUrl}
         newSongMinisterId={newSongMinisterId}
         setNewSongMinisterId={setNewSongMinisterId}
         newSongMinisterKey={newSongMinisterKey}
