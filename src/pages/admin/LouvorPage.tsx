@@ -455,13 +455,9 @@ export default function LouvorPage() {
         if (ss.song?.youtube_url) {
           msg += `   🎬 YouTube: ${ss.song.youtube_url}\n`;
         }
-        if (ss.song?.chords_url) {
-          msg += `   📝 Cifra: ${ss.song.chords_url}\n`;
-        } else {
-          const urlMatch = ss.song?.lyrics?.match(/https?:\/\/[^\s]+/);
-          if (urlMatch) {
-            msg += `   📝 Cifra: ${urlMatch[0]}\n`;
-          }
+        // Link interno da cifra/letra (sem anúncios)
+        if (ss.song?.id) {
+          msg += `   📝 Cifra: ${window.location.origin}/musica/${ss.song.id}\n`;
         }
       });
     }
@@ -471,12 +467,7 @@ export default function LouvorPage() {
   };
 
   const openViewLyricsInNewTab = (song: WorshipSong) => {
-    const content = song.lyrics || "Conteúdo não disponível";
-    const youtubeLink = (song as any).youtube_url ? `<p style="margin-bottom:16px"><a href="${(song as any).youtube_url}" target="_blank" style="color:#2563eb;text-decoration:underline">🎬 Assistir no YouTube</a></p>` : '';
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${song.name}</title><style>body{font-family:monospace;padding:32px;max-width:900px;margin:0 auto;background:#f9fafb}h1{font-size:1.5rem;margin-bottom:8px}pre{white-space:pre-wrap;background:#fff;padding:24px;border-radius:8px;border:1px solid #e5e7eb;font-size:14px;line-height:1.6}</style></head><body><h1>${song.name}</h1><p style="margin-bottom:16px"><span style="background:#e0e7ff;padding:4px 12px;border-radius:999px;font-size:14px">Tom: ${song.original_key}</span></p>${youtubeLink}<pre>${content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre></body></html>`;
-    const blob = new Blob([html], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    window.open(url, '_blank');
+    window.open(`/musica/${song.id}`, '_blank');
   };
 
   if (!hasLouvorAccess && !membersLoading) {

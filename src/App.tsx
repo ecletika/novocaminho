@@ -21,6 +21,7 @@ import AuthPage from "./pages/AuthPage";
 import RegistoAniversarioPage from "./pages/RegistoAniversarioPage";
 import BelievePage from "./pages/BelievePage";
 import BibliaPage from "./pages/BibliaPage";
+import SongViewerPage from "./pages/SongViewerPage";
 import NotFound from "./pages/NotFound";
 
 // Admin Layout & Pages
@@ -66,6 +67,7 @@ const App = () => (
             <Route element={<PublicLayout><CasadosRecursosPage /></PublicLayout>} path="/casados/recursos" />
             <Route element={<PublicLayout><BelievePage /></PublicLayout>} path="/no-que-cremos" />
             <Route element={<PublicLayout><BibliaPage /></PublicLayout>} path="/biblia" />
+            <Route path="/musica/:id" element={<SongViewerPage />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/registo-aniversario" element={<RegistoAniversarioPage />} />
 
