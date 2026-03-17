@@ -679,6 +679,9 @@ export default function LouvorPage() {
         setSelectedLouvor={setSelectedLouvor}
         selectedMusicos={selectedMusicos}
         setSelectedMusicos={setSelectedMusicos}
+        selectedSongs={selectedSongs}
+        setSelectedSongs={setSelectedSongs}
+        assignments={assignments}
         toggleLouvorMember={(list: string[], setList: (val: string[]) => void, id: string) => {
           if (list.includes(id)) setList(list.filter(item => item !== id));
           else setList([...list, id]);

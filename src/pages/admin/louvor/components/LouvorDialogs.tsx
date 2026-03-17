@@ -522,13 +522,13 @@ export function LouvorDialogs({
               
               <div className="flex gap-2">
                 <Select onValueChange={(songId) => {
-                  const song = songs.find(s => s.id === songId);
-                  if (song && !selectedSongs.some(ss => ss.song_id === song.id)) {
+                  const song = songs?.find(s => s.id === songId);
+                  if (song && !selectedSongs?.some(ss => ss.song_id === song.id)) {
                     // Check if there is an assignment for the first selected ministrante
-                    const ministerId = selectedMinistrantes[0];
-                    const assignment = assignments.find(a => a.song_id === songId && a.minister_id === ministerId);
+                    const ministerId = selectedMinistrantes?.[0];
+                    const assignment = assignments?.find(a => a.song_id === songId && a.minister_id === ministerId);
                     const key = assignment?.key || song.original_key || "";
-                    setSelectedSongs([...selectedSongs, { song_id: song.id, key, sort_order: selectedSongs.length }]);
+                    setSelectedSongs([...(selectedSongs || []), { song_id: song.id, key, sort_order: (selectedSongs || []).length }]);
                   }
                 }}>
                   <SelectTrigger className="flex-1">
@@ -536,12 +536,12 @@ export function LouvorDialogs({
                   </SelectTrigger>
                   <SelectContent>
                     {/* Priority for Minister's Songs */}
-                    {selectedMinistrantes.length > 0 && assignments.filter(a => selectedMinistrantes.includes(a.minister_id)).length > 0 && (
+                    {selectedMinistrantes?.length > 0 && (assignments || []).filter(a => selectedMinistrantes.includes(a.minister_id)).length > 0 && (
                       <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground bg-muted/30">
                         Repertório do Ministrante
                       </div>
                     )}
-                    {selectedMinistrantes.length > 0 && assignments
+                    {selectedMinistrantes?.length > 0 && (assignments || [])
                       .filter(a => selectedMinistrantes.includes(a.minister_id))
                       .map(a => (
                         <SelectItem key={`dialog-song-rep-${a.id}`} value={a.song_id}>
@@ -553,7 +553,7 @@ export function LouvorDialogs({
                     <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground bg-muted/30">
                       Todas as Músicas
                     </div>
-                    {songs.map(song => (
+                    {(songs || []).map(song => (
                       <SelectItem key={`dialog-song-all-${song.id}`} value={song.id}>
                         {song.name}
                       </SelectItem>
@@ -564,8 +564,8 @@ export function LouvorDialogs({
 
               {selectedSongs.length > 0 && (
                 <div className="space-y-2 border rounded-md p-2 bg-muted/10">
-                  {selectedSongs.map((ss, index) => {
-                    const song = songs.find(s => s.id === ss.song_id);
+                  {selectedSongs?.map((ss, index) => {
+                    const song = songs?.find(s => s.id === ss.song_id);
                     return (
                       <div key={`sel-song-${ss.song_id}`} className="flex items-center gap-3 bg-background p-2 rounded border border-border/50 group">
                         <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary">
