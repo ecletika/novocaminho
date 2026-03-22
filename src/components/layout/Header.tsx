@@ -7,6 +7,7 @@ import logoImage from "@/assets/logos/10 - Fresh Sky.png";
 
 const baseNavigation = [
   { name: "Início", href: "/" },
+  { name: "África", href: "/africa" },
   { name: "Eventos", href: "/eventos" },
   { name: "Bíblia", href: "/biblia" },
   { name: "No que Cremos", href: "/no-que-cremos" },

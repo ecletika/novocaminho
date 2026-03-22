@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      africa_content: {
+        Row: {
+          content: string | null
+          created_at: string
+          description: string | null
+          id: string
+          media_url: string | null
+          sort_order: number | null
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          media_url?: string | null
+          sort_order?: number | null
+          title: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          media_url?: string | null
+          sort_order?: number | null
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       birthday_ministries: {
         Row: {
           birthday_id: string

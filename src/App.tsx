@@ -22,6 +22,7 @@ import RegistoAniversarioPage from "./pages/RegistoAniversarioPage";
 import BelievePage from "./pages/BelievePage";
 import BibliaPage from "./pages/BibliaPage";
 import SongViewerPage from "./pages/SongViewerPage";
+import AfricaPage from "./pages/AfricaPage";
 import NotFound from "./pages/NotFound";
 
 // Admin Layout & Pages
@@ -39,6 +40,7 @@ import AdminCasadosPage from "./pages/admin/AdminCasadosPage";
 import AdminLiderancaPage from "./pages/admin/AdminLiderancaPage";
 import AdminEscalasPage from "./pages/admin/AdminEscalasPage";
 import UsersPage from "./pages/admin/UsersPage";
+import AdminAfricaPage from "./pages/admin/AdminAfricaPage";
 import DiscipuladoPage from "./pages/DiscipuladoPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PermissionRoute from "./components/PermissionRoute";
@@ -67,6 +69,7 @@ const App = () => (
             <Route element={<PublicLayout><CasadosRecursosPage /></PublicLayout>} path="/casados/recursos" />
             <Route element={<PublicLayout><BelievePage /></PublicLayout>} path="/no-que-cremos" />
             <Route element={<PublicLayout><BibliaPage /></PublicLayout>} path="/biblia" />
+            <Route element={<PublicLayout><AfricaPage /></PublicLayout>} path="/africa" />
             <Route path="/musica/:id" element={<SongViewerPage />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/registo-aniversario" element={<RegistoAniversarioPage />} />
@@ -98,6 +101,7 @@ const App = () => (
               <Route path="escalas" element={<PermissionRoute perm="escalas"><AdminEscalasPage /></PermissionRoute>} />
               <Route path="aniversarios" element={<PermissionRoute perm="aniversarios"><AniversariosPage /></PermissionRoute>} />
               <Route path="casados" element={<PermissionRoute perm="casados"><AdminCasadosPage /></PermissionRoute>} />
+              <Route path="africa" element={<PermissionRoute perm="admin"><AdminAfricaPage /></PermissionRoute>} />
               <Route path="lideranca" element={<PermissionRoute perm="ministerios"><AdminLiderancaPage /></PermissionRoute>} />
               <Route path="config" element={<PermissionRoute perm="owner"><ConfigPage /></PermissionRoute>} />
 
