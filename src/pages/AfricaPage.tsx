@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useAfricaContents } from "@/hooks/useAfricaContent";
-import { Loader2, History, Video, Play } from "lucide-react";
+import { Loader2, History, Video, Play, Users } from "lucide-react";
+import MemberBadge from "@/components/MemberBadge";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import africaHero from "@/assets/africa-hero.png";
 
 export default function AfricaPage() {
   const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
@@ -11,6 +13,7 @@ export default function AfricaPage() {
   const historyItems = Array.isArray(contents) ? contents.filter(c => c.type === 'history') : [];
   const imageItems = Array.isArray(contents) ? contents.filter(c => c.type === 'image') : [];
   const videoItems = Array.isArray(contents) ? contents.filter(c => c.type === 'video') : [];
+  const pastorItems = Array.isArray(contents) ? contents.filter(c => c.type === 'pastor') : [];
 
   if (isLoading) {
     return (
@@ -56,7 +59,7 @@ export default function AfricaPage() {
       <section className="relative h-[80vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 bg-black">
           <img
-            src="/assets/africa-hero.png"
+            src={africaHero}
             alt="Igreja na África"
             className="w-full h-full object-cover opacity-60"
             loading="eager"
@@ -77,6 +80,38 @@ export default function AfricaPage() {
           </p>
         </div>
       </section>
+
+      {/* Pastores e Liderança */}
+      {pastorItems.length > 0 && (
+        <section className="section-padding bg-background">
+          <div className="container-church text-center mb-16">
+            <span className="text-secondary font-bold text-sm tracking-widest uppercase flex items-center justify-center gap-2 mb-4">
+              <Users className="w-4 h-4" /> Nossa Liderança
+            </span>
+            <h2 className="font-display text-4xl md:text-5xl font-bold text-foreground">
+              Pastores e Obreiros
+            </h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto mt-4">
+              Conheça aqueles que dedicam as suas vidas a servir e cuidar da nossa família na África.
+            </p>
+          </div>
+
+          <div className="container-church">
+            <div className="flex flex-wrap justify-center gap-12">
+              {pastorItems.map((pastor) => (
+                <div key={pastor.id} className="animate-fade-up">
+                  <MemberBadge
+                    name={pastor.title}
+                    photo_url={pastor.media_url || ""}
+                    role={pastor.description || "Pastor"}
+                    variant="blue"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Nossa História */}
       {historyItems.length > 0 && (
@@ -146,7 +181,7 @@ export default function AfricaPage() {
                   className="relative group overflow-hidden rounded-2xl shadow-soft hover:shadow-card transition-all duration-500 break-inside-avoid"
                 >
                   <img
-                    src={item.media_url ? `${item.media_url}?width=600&quality=80` : ""}
+                    src={item.media_url ? item.media_url : ""}
                     alt={item.title}
                     className="w-full h-auto transition-transform duration-700 group-hover:scale-110"
                     loading="lazy"

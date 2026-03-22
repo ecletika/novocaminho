@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Plus, Search, FileText, Trash2, Edit, Loader2, Eye, Image, Video, History, MoveUp, MoveDown } from "lucide-react";
+import { Plus, Search, FileText, Trash2, Edit, Loader2, Eye, Image, Video, History, MoveUp, MoveDown, UserCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -150,6 +150,7 @@ export default function AdminAfricaPage() {
       case 'history': return <History className="w-5 h-5" />;
       case 'image': return <Image className="w-5 h-5" />;
       case 'video': return <Video className="w-5 h-5" />;
+      case 'pastor': return <UserCheck className="w-5 h-5" />;
     }
   };
 
@@ -205,7 +206,7 @@ export default function AdminAfricaPage() {
               <div className="flex items-center gap-2">
                 <h3 className="font-semibold text-foreground truncate">{content.title}</h3>
                 <span className="px-2 py-0.5 rounded-full bg-muted text-muted-foreground text-[10px] uppercase font-bold tracking-wider">
-                  {content.type === 'history' ? 'História' : content.type === 'image' ? 'Imagem' : 'Vídeo'}
+                  {content.type === 'history' ? 'História' : content.type === 'image' ? 'Imagem' : content.type === 'video' ? 'Vídeo' : 'Pastor'}
                 </span>
               </div>
               <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
@@ -287,6 +288,7 @@ export default function AdminAfricaPage() {
                     <SelectItem value="history">História da Igreja</SelectItem>
                     <SelectItem value="image">Imagem / Foto</SelectItem>
                     <SelectItem value="video">Vídeo (YouTube/Vimeo)</SelectItem>
+                    <SelectItem value="pastor">Pastor / Liderança</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -316,9 +318,9 @@ export default function AdminAfricaPage() {
             </div>
 
             {/* Media Upload or URL */}
-            {formData.type === 'image' && (
+            {(formData.type === 'image' || formData.type === 'pastor') && (
               <div className="space-y-2">
-                <Label>Upload de Imagem</Label>
+                <Label>{formData.type === 'pastor' ? 'Foto do Pastor' : 'Upload de Imagem'}</Label>
                 <input
                   ref={fileInputRef}
                   type="file"
