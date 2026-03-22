@@ -356,6 +356,23 @@ export function useWorshipSongs() {
   });
 }
 
+export function useWorshipSong(id?: string) {
+  return useQuery({
+    queryKey: ["worship-song", id],
+    queryFn: async () => {
+      if (!id) return null;
+      const { data, error } = await supabase
+        .from("worship_songs")
+        .select("*")
+        .eq("id", id)
+        .single();
+      if (error) throw error;
+      return data as WorshipSong;
+    },
+    enabled: !!id,
+  });
+}
+
 export function useCreateWorshipSong() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
