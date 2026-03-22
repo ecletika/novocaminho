@@ -28,6 +28,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import RichTextEditor from "@/components/editor/RichTextEditor";
+import { useToast } from "@/hooks/use-toast";
 import {
   useAfricaContents,
   useCreateAfricaContent,
@@ -47,6 +48,7 @@ export default function AdminAfricaPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
+  const { toast } = useToast();
   // Form state
   const [formData, setFormData] = useState({
     type: 'image' as AfricaContentType,
@@ -97,8 +99,17 @@ export default function AdminAfricaPage() {
     try {
       const url = await uploadAfricaMedia(file);
       setFormData((prev) => ({ ...prev, media_url: url }));
-    } catch (error) {
+      toast({
+        title: "Upload concluído",
+        description: "A imagem foi carregada com sucesso.",
+      });
+    } catch (error: any) {
       console.error("Error uploading media:", error);
+      toast({
+        title: "Erro no upload",
+        description: error.message || "Não foi possível carregar a imagem.",
+        variant: "destructive",
+      });
     } finally {
       setIsUploading(false);
     }
@@ -107,13 +118,20 @@ export default function AdminAfricaPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    const dataToSubmit = {
+      ...formData,
+      content: formData.content || null,
+      description: formData.description || null,
+      media_url: formData.media_url || null,
+    };
+
     if (selectedContent) {
       await updateContent.mutateAsync({ 
         id: selectedContent.id, 
-        updates: formData 
+        updates: dataToSubmit 
       });
     } else {
-      await createContent.mutateAsync(formData);
+      await createContent.mutateAsync(dataToSubmit);
     }
 
     setIsDialogOpen(false);
