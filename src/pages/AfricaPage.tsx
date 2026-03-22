@@ -1,16 +1,16 @@
 import { useState } from "react";
 import { useAfricaContents } from "@/hooks/useAfricaContent";
-import { Loader2, History, Image as ImageIcon, Video, ChevronRight, Play } from "lucide-react";
+import { Loader2, History, Video, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import africaHero from "@/assets/logos/10 - Fresh Sky.png"; // Fallback if no specific image is set
 
 export default function AfricaPage() {
-  const { data: contents = [], isLoading } = useAfricaContents();
+  const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
+  const { data: contents = [], isLoading, error } = useAfricaContents();
 
-  const historyItems = contents.filter(c => c.type === 'history');
-  const imageItems = contents.filter(c => c.type === 'image');
-  const videoItems = contents.filter(c => c.type === 'video');
+  const historyItems = Array.isArray(contents) ? contents.filter(c => c.type === 'history') : [];
+  const imageItems = Array.isArray(contents) ? contents.filter(c => c.type === 'image') : [];
+  const videoItems = Array.isArray(contents) ? contents.filter(c => c.type === 'video') : [];
 
   if (isLoading) {
     return (
@@ -40,7 +40,15 @@ export default function AfricaPage() {
     return "";
   };
 
-  const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-4">
+        <h2 className="text-2xl font-bold mb-4">Erro ao carregar conteúdos</h2>
+        <p className="text-muted-foreground mb-6">Por favor, verifique se a base de dados foi configurada corretamente.</p>
+        <Button onClick={() => window.location.reload()}>Tentar Novamente</Button>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -138,7 +146,7 @@ export default function AfricaPage() {
                   className="relative group overflow-hidden rounded-2xl shadow-soft hover:shadow-card transition-all duration-500 break-inside-avoid"
                 >
                   <img
-                    src={`${item.media_url}?width=600&quality=80`}
+                    src={item.media_url ? `${item.media_url}?width=600&quality=80` : ""}
                     alt={item.title}
                     className="w-full h-auto transition-transform duration-700 group-hover:scale-110"
                     loading="lazy"
