@@ -14,6 +14,7 @@ export interface CasadosPost {
 export function useCasadosPosts() {
   return useQuery({
     queryKey: ["casados-posts"],
+    retry: false,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("casados_posts")

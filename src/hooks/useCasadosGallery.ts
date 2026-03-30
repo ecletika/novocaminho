@@ -12,6 +12,7 @@ export interface GalleryImage {
 export function useCasadosGallery() {
   return useQuery({
     queryKey: ["casados-gallery"],
+    retry: false,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("casados_gallery")
