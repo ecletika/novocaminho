@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Plus, Search, Trash2, Edit, Loader2, Eye, Image, Heart, Camera, Save, Info, ClipboardList, GraduationCap, BookOpen, UserPlus, Calendar as CalendarIcon, ExternalLink, Link as LinkIcon, FileText, GraduationCap as GradIcon, Lock } from "lucide-react";
+import { Plus, Search, Trash2, Edit, Loader2, Eye, EyeOff, Image, Heart, Camera, Save, Info, ClipboardList, GraduationCap, BookOpen, UserPlus, Calendar as CalendarIcon, ExternalLink, Link as LinkIcon, FileText, GraduationCap as GradIcon, Lock, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -101,6 +101,13 @@ export default function AdminCasadosPage() {
   const [editingCourseId, setEditingCourseId] = useState<string | null>(null);
   const [editingStudentId, setEditingStudentId] = useState<string | null>(null);
 
+  // Material Online users state
+  const [onlineUsers, setOnlineUsers] = useState<{ id: string; name: string; email: string | null }[]>([]);
+  const [isOnlineUserDialogOpen, setIsOnlineUserDialogOpen] = useState(false);
+  const [onlineUserForm, setOnlineUserForm] = useState({ name: "", email: "", password: "" });
+  const [showOnlinePassword, setShowOnlinePassword] = useState(false);
+  const [isCreatingOnlineUser, setIsCreatingOnlineUser] = useState(false);
+
   // Load about content from site_config
   useEffect(() => {
     const loadAbout = async () => {
@@ -158,6 +165,48 @@ export default function AdminCasadosPage() {
     };
     loadData();
   }, []);
+
+  useEffect(() => {
+    const loadOnlineUsers = async () => {
+      const { data: perms } = await supabase
+        .from("user_permissions")
+        .select("user_id")
+        .eq("permission", "casados");
+      if (!perms || perms.length === 0) return;
+      const ids = perms.map((p: any) => p.user_id);
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("user_id, full_name, email")
+        .in("user_id", ids);
+      if (profiles) {
+        setOnlineUsers(profiles.map((p: any) => ({ id: p.user_id, name: p.full_name || "—", email: p.email })));
+      }
+    };
+    loadOnlineUsers();
+  }, []);
+
+  const createOnlineUser = async () => {
+    if (!onlineUserForm.name || !onlineUserForm.email || !onlineUserForm.password) return;
+    setIsCreatingOnlineUser(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-user", {
+        body: { action: "create", email: onlineUserForm.email, password: onlineUserForm.password, full_name: onlineUserForm.name },
+      });
+      if (error || data?.error) throw new Error(error?.message || data?.error);
+      const userId = data?.user?.id;
+      if (userId) {
+        await supabase.from("user_permissions").upsert({ user_id: userId, permission: "casados" });
+        setOnlineUsers(prev => [...prev, { id: userId, name: onlineUserForm.name, email: onlineUserForm.email }]);
+      }
+      toast({ title: "Utilizador criado", description: `Acesso ao Material Online concedido a ${onlineUserForm.name}.` });
+      setOnlineUserForm({ name: "", email: "", password: "" });
+      setIsOnlineUserDialogOpen(false);
+    } catch (err: any) {
+      toast({ title: "Erro", description: err.message, variant: "destructive" });
+    } finally {
+      setIsCreatingOnlineUser(false);
+    }
+  };
 
   const { data: posts = [], isLoading: postsLoading } = useCasadosPosts();
   const createPost = useCreateCasadosPost();
@@ -412,6 +461,10 @@ export default function AdminCasadosPage() {
                 <LinkIcon className="w-3 h-3 mr-1" />
                 Recursos
               </TabsTrigger>
+              <TabsTrigger value="utilizadores" className="text-xs">
+                <Users className="w-3 h-3 mr-1" />
+                Utilizadores
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="cursos" className="space-y-4 mt-4">
@@ -548,6 +601,34 @@ export default function AdminCasadosPage() {
                     </a>
                   );
                 })}
+              </div>
+            </TabsContent>
+            <TabsContent value="utilizadores" className="space-y-4 mt-4">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="text-lg font-semibold">Acesso ao Material Online</h3>
+                  <p className="text-sm text-muted-foreground">Utilizadores com acesso à aba Material Online</p>
+                </div>
+                <Button size="sm" onClick={() => { setOnlineUserForm({ name: "", email: "", password: "" }); setIsOnlineUserDialogOpen(true); }}>
+                  <UserPlus className="w-4 h-4 mr-1" /> Novo Utilizador
+                </Button>
+              </div>
+              <div className="grid gap-3">
+                {onlineUsers.map(u => (
+                  <div key={u.id} className="bg-card rounded-xl p-4 shadow-soft border border-border flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium">{u.name}</h4>
+                      <p className="text-sm text-muted-foreground">{u.email}</p>
+                    </div>
+                    <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase">Material Online</span>
+                  </div>
+                ))}
+                {onlineUsers.length === 0 && (
+                  <div className="text-center py-10 text-muted-foreground">
+                    <Users className="w-10 h-10 mx-auto mb-3 opacity-40" />
+                    <p>Nenhum utilizador com acesso ao Material Online.</p>
+                  </div>
+                )}
               </div>
             </TabsContent>
           </Tabs>
@@ -691,6 +772,48 @@ export default function AdminCasadosPage() {
               }
               setIsCourseDialogOpen(false);
             }}>Guardar</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Online User Dialog */}
+      <Dialog open={isOnlineUserDialogOpen} onOpenChange={setIsOnlineUserDialogOpen}>
+        <DialogContent className="w-[95vw] sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Novo Utilizador — Material Online</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="onlineName">Nome</Label>
+              <Input id="onlineName" value={onlineUserForm.name} onChange={e => setOnlineUserForm({ ...onlineUserForm, name: e.target.value })} placeholder="Nome do casal ou pessoa" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="onlineEmail">Email</Label>
+              <Input id="onlineEmail" type="email" value={onlineUserForm.email} onChange={e => setOnlineUserForm({ ...onlineUserForm, email: e.target.value })} placeholder="email@exemplo.com" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="onlinePassword">Senha</Label>
+              <div className="relative">
+                <Input
+                  id="onlinePassword"
+                  type={showOnlinePassword ? "text" : "password"}
+                  value={onlineUserForm.password}
+                  onChange={e => setOnlineUserForm({ ...onlineUserForm, password: e.target.value })}
+                  placeholder="Mínimo 6 caracteres"
+                  className="pr-10"
+                />
+                <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" onClick={() => setShowOnlinePassword(v => !v)}>
+                  {showOnlinePassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setIsOnlineUserDialogOpen(false)}>Cancelar</Button>
+            <Button onClick={createOnlineUser} disabled={isCreatingOnlineUser || !onlineUserForm.name || !onlineUserForm.email || !onlineUserForm.password}>
+              {isCreatingOnlineUser ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <UserPlus className="w-4 h-4 mr-2" />}
+              Criar Utilizador
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

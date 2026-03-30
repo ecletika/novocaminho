@@ -63,7 +63,7 @@ const App = () => (
             <Route element={<PublicLayout><EventosPage /></PublicLayout>} path="/eventos" />
             <Route element={<PublicLayout><ContactoPage /></PublicLayout>} path="/contacto" />
             <Route element={<PublicLayout><CasadosPage /></PublicLayout>} path="/casados" />
-            <Route element={<PublicLayout><CasadosProtectedRoute><CasadosCursosPage /></CasadosProtectedRoute></PublicLayout>} path="/casados/cursos" />
+            <Route element={<PublicLayout><CasadosCursosPage /></PublicLayout>} path="/casados/cursos" />
             <Route element={<PublicLayout><CasadosProtectedRoute><CasadosMaterialPage /></CasadosProtectedRoute></PublicLayout>} path="/casados/material" />
             <Route element={<PublicLayout><CasadosEstudosPage /></PublicLayout>} path="/casados/estudos" />
             <Route element={<PublicLayout><CasadosRecursosPage /></PublicLayout>} path="/casados/recursos" />
