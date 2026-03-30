@@ -46,7 +46,10 @@ import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { CASADOS_COURSES, CASADOS_RESOURCES, CASADOS_PORTAL_LOGINS } from "@/constants/casadosData";
+import { CASADOS_RESOURCES, CASADOS_PORTAL_LOGINS } from "@/constants/casadosData";
+
+type Course = { id: string; name: string; startDate: string; status: string; link: string };
+type Student = { id: string; name: string; phone: string; courseId: string; status: string; link: string };
 
 const resourceIconMap: Record<string, React.ElementType> = {
   FileText,
@@ -86,12 +89,10 @@ export default function AdminCasadosPage() {
   const [deleteGalleryId, setDeleteGalleryId] = useState<string | null>(null);
   const galleryFileRef = useRef<HTMLInputElement>(null);
 
-  // New Management State (Using shared data as initial state)
-  const [courses, setCourses] = useState(CASADOS_COURSES);
-  const [students, setStudents] = useState([
-    { id: "1", name: "João Silva & Maria Silva", phone: "(11) 99999-9999", courseId: "1", status: "Confirmado", link: "https://exemplo.com/aluno/joao-maria" },
-    { id: "2", name: "Pedro Santos & Ana Santos", phone: "(11) 88888-8888", courseId: "1", status: "Confirmado", link: "https://exemplo.com/aluno/pedro-ana" },
-  ]);
+  // Management State — loaded from Supabase
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [students, setStudents] = useState<Student[]>([]);
+  const [isLoadingData, setIsLoadingData] = useState(true);
 
   const [isCourseDialogOpen, setIsCourseDialogOpen] = useState(false);
   const [isStudentDialogOpen, setIsStudentDialogOpen] = useState(false);
@@ -145,6 +146,18 @@ export default function AdminCasadosPage() {
       setIsSavingAbout(false);
     }
   };
+
+  // Load courses and students from Supabase
+  useEffect(() => {
+    const loadData = async () => {
+      const { data: cursosData } = await supabase.from("casados_cursos").select("*").order("created_at");
+      const { data: inscData } = await supabase.from("casados_inscricoes").select("*").order("created_at");
+      if (cursosData) setCourses(cursosData.map((c: any) => ({ id: c.id, name: c.name, startDate: c.start_date || "", status: c.status, link: c.link || "" })));
+      if (inscData) setStudents(inscData.map((s: any) => ({ id: s.id, name: s.name, phone: s.phone || "", courseId: s.course_id || "", status: s.status, link: s.link || "" })));
+      setIsLoadingData(false);
+    };
+    loadData();
+  }, []);
 
   const { data: posts = [], isLoading: postsLoading } = useCasadosPosts();
   const createPost = useCreateCasadosPost();
@@ -218,7 +231,7 @@ export default function AdminCasadosPage() {
     p.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (postsLoading || galleryLoading) {
+  if (postsLoading || galleryLoading || isLoadingData) {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -436,7 +449,10 @@ export default function AdminCasadosPage() {
                         }}>
                           <Edit className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => setCourses(courses.filter(c => c.id !== course.id))}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={async () => {
+                          await supabase.from("casados_cursos").delete().eq("id", course.id);
+                          setCourses(courses.filter(c => c.id !== course.id));
+                        }}>
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
@@ -479,7 +495,10 @@ export default function AdminCasadosPage() {
                           }}>
                             <Edit className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => setStudents(students.filter(s => s.id !== student.id))}>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={async () => {
+                            await supabase.from("casados_inscricoes").delete().eq("id", student.id);
+                            setStudents(students.filter(s => s.id !== student.id));
+                          }}>
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>
@@ -661,11 +680,14 @@ export default function AdminCasadosPage() {
           </div>
           <div className="flex justify-end gap-3">
             <Button variant="outline" onClick={() => setIsCourseDialogOpen(false)}>Cancelar</Button>
-            <Button onClick={() => {
+            <Button onClick={async () => {
+              const payload = { name: courseFormData.name, start_date: courseFormData.startDate || null, status: courseFormData.status, link: courseFormData.link || null };
               if (editingCourseId) {
+                await supabase.from("casados_cursos").update(payload).eq("id", editingCourseId);
                 setCourses(courses.map(c => c.id === editingCourseId ? { ...c, ...courseFormData } : c));
               } else {
-                setCourses([...courses, { id: Math.random().toString(), ...courseFormData }]);
+                const { data } = await supabase.from("casados_cursos").insert(payload).select().single();
+                if (data) setCourses([...courses, { id: data.id, name: data.name, startDate: data.start_date || "", status: data.status, link: data.link || "" }]);
               }
               setIsCourseDialogOpen(false);
             }}>Guardar</Button>
@@ -708,11 +730,14 @@ export default function AdminCasadosPage() {
           </div>
           <div className="flex justify-end gap-3">
             <Button variant="outline" onClick={() => setIsStudentDialogOpen(false)}>Cancelar</Button>
-            <Button onClick={() => {
+            <Button onClick={async () => {
+              const payload = { name: studentFormData.name, phone: studentFormData.phone || null, course_id: studentFormData.courseId || null, status: studentFormData.status, link: studentFormData.link || null };
               if (editingStudentId) {
+                await supabase.from("casados_inscricoes").update(payload).eq("id", editingStudentId);
                 setStudents(students.map(s => s.id === editingStudentId ? { ...s, ...studentFormData } : s));
               } else {
-                setStudents([...students, { id: Math.random().toString(), ...studentFormData }]);
+                const { data } = await supabase.from("casados_inscricoes").insert(payload).select().single();
+                if (data) setStudents([...students, { id: data.id, name: data.name, phone: data.phone || "", courseId: data.course_id || "", status: data.status, link: data.link || "" }]);
               }
               setIsStudentDialogOpen(false);
             }}>Guardar</Button>
