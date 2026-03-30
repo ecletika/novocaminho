@@ -1,20 +1,3 @@
-export const CASADOS_COURSES = [
-    {
-        id: "1",
-        name: "Turma de Primavera 2024",
-        startDate: "2024-03-20",
-        status: "Em andamento",
-        link: "https://2equal1.eu/europe_it/corso-proposto/"
-    },
-    {
-        id: "2",
-        name: "Turma de Inverno 2024",
-        startDate: "2024-06-15",
-        status: "Inscrições Abertas",
-        link: "https://2equal1.eu/europe_it/corso-proposto/"
-    },
-];
-
 export const CASADOS_RESOURCES = [
     {
         title: "Proposta de Curso",
