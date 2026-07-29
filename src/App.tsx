@@ -49,7 +49,19 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import PermissionRoute from "./components/PermissionRoute";
 import CasadosProtectedRoute from "./components/CasadosProtectedRoute";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // Evita ficar "imenso a carregar": em vez de 3 tentativas com backoff
+      // (~7s) quando uma query falha, falha rápido com 1 tentativa.
+      retry: 1,
+      // Não refazer a query sempre que a janela ganha foco.
+      refetchOnWindowFocus: false,
+      // Considera os dados frescos 1 min — navegação entre páginas fica instantânea.
+      staleTime: 60_000,
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
