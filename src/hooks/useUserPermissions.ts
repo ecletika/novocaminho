@@ -17,6 +17,7 @@ export const ALL_PERMISSIONS = [
   { key: "conteudos", label: "Conteúdos" },
   { key: "casados", label: "Casados Para Sempre" },
   { key: "aniversarios", label: "Aniversários" },
+  { key: "visitantes", label: "Visitantes" },
   { key: "escalas", label: "Escalas" },
   { key: "docs", label: "Documentação" },
   { key: "config", label: "Configurações" },

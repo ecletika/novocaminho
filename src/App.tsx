@@ -19,6 +19,8 @@ import CasadosEstudosPage from "./pages/casados/CasadosEstudosPage";
 import CasadosRecursosPage from "./pages/casados/CasadosRecursosPage";
 import AuthPage from "./pages/AuthPage";
 import RegistoAniversarioPage from "./pages/RegistoAniversarioPage";
+import VisitantesPage from "./pages/VisitantesPage";
+import RegistoVisitantePage from "./pages/RegistoVisitantePage";
 import BelievePage from "./pages/BelievePage";
 import BibliaPage from "./pages/BibliaPage";
 import SongViewerPage from "./pages/SongViewerPage";
@@ -41,6 +43,7 @@ import AdminLiderancaPage from "./pages/admin/AdminLiderancaPage";
 import AdminEscalasPage from "./pages/admin/AdminEscalasPage";
 import UsersPage from "./pages/admin/UsersPage";
 import AdminAfricaPage from "./pages/admin/AdminAfricaPage";
+import AdminVisitantesPage from "./pages/admin/AdminVisitantesPage";
 import DiscipuladoPage from "./pages/DiscipuladoPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PermissionRoute from "./components/PermissionRoute";
@@ -70,9 +73,11 @@ const App = () => (
             <Route element={<PublicLayout><BelievePage /></PublicLayout>} path="/no-que-cremos" />
             <Route element={<PublicLayout><BibliaPage /></PublicLayout>} path="/biblia" />
             <Route element={<PublicLayout><AfricaPage /></PublicLayout>} path="/africa" />
+            <Route element={<PublicLayout><VisitantesPage /></PublicLayout>} path="/visitantes" />
             <Route path="/musica/:id" element={<SongViewerPage />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/registo-aniversario" element={<RegistoAniversarioPage />} />
+            <Route path="/registo-visitante" element={<RegistoVisitantePage />} />
 
             {/* Discipulado — rota isolada, acesso por permissão especial */}
             <Route
@@ -100,6 +105,7 @@ const App = () => (
               <Route path="eventos" element={<PermissionRoute perm="eventos"><AdminEventosPage /></PermissionRoute>} />
               <Route path="escalas" element={<PermissionRoute perm="escalas"><AdminEscalasPage /></PermissionRoute>} />
               <Route path="aniversarios" element={<PermissionRoute perm="aniversarios"><AniversariosPage /></PermissionRoute>} />
+              <Route path="visitantes" element={<PermissionRoute perm="visitantes"><AdminVisitantesPage /></PermissionRoute>} />
               <Route path="casados" element={<PermissionRoute perm="casados"><AdminCasadosPage /></PermissionRoute>} />
               <Route path="africa" element={<PermissionRoute perm="admin"><AdminAfricaPage /></PermissionRoute>} />
               <Route path="lideranca" element={<PermissionRoute perm="ministerios"><AdminLiderancaPage /></PermissionRoute>} />

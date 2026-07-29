@@ -143,6 +143,54 @@ export type Database = {
         }
         Relationships: []
       }
+      visitors: {
+        Row: {
+          accompanied_by: string[]
+          address: string | null
+          birth_date: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          phone: string | null
+          photo_url: string | null
+          prayer_requests: string[]
+          updated_at: string
+          wants_home_visit: boolean
+        }
+        Insert: {
+          accompanied_by?: string[]
+          address?: string | null
+          birth_date?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+          photo_url?: string | null
+          prayer_requests?: string[]
+          updated_at?: string
+          wants_home_visit?: boolean
+        }
+        Update: {
+          accompanied_by?: string[]
+          address?: string | null
+          birth_date?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          photo_url?: string | null
+          prayer_requests?: string[]
+          updated_at?: string
+          wants_home_visit?: boolean
+        }
+        Relationships: []
+      }
       casados_gallery: {
         Row: {
           caption: string | null
