@@ -1,49 +1,24 @@
-import { useState, useMemo } from "react";
-import { Cake, Heart, CheckCircle, Loader2, Users, User } from "lucide-react";
+import { useState } from "react";
+import { Cake, Heart, CheckCircle, Loader2, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useMinistries } from "@/hooks/useMinistries";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-const SLUG_CASADOS = ["casados", "casal", "casais", "casados-para-sempre"];
-
-function isCasaisMinistry(m: { slug: string; title: string }) {
-  const slug = m.slug.toLowerCase();
-  const title = m.title.toLowerCase();
-  return (
-    SLUG_CASADOS.some((s) => slug.includes(s)) ||
-    title.includes("casado") ||
-    title.includes("casal") ||
-    title.includes("casais")
-  );
-}
-
 const initialForm = {
-  woman_name: "",
-  man_name: "",
-  birthday_date: "",
-  birthday_type: "personal" as "personal" | "wedding",
+  name: "",
   gender: "" as "male" | "female" | "",
+  birthday_date: "",
+  wedding_date: "",
   photo_url: "",
   phone: "",
   email: "",
   address: "",
-  woman_birthday: "",
-  man_birthday: "",
   leader_name: "",
-  man_phone: "",
-  woman_phone: "",
   ministry_ids: [] as string[],
 };
 
@@ -54,28 +29,7 @@ export default function RegistoAniversarioPage() {
   const [formData, setFormData] = useState(initialForm);
   const [uploading, setUploading] = useState(false);
 
-  // Ministérios filtrados conforme o tipo de registo
-  const visibleMinistries = useMemo(() => {
-    const active = ministries.filter((m) => m.is_active);
-    if (formData.birthday_type === "wedding") {
-      // Casamento → mostra APENAS o ministério de casais
-      return active.filter(isCasaisMinistry);
-    }
-    // Pessoal → mostra todos
-    return active;
-  }, [ministries, formData.birthday_type]);
-
-  // Ao mudar o tipo, limpa os ministérios seleccionados e pré-selecciona casais se for wedding
-  const handleTypeChange = (v: "personal" | "wedding") => {
-    if (v === "wedding") {
-      const casaisIds = ministries
-        .filter((m) => m.is_active && isCasaisMinistry(m))
-        .map((m) => m.id);
-      setFormData((prev) => ({ ...prev, birthday_type: v, ministry_ids: casaisIds, gender: "" }));
-    } else {
-      setFormData((prev) => ({ ...prev, birthday_type: v, ministry_ids: [], gender: "" }));
-    }
-  };
+  const visibleMinistries = ministries.filter((m) => m.is_active);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -106,68 +60,53 @@ export default function RegistoAniversarioPage() {
     }));
   };
 
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>, key: string) => {
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, "");
-    setFormData(prev => ({ ...prev, [key]: value }));
+    setFormData((prev) => ({ ...prev, phone: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validação extra conforme tipo e género
-    if (formData.birthday_type === "personal") {
-      if (!formData.gender) {
-        toast.error("Por favor, selecione o género.");
-        return;
-      }
-      if (!formData.woman_name && !formData.man_name) {
-        toast.error("Por favor, preencha o seu nome.");
-        return;
-      }
+    if (!formData.gender) {
+      toast.error("Por favor, selecione o género.");
+      return;
+    }
+    if (!formData.name.trim()) {
+      toast.error("Por favor, preencha o seu nome.");
+      return;
     }
 
     setIsSubmitting(true);
     try {
-      console.log("Submitting directly to tables:", formData);
+      const { ministry_ids } = formData;
+      const name = formData.name.trim();
 
-      const { ministry_ids, gender, ...birthdayData } = formData;
-
-      // Montar payload conforme o tipo e género
+      // Registo sempre pessoal. A data de casamento é opcional e individual.
       const payload: any = {
-        photo_url: birthdayData.photo_url || null,
-        birthday_date: birthdayData.birthday_date,
-        birthday_type: birthdayData.birthday_type,
-        phone: birthdayData.phone || null,
-        email: birthdayData.email || null,
-        address: birthdayData.address || null,
-        leader_name: birthdayData.leader_name || null,
+        birthday_type: "personal",
+        birthday_date: null,
+        photo_url: formData.photo_url || null,
+        phone: formData.phone || null,
+        email: formData.email || null,
+        address: formData.address || null,
+        leader_name: formData.leader_name || null,
+        wedding_date: formData.wedding_date || null,
       };
 
-      if (birthdayData.birthday_type === "wedding") {
-        payload.birthday_date = birthdayData.birthday_date; // Data do Casamento
-        payload.man_name = birthdayData.man_name || null;
-        payload.woman_name = birthdayData.woman_name || null;
-        payload.man_birthday = birthdayData.man_birthday || null;
-        payload.woman_birthday = birthdayData.woman_birthday || null;
-        payload.man_phone = birthdayData.man_phone || null;
-        payload.woman_phone = birthdayData.woman_phone || null;
+      if (formData.gender === "male") {
+        payload.man_name = name;
+        payload.man_birthday = formData.birthday_date;
+        payload.woman_name = null;
+        payload.woman_birthday = null;
       } else {
-        payload.birthday_date = null; // Não guarda em birthday_date se for pessoal
-        const name = birthdayData.woman_name || birthdayData.man_name;
-        if (gender === "male") {
-          payload.man_name = name;
-          payload.man_birthday = birthdayData.birthday_date;
-          payload.woman_name = null;
-          payload.woman_birthday = null;
-        } else {
-          payload.woman_name = name;
-          payload.woman_birthday = birthdayData.birthday_date;
-          payload.man_name = null;
-          payload.man_birthday = null;
-        }
+        payload.woman_name = name;
+        payload.woman_birthday = formData.birthday_date;
+        payload.man_name = null;
+        payload.man_birthday = null;
       }
 
-      // 1. Inserir na tabela birthdays
+      // 1. Inserir o aniversário
       const { data: birthday, error: insertError } = await supabase
         .from("birthdays")
         .insert(payload)
@@ -176,21 +115,16 @@ export default function RegistoAniversarioPage() {
 
       if (insertError) throw insertError;
 
-      // 2. Inserir relações de ministério se houver
-      if (ministry_ids && ministry_ids.length > 0) {
+      // 2. Associar ministérios (se houver)
+      if (ministry_ids.length > 0) {
         const relationships = ministry_ids.map((id) => ({
           birthday_id: birthday.id,
           ministry_id: id,
         }));
-
         const { error: relError } = await supabase
           .from("birthday_ministries")
           .insert(relationships);
-
-        if (relError) {
-          console.error("Erro ao associar ministérios:", relError);
-          // Não falhamos o registo principal se as relações falharem
-        }
+        if (relError) console.error("Erro ao associar ministérios:", relError);
       }
 
       toast.success("Registo concluído com sucesso!");
@@ -226,203 +160,66 @@ export default function RegistoAniversarioPage() {
     );
   }
 
-  const isWedding = formData.birthday_type === "wedding";
-
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="bg-card rounded-2xl shadow-lg p-8 max-w-lg w-full">
         {/* Header */}
         <div className="text-center mb-6">
           <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-            {isWedding ? (
-              <Heart className="w-8 h-8 text-primary" />
-            ) : (
-              <Cake className="w-8 h-8 text-primary" />
-            )}
+            <Cake className="w-8 h-8 text-primary" />
           </div>
           <h1 className="font-display text-2xl font-bold text-foreground">
             Registo de Aniversário
           </h1>
           <p className="text-muted-foreground mt-1">
-            Preencha os seus dados para registar o aniversário
+            Preencha os seus dados para registar o seu aniversário
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* ── Tipo de Registo ── */}
+          {/* ── Género ── */}
           <div className="space-y-2">
-            <Label>Tipo de Registo</Label>
+            <Label>Género *</Label>
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
-                onClick={() => handleTypeChange("personal")}
-                className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${!isWedding
+                onClick={() => setFormData({ ...formData, gender: "male" })}
+                className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${formData.gender === "male"
                   ? "border-primary bg-primary/5 text-primary"
                   : "border-border text-muted-foreground hover:border-muted-foreground/50"
                   }`}
               >
-                <User className="w-6 h-6" />
-                <span className="text-sm font-medium">Pessoal</span>
+                <span className="text-2xl">👨</span>
+                <span className="text-sm font-medium">Homem</span>
               </button>
               <button
                 type="button"
-                onClick={() => handleTypeChange("wedding")}
-                className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${isWedding
+                onClick={() => setFormData({ ...formData, gender: "female" })}
+                className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${formData.gender === "female"
                   ? "border-primary bg-primary/5 text-primary"
                   : "border-border text-muted-foreground hover:border-muted-foreground/50"
                   }`}
               >
-                <Heart className="w-6 h-6" />
-                <span className="text-sm font-medium">Casamento</span>
+                <span className="text-2xl">👩</span>
+                <span className="text-sm font-medium">Mulher</span>
               </button>
             </div>
-            {isWedding && (
-              <p className="text-xs text-muted-foreground bg-muted/40 rounded-lg px-3 py-2">
-                💡 O registo de casamento é guardado individualmente para cada cônjuge.
-                O pastor/líder irá associá-los a outros ministérios depois.
-              </p>
-            )}
           </div>
 
-          {/* ── Género (Apenas para Pessoal) ── */}
-          {!isWedding && (
-            <div className="space-y-2 animate-in fade-in slide-in-from-top-4 duration-300">
-              <Label>Género *</Label>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => setFormData({ ...formData, gender: "male" })}
-                  className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${formData.gender === "male"
-                    ? "border-primary bg-primary/5 text-primary"
-                    : "border-border text-muted-foreground hover:border-muted-foreground/50"
-                    }`}
-                >
-                  <span className="text-2xl">👨</span>
-                  <span className="text-sm font-medium">Homem</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFormData({ ...formData, gender: "female" })}
-                  className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${formData.gender === "female"
-                    ? "border-primary bg-primary/5 text-primary"
-                    : "border-border text-muted-foreground hover:border-muted-foreground/50"
-                    }`}
-                >
-                  <span className="text-2xl">👩</span>
-                  <span className="text-sm font-medium">Mulher</span>
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* ── Campos por tipo ── */}
-          {isWedding ? (
-            <>
-              {/* Nomes */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Nome do Marido *</Label>
-                  <Input
-                    value={formData.man_name}
-                    onChange={(e) => setFormData({ ...formData, man_name: e.target.value })}
-                    placeholder="Nome do marido"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Nome da Mulher *</Label>
-                  <Input
-                    value={formData.woman_name}
-                    onChange={(e) => setFormData({ ...formData, woman_name: e.target.value })}
-                    placeholder="Nome da mulher"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Datas de nascimento individuais */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Aniversário do Marido *</Label>
-                  <Input
-                    type="date"
-                    value={formData.man_birthday}
-                    onChange={(e) => setFormData({ ...formData, man_birthday: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Aniversário da Mulher *</Label>
-                  <Input
-                    type="date"
-                    value={formData.woman_birthday}
-                    onChange={(e) => setFormData({ ...formData, woman_birthday: e.target.value })}
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Telemóveis individuais */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Telemóvel do Marido</Label>
-                  <Input
-                    type="tel"
-                    value={formData.man_phone}
-                    onChange={(e) => handlePhoneChange(e, 'man_phone')}
-                    placeholder="9xx xxx xxx"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Telemóvel da Mulher</Label>
-                  <Input
-                    type="tel"
-                    value={formData.woman_phone}
-                    onChange={(e) => handlePhoneChange(e, 'woman_phone')}
-                    placeholder="9xx xxx xxx"
-                  />
-                </div>
-              </div>
-
-              {/* Telemóvel geral do casal (para contacto único) */}
-              <div className="space-y-2">
-                <Label>Telemóvel Geral do Casal</Label>
-                <Input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => handlePhoneChange(e, 'phone')}
-                  placeholder="Telemóvel principal para contacto"
-                />
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="space-y-2">
-                <Label>Nome Completo *</Label>
-                <Input
-                  value={formData.woman_name || formData.man_name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, woman_name: e.target.value, man_name: "" })
-                  }
-                  placeholder="O seu nome completo"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Telemóvel</Label>
-                <Input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => handlePhoneChange(e, 'phone')}
-                  placeholder="912 345 678"
-                />
-              </div>
-            </>
-          )}
-
-          {/* ── Data Principal ── */}
+          {/* ── Nome ── */}
           <div className="space-y-2">
-            <Label>{isWedding ? "Data do Casamento *" : "Data de Aniversário *"}</Label>
+            <Label>Nome Completo *</Label>
+            <Input
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              placeholder="O seu nome completo"
+              required
+            />
+          </div>
+
+          {/* ── Data de Aniversário ── */}
+          <div className="space-y-2">
+            <Label>Data de Aniversário *</Label>
             <Input
               type="date"
               value={formData.birthday_date}
@@ -431,9 +228,37 @@ export default function RegistoAniversarioPage() {
             />
           </div>
 
+          {/* ── Data de Aniversário de Casamento (opcional) ── */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2">
+              <Heart className="w-4 h-4 text-primary" />
+              Data de Aniversário de Casamento
+              <span className="text-xs text-muted-foreground font-normal">(opcional)</span>
+            </Label>
+            <Input
+              type="date"
+              value={formData.wedding_date}
+              onChange={(e) => setFormData({ ...formData, wedding_date: e.target.value })}
+            />
+            <p className="text-xs text-muted-foreground">
+              Se for casado(a), indique a data do seu casamento para celebrarmos as bodas.
+            </p>
+          </div>
+
+          {/* ── Telemóvel ── */}
+          <div className="space-y-2">
+            <Label>Telemóvel</Label>
+            <Input
+              type="tel"
+              value={formData.phone}
+              onChange={handlePhoneChange}
+              placeholder="912 345 678"
+            />
+          </div>
+
           {/* ── Foto ── */}
           <div className="space-y-2">
-            <Label>Foto {isWedding ? "(foto do casal)" : ""}</Label>
+            <Label>Foto</Label>
             <Tabs defaultValue="upload" className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-2">
                 <TabsTrigger value="upload" className="text-xs">Ficheiro</TabsTrigger>
@@ -501,41 +326,30 @@ export default function RegistoAniversarioPage() {
           <div className="space-y-2">
             <Label className="flex items-center gap-2">
               <Users className="w-4 h-4 text-primary" />
-              {isWedding ? "Ministério" : "Ministérios"}
+              Ministérios
             </Label>
-
-            {isWedding && visibleMinistries.length === 0 && (
-              <p className="text-xs text-muted-foreground italic border rounded-lg p-3 bg-muted/20">
-                Nenhum ministério de casais encontrado. Será associado pelo líder.
-              </p>
-            )}
-
             {visibleMinistries.length > 0 && (
               <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-3 border rounded-lg bg-muted/10">
-                {!isWedding && (
-                  <div className="flex items-center gap-2 col-span-2">
-                    <Checkbox
-                      id="ministry-none"
-                      checked={formData.ministry_ids.length === 0}
-                      onCheckedChange={() => setFormData({ ...formData, ministry_ids: [] })}
-                    />
-                    <label htmlFor="ministry-none" className="text-sm cursor-pointer text-muted-foreground italic">
-                      Sem Ministério
-                    </label>
-                  </div>
-                )}
+                <div className="flex items-center gap-2 col-span-2">
+                  <Checkbox
+                    id="ministry-none"
+                    checked={formData.ministry_ids.length === 0}
+                    onCheckedChange={() => setFormData({ ...formData, ministry_ids: [] })}
+                  />
+                  <label htmlFor="ministry-none" className="text-sm cursor-pointer text-muted-foreground italic">
+                    Sem Ministério
+                  </label>
+                </div>
                 {visibleMinistries.map((ministry) => (
                   <div key={ministry.id} className="flex items-center gap-2">
                     <Checkbox
                       id={`pub-ministry-${ministry.id}`}
                       checked={formData.ministry_ids.includes(ministry.id)}
                       onCheckedChange={() => toggleMinistry(ministry.id)}
-                      // No modo casamento o ministério é pré-seleccionado e não deve ser desmarcado
-                      disabled={isWedding}
                     />
                     <label
                       htmlFor={`pub-ministry-${ministry.id}`}
-                      className={`text-sm ${isWedding ? "text-foreground font-medium" : "cursor-pointer"}`}
+                      className="text-sm cursor-pointer"
                     >
                       {ministry.title}
                     </label>

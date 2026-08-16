@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Search, Cake, Heart, Trash2, Edit, Loader2, Calendar, Phone, Mail, MapPin, FileText, Link2, Copy } from "lucide-react";
+import { Plus, Search, Cake, Heart, Trash2, Edit, Loader2, Calendar, Phone, Mail, MapPin, FileText, Link2, Copy, QrCode, Printer } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -55,6 +55,7 @@ export default function AniversariosPage() {
     man_name: "",
     birthday_date: "",
     birthday_type: "personal" as "personal" | "wedding",
+    wedding_date: "",
     phone: "",
     email: "",
     address: "",
@@ -78,6 +79,7 @@ export default function AniversariosPage() {
       man_name: "",
       birthday_date: "",
       birthday_type: "personal",
+      wedding_date: "",
       phone: "",
       email: "",
       address: "",
@@ -98,6 +100,7 @@ export default function AniversariosPage() {
       man_name: birthday.man_name || "",
       birthday_date: birthday.birthday_date,
       birthday_type: birthday.birthday_type as "personal" | "wedding",
+      wedding_date: birthday.wedding_date || "",
       phone: birthday.phone || "",
       email: birthday.email || "",
       address: birthday.address || "",
@@ -151,6 +154,7 @@ export default function AniversariosPage() {
         address: formData.address || null,
         leader_name: formData.leader_name || null,
         photo_url: (formData as any).photo_url || null,
+        wedding_date: formData.wedding_date || null,
         ministry_selections: formData.ministry_selections,
       };
 
@@ -286,10 +290,37 @@ export default function AniversariosPage() {
     return birthday.woman_name || birthday.man_name || "";
   };
 
+  const registrationUrl = `${window.location.origin}/registo-aniversario`;
+  const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=10&data=${encodeURIComponent(registrationUrl)}`;
+
   const copyRegistrationLink = () => {
-    const link = `${window.location.origin}/registo-aniversario`;
-    navigator.clipboard.writeText(link);
+    navigator.clipboard.writeText(registrationUrl);
     toast.success("Link copiado para a área de transferência!");
+  };
+
+  const printQr = () => {
+    const w = window.open("", "_blank", "width=600,height=800");
+    if (!w) return;
+    w.document.write(`
+      <html>
+        <head><title>QR Code - Registo de Aniversário</title>
+        <style>
+          body{font-family:system-ui,sans-serif;text-align:center;padding:40px;color:#111}
+          h1{font-size:28px;margin-bottom:8px}
+          p{font-size:18px;color:#444;margin-top:0}
+          img{margin:32px auto;display:block}
+          .hint{font-size:16px;color:#666;margin-top:24px}
+        </style></head>
+        <body>
+          <h1>Registo de Aniversário</h1>
+          <p>Aponte a câmara do telemóvel para o código e faça o seu registo</p>
+          <img src="${qrSrc}" width="320" height="320" alt="QR Code" />
+          <p class="hint">${registrationUrl}</p>
+        </body>
+      </html>`);
+    w.document.close();
+    w.focus();
+    setTimeout(() => w.print(), 500);
   };
 
   if (isLoading) {
@@ -329,6 +360,10 @@ export default function AniversariosPage() {
           <TabsTrigger value="report" className="flex-1 sm:flex-none">
             <FileText className="w-4 h-4 mr-2" />
             Relatório
+          </TabsTrigger>
+          <TabsTrigger value="qr" className="flex-1 sm:flex-none">
+            <QrCode className="w-4 h-4 mr-2" />
+            QR Code
           </TabsTrigger>
         </TabsList>
 
@@ -464,6 +499,7 @@ export default function AniversariosPage() {
                     <th className="text-left p-3 font-medium text-muted-foreground">Telefone</th>
                     <th className="text-left p-3 font-medium text-muted-foreground">Email</th>
                     <th className="text-left p-3 font-medium text-muted-foreground">Morada</th>
+                    <th className="text-left p-3 font-medium text-muted-foreground">Casamento</th>
                     <th className="text-left p-3 font-medium text-muted-foreground">Ministérios</th>
                   </tr>
                 </thead>
@@ -481,6 +517,7 @@ export default function AniversariosPage() {
                       <td className="p-3 text-muted-foreground">{(b as any).phone || "—"}</td>
                       <td className="p-3 text-muted-foreground">{(b as any).email || "—"}</td>
                       <td className="p-3 text-muted-foreground">{(b as any).address || "—"}</td>
+                      <td className="p-3 text-muted-foreground">{(b as any).wedding_date ? formatDate((b as any).wedding_date) : "—"}</td>
                       <td className="p-3">
                         {b.ministries && b.ministries.length > 0 ? (
                           <div className="flex flex-wrap gap-1">
@@ -510,6 +547,38 @@ export default function AniversariosPage() {
             )}
             <div className="p-3 border-t border-border text-sm text-muted-foreground">
               {reportBirthdays.length} resultado(s)
+            </div>
+          </div>
+        </TabsContent>
+
+        {/* QR Code Tab */}
+        <TabsContent value="qr">
+          <div className="bg-card rounded-xl shadow-soft p-6 max-w-xl mx-auto text-center space-y-6">
+            <div>
+              <h2 className="font-display text-xl font-semibold text-foreground">
+                QR Code de Registo de Aniversário
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Imprima e coloque na igreja. As pessoas apontam a câmara e registam o seu aniversário.
+              </p>
+            </div>
+            <div className="flex justify-center">
+              <img
+                src={qrSrc}
+                alt="QR Code de registo de aniversário"
+                width={280}
+                height={280}
+                className="rounded-xl border border-border p-2 bg-white"
+              />
+            </div>
+            <code className="text-xs bg-muted px-3 py-2 rounded-lg break-all inline-block">{registrationUrl}</code>
+            <div className="flex gap-3 justify-center">
+              <Button variant="outline" onClick={copyRegistrationLink}>
+                <Copy className="w-4 h-4 mr-2" /> Copiar Link
+              </Button>
+              <Button onClick={printQr}>
+                <Printer className="w-4 h-4 mr-2" /> Imprimir QR Code
+              </Button>
             </div>
           </div>
         </TabsContent>
@@ -642,6 +711,17 @@ export default function AniversariosPage() {
               </Label>
               <Input type="date" value={formData.birthday_date} onChange={(e) => setFormData({ ...formData, birthday_date: e.target.value })} required />
             </div>
+
+            {formData.birthday_type === "personal" && (
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <Heart className="w-4 h-4 text-primary" />
+                  Data de Aniversário de Casamento
+                  <span className="text-xs text-muted-foreground font-normal">(opcional)</span>
+                </Label>
+                <Input type="date" value={formData.wedding_date} onChange={(e) => setFormData({ ...formData, wedding_date: e.target.value })} />
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label>Líder / Supervisor</Label>

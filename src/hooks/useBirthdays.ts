@@ -16,6 +16,7 @@ export interface Birthday {
   man_birthday?: string | null;
   woman_phone?: string | null;
   man_phone?: string | null;
+  wedding_date?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -38,6 +39,7 @@ export interface BirthdayInsert {
   man_birthday?: string | null;
   woman_phone?: string | null;
   man_phone?: string | null;
+  wedding_date?: string | null;
   ministry_selections?: { ministry_id: string; is_leader: boolean; leader_id?: string | null }[];
 }
 
@@ -127,6 +129,18 @@ export function useMonthlyBirthdays() {
             displayDate: b.birthday_date,
             birthday_date: b.birthday_date, // Importante para componentes legados
             displayName: `${b.man_name || ''} & ${b.woman_name || ''} (Bodas)`,
+            iconType: 'heart'
+          });
+        }
+
+        // 1b. Novo modelo: registo pessoal com data de casamento opcional (bodas individuais)
+        if (!isWedding && (b as any).wedding_date && getMonth((b as any).wedding_date) === currentMonth) {
+          const personName = b.woman_name || b.man_name || '';
+          allMonthly.push({
+            ...(b as Birthday),
+            displayDate: (b as any).wedding_date,
+            birthday_date: (b as any).wedding_date,
+            displayName: `${personName} (Bodas de Casamento)`,
             iconType: 'heart'
           });
         }
