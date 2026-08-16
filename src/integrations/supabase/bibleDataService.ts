@@ -107,38 +107,56 @@ export const getChaptersList = async (book: string) => {
 };
 
 export const getBibleChapter = async (book: string, chapter: number, version: string) => {
-  const { data, error } = await supabase
-    .from('verse_texts')
-    .select(`
-      text,
-      verses!inner (
-        verse_number,
-        chapters!inner (
-          chapter_number,
-          books!inner (
-            name
-          )
-        )
-      ),
-      translations!inner (
-        name
-      )
-    `)
-    .eq('verses.chapters.books.name', book)
-    .eq('verses.chapters.chapter_number', chapter)
-    .eq('translations.name', version);
+  // NOTA DE PERFORMANCE: a versão antiga fazia um único join de 4 níveis
+  // (verse_texts → verses → chapters → books + translations) filtrado por NOME.
+  // Esse plano excedia o statement_timeout do Postgres (~3s → HTTP 500) e o
+  // capítulo ficava em branco. Aqui resolvemos primeiro os IDs (lookups
+  // indexados e instantâneos) e só depois pedimos os textos com um embed leve.
 
-  if (error) throw error;
+  // 1. Resolver book_id, chapter_id e translation_id (rápido)
+  const { data: bookRow, error: bookErr } = await supabase
+    .from('books').select('id').eq('name', book).maybeSingle();
+  if (bookErr) throw bookErr;
+  if (!bookRow) return { book, chapter, verses: [] };
 
+  const { data: chapterRow, error: chapErr } = await supabase
+    .from('chapters').select('id').eq('book_id', bookRow.id).eq('chapter_number', chapter).maybeSingle();
+  if (chapErr) throw chapErr;
+  if (!chapterRow) return { book, chapter, verses: [] };
+
+  const { data: transRow } = await supabase
+    .from('translations').select('id').eq('name', version).maybeSingle();
+
+  // 2. Buscar os textos da tradução escolhida (query leve, ~0.3s)
+  if (transRow) {
+    const { data, error } = await supabase
+      .from('verse_texts')
+      .select('text, verses!inner(verse_number)')
+      .eq('translation_id', transRow.id)
+      .eq('verses.chapter_id', chapterRow.id);
+    if (error) throw error;
+    if (data && data.length > 0) {
+      return {
+        book,
+        chapter,
+        verses: data
+          .map((v: any) => ({ number: v.verses.verse_number, text: v.text }))
+          .sort((a: any, b: any) => a.number - b.number),
+      };
+    }
+  }
+
+  // 3. Fallback: se a tradução não tiver textos, usar o texto padrão da
+  //    própria tabela 'verses' (também rápido) para não deixar o capítulo vazio.
+  const { data: vs, error: vErr } = await supabase
+    .from('verses').select('verse_number, text').eq('chapter_id', chapterRow.id);
+  if (vErr) throw vErr;
   return {
     book,
     chapter,
-    verses: (data || [])
-      .map((v: any) => ({
-        number: v.verses.verse_number,
-        text: v.text
-      }))
-      .sort((a, b) => a.number - b.number)
+    verses: (vs || [])
+      .map((v: any) => ({ number: v.verse_number, text: v.text }))
+      .sort((a: any, b: any) => a.number - b.number),
   };
 };
 
