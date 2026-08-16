@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Search, Cake, Heart, Trash2, Edit, Loader2, Calendar, Phone, Mail, MapPin, FileText, Link2, Copy, QrCode, Printer } from "lucide-react";
+import { Plus, Search, Cake, Heart, Trash2, Edit, Loader2, Calendar, Phone, Mail, MapPin, FileText, Link2, Copy, QrCode, Printer, CalendarDays } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -298,6 +298,60 @@ export default function AniversariosPage() {
     toast.success("Link copiado para a área de transferência!");
   };
 
+  // Gera e descarrega um ficheiro .ics com todos os aniversários e bodas,
+  // como eventos anuais recorrentes (para importar no calendário do telemóvel).
+  const downloadIcal = () => {
+    const toIcsDate = (s?: string | null) => (s ? s.replace(/-/g, "") : null); // 1990-05-10 -> 19900510
+    const esc = (t: string) => t.replace(/([,;\\])/g, "\\$1").replace(/\n/g, "\\n");
+    const stamp = new Date().toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+    const lines: string[] = [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "PRODID:-//Novo Caminho//Aniversarios//PT",
+      "CALSCALE:GREGORIAN",
+      "METHOD:PUBLISH",
+      "X-WR-CALNAME:Aniversários - Novo Caminho",
+    ];
+    const add = (uid: string, date: string | null | undefined, summary: string) => {
+      const d = toIcsDate(date);
+      if (!d || d.length !== 8 || !summary.trim()) return;
+      lines.push(
+        "BEGIN:VEVENT",
+        `UID:${uid}@novocaminho`,
+        `DTSTAMP:${stamp}`,
+        `DTSTART;VALUE=DATE:${d}`,
+        "RRULE:FREQ=YEARLY",
+        `SUMMARY:${esc(summary)}`,
+        "TRANSP:TRANSPARENT",
+        "END:VEVENT",
+      );
+    };
+    birthdays.forEach((b) => {
+      if (b.birthday_type === "wedding") {
+        const couple = [b.man_name, b.woman_name].filter(Boolean).join(" & ");
+        add(`bodas-${b.id}`, b.birthday_date, `💍 Bodas de ${couple}`);
+        if (b.man_name) add(`bd-m-${b.id}`, b.man_birthday, `🎂 Aniversário de ${b.man_name}`);
+        if (b.woman_name) add(`bd-w-${b.id}`, b.woman_birthday, `🎂 Aniversário de ${b.woman_name}`);
+      } else {
+        const name = b.woman_name || b.man_name || "";
+        add(`bd-${b.id}`, b.man_birthday || b.woman_birthday || b.birthday_date, `🎂 Aniversário de ${name}`);
+        if ((b as any).wedding_date) add(`bodas-${b.id}`, (b as any).wedding_date, `💍 Bodas de ${name}`);
+      }
+    });
+    lines.push("END:VCALENDAR");
+
+    const blob = new Blob([lines.join("\r\n")], { type: "text/calendar;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "aniversarios-novocaminho.ics";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success("Calendário descarregado! Importe-o no calendário do telemóvel.");
+  };
+
   const printQr = () => {
     const w = window.open("", "_blank", "width=600,height=800");
     if (!w) return;
@@ -339,7 +393,11 @@ export default function AniversariosPage() {
           <h1 className="font-display text-3xl font-bold text-foreground">Registos de Aniversário</h1>
           <p className="text-muted-foreground mt-1">Gerencie os registos de aniversários e bodas da igreja</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={downloadIcal}>
+            <CalendarDays className="w-4 h-4 mr-2" />
+            Calendário (.ics)
+          </Button>
           <Button variant="outline" onClick={copyRegistrationLink}>
             <Link2 className="w-4 h-4 mr-2" />
             Copiar Link de Registo
