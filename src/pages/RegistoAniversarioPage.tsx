@@ -106,12 +106,23 @@ export default function RegistoAniversarioPage() {
         payload.man_birthday = null;
       }
 
-      // 1. Inserir o aniversário
-      const { data: birthday, error: insertError } = await supabase
+      // 1. Inserir o aniversário.
+      //    Rede de segurança: se a coluna wedding_date ainda não existir na BD,
+      //    o registo grava na mesma (sem a data de casamento) em vez de falhar.
+      let { data: birthday, error: insertError } = await supabase
         .from("birthdays")
         .insert(payload)
         .select()
         .single();
+
+      if (insertError && (insertError.code === "PGRST204" || /wedding_date/i.test(insertError.message || ""))) {
+        const { wedding_date, ...withoutWedding } = payload;
+        ({ data: birthday, error: insertError } = await supabase
+          .from("birthdays")
+          .insert(withoutWedding)
+          .select()
+          .single());
+      }
 
       if (insertError) throw insertError;
 

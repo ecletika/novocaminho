@@ -230,12 +230,21 @@ export function useCreateBirthday() {
     mutationFn: async (data: BirthdayInsert) => {
       const { ministry_selections, ...birthdayData } = data;
 
-      // Create birthday
-      const { data: birthday, error } = await supabase
+      // Create birthday (rede de segurança se wedding_date ainda não existir na BD)
+      let { data: birthday, error } = await supabase
         .from("birthdays")
         .insert(birthdayData)
         .select()
         .single();
+
+      if (error && ((error as any).code === "PGRST204" || /wedding_date/i.test(error.message || ""))) {
+        const { wedding_date, ...withoutWedding } = birthdayData as any;
+        ({ data: birthday, error } = await supabase
+          .from("birthdays")
+          .insert(withoutWedding)
+          .select()
+          .single());
+      }
 
       if (error) throw error;
 
@@ -270,13 +279,23 @@ export function useUpdateBirthday() {
     mutationFn: async ({ id, ...data }: BirthdayInsert & { id: string }) => {
       const { ministry_selections, ...birthdayData } = data;
 
-      // Update birthday
-      const { data: birthday, error } = await supabase
+      // Update birthday (rede de segurança se wedding_date ainda não existir na BD)
+      let { data: birthday, error } = await supabase
         .from("birthdays")
         .update(birthdayData)
         .eq("id", id)
         .select()
         .single();
+
+      if (error && ((error as any).code === "PGRST204" || /wedding_date/i.test(error.message || ""))) {
+        const { wedding_date, ...withoutWedding } = birthdayData as any;
+        ({ data: birthday, error } = await supabase
+          .from("birthdays")
+          .update(withoutWedding)
+          .eq("id", id)
+          .select()
+          .single());
+      }
 
       if (error) throw error;
 
