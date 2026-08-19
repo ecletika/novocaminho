@@ -40,6 +40,7 @@ import { useMinistries } from "@/hooks/useMinistries";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import { toast } from "sonner";
+import { CHURCHES, churchLabel } from "@/constants/churches";
 
 
 export default function AniversariosPage() {
@@ -56,6 +57,7 @@ export default function AniversariosPage() {
     birthday_date: "",
     birthday_type: "personal" as "personal" | "wedding",
     wedding_date: "",
+    church: "",
     phone: "",
     email: "",
     address: "",
@@ -80,6 +82,7 @@ export default function AniversariosPage() {
       birthday_date: "",
       birthday_type: "personal",
       wedding_date: "",
+      church: "",
       phone: "",
       email: "",
       address: "",
@@ -101,6 +104,7 @@ export default function AniversariosPage() {
       birthday_date: birthday.birthday_date,
       birthday_type: birthday.birthday_type as "personal" | "wedding",
       wedding_date: birthday.wedding_date || "",
+      church: birthday.church || "",
       phone: birthday.phone || "",
       email: birthday.email || "",
       address: birthday.address || "",
@@ -155,6 +159,7 @@ export default function AniversariosPage() {
         leader_name: formData.leader_name || null,
         photo_url: (formData as any).photo_url || null,
         wedding_date: formData.wedding_date || null,
+        church: formData.church || null,
         ministry_selections: formData.ministry_selections,
       };
 
@@ -470,6 +475,11 @@ export default function AniversariosPage() {
                       }`}>
                       {birthday.birthday_type === "wedding" ? "Casamento" : "Pessoal"}
                     </span>
+                    {(birthday as any).church && (
+                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700">
+                        {churchLabel((birthday as any).church)}
+                      </span>
+                    )}
                   </div>
                   <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
                     <Calendar className="w-4 h-4" />
@@ -562,6 +572,7 @@ export default function AniversariosPage() {
                 <thead>
                   <tr className="border-b border-border">
                     <th className="text-left p-3 font-medium text-muted-foreground">Nome</th>
+                    <th className="text-left p-3 font-medium text-muted-foreground">Igreja</th>
                     <th className="text-left p-3 font-medium text-muted-foreground">Data</th>
                     <th className="text-left p-3 font-medium text-muted-foreground">Tipo</th>
                     <th className="text-left p-3 font-medium text-muted-foreground">Telefone</th>
@@ -575,6 +586,7 @@ export default function AniversariosPage() {
                   {reportBirthdays.map((b) => (
                     <tr key={b.id} className="border-b border-border/50 hover:bg-muted/50">
                       <td className="p-3 font-medium text-foreground">{getName(b)}</td>
+                      <td className="p-3 text-muted-foreground">{churchLabel((b as any).church)}</td>
                       <td className="p-3 text-muted-foreground">{formatDate(getDisplayDate(b))}</td>
                       <td className="p-3">
                         <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${b.birthday_type === "wedding" ? "bg-pink-100 text-pink-700" : "bg-blue-100 text-blue-700"
@@ -698,6 +710,22 @@ export default function AniversariosPage() {
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <Label>Igreja</Label>
+              <Select
+                value={formData.church || "none"}
+                onValueChange={(v) => setFormData({ ...formData, church: v === "none" ? "" : v })}
+              >
+                <SelectTrigger><SelectValue placeholder="Selecionar igreja" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">— Sem igreja —</SelectItem>
+                  {CHURCHES.map((c) => (
+                    <SelectItem key={c.key} value={c.key}>{c.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="space-y-2">
               <Label>Tipo</Label>
               <Select

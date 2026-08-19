@@ -16,8 +16,10 @@ import {
   useVisitorPortalConfig,
   DEFAULT_PORTAL_CONFIG,
 } from "@/hooks/useVisitorPortalConfig";
+import { CHURCHES } from "@/constants/churches";
 
 const initialForm = {
+  church: "" as string,
   name: "",
   birth_date: "",
   address: "",
@@ -76,12 +78,17 @@ export default function RegistoVisitantePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.church) {
+      toast.error("Por favor, selecione a igreja.");
+      return;
+    }
     if (!formData.name.trim()) {
       toast.error("Por favor, indique o seu nome.");
       return;
     }
     try {
       await createVisitor.mutateAsync({
+        church: formData.church || null,
         name: formData.name.trim(),
         birth_date: formData.birth_date || null,
         address: formData.address || null,
@@ -144,6 +151,31 @@ export default function RegistoVisitantePage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
+          {/* ── Igreja ── */}
+          <div className="space-y-2">
+            <Label>Qual a igreja que está a visitar? *</Label>
+            <div className="grid grid-cols-2 gap-3">
+              {CHURCHES.map((c) => {
+                const active = formData.church === c.key;
+                return (
+                  <button
+                    key={c.key}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, church: c.key })}
+                    className={`p-4 rounded-xl border-2 text-sm font-medium transition-all ${
+                      active
+                        ? "text-white"
+                        : "border-border text-muted-foreground hover:border-muted-foreground/50"
+                    }`}
+                    style={active ? { backgroundColor: accent, borderColor: accent } : undefined}
+                  >
+                    {c.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           {/* ── Quem esteve consigo ── */}
           <div className="space-y-2">
             <Label className="flex items-center gap-2">

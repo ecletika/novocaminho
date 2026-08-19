@@ -13,6 +13,7 @@ export interface Visitor {
   accompanied_by: string[];
   prayer_requests: string[];
   notes: string | null;
+  church: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -28,6 +29,7 @@ export interface VisitorInsert {
   accompanied_by?: string[];
   prayer_requests?: string[];
   notes?: string | null;
+  church?: string | null;
 }
 
 // Opções fixas apresentadas no formulário (chave guardada + rótulo mostrado)
@@ -96,11 +98,21 @@ export function useCreateVisitor() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (data: VisitorInsert) => {
-      const { data: visitor, error } = await supabase
+      // Rede de segurança: se a coluna church ainda não existir na BD,
+      // grava na mesma (sem a igreja) em vez de falhar.
+      let { data: visitor, error } = await supabase
         .from("visitors")
         .insert(data)
         .select()
         .single();
+      if (error && ((error as any).code === "PGRST204" || /church/i.test(error.message || ""))) {
+        const { church, ...safe } = data as any;
+        ({ data: visitor, error } = await supabase
+          .from("visitors")
+          .insert(safe)
+          .select()
+          .single());
+      }
       if (error) throw error;
       return visitor as Visitor;
     },
@@ -114,12 +126,21 @@ export function useUpdateVisitor() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...data }: VisitorInsert & { id: string }) => {
-      const { data: visitor, error } = await supabase
+      let { data: visitor, error } = await supabase
         .from("visitors")
         .update(data)
         .eq("id", id)
         .select()
         .single();
+      if (error && ((error as any).code === "PGRST204" || /church/i.test(error.message || ""))) {
+        const { church, ...safe } = data as any;
+        ({ data: visitor, error } = await supabase
+          .from("visitors")
+          .update(safe)
+          .eq("id", id)
+          .select()
+          .single());
+      }
       if (error) throw error;
       return visitor as Visitor;
     },

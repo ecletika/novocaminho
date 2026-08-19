@@ -60,8 +60,10 @@ import {
 } from "@/hooks/useVisitorPortalConfig";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { CHURCHES, churchLabel } from "@/constants/churches";
 
 const emptyEdit = {
+  church: "",
   name: "",
   birth_date: "",
   address: "",
@@ -108,6 +110,7 @@ export default function AdminVisitantesPage() {
   const openEdit = (v: Visitor) => {
     setEditing(v);
     setEditForm({
+      church: v.church || "",
       name: v.name,
       birth_date: v.birth_date || "",
       address: v.address || "",
@@ -156,6 +159,7 @@ export default function AdminVisitantesPage() {
     try {
       await updateVisitor.mutateAsync({
         id: editing.id,
+        church: editForm.church || null,
         name: editForm.name.trim(),
         birth_date: editForm.birth_date || null,
         address: editForm.address || null,
@@ -298,6 +302,11 @@ export default function AdminVisitantesPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <h3 className="font-semibold text-foreground">{v.name}</h3>
+                    {v.church && (
+                      <span className="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-xs font-medium">
+                        {churchLabel(v.church)}
+                      </span>
+                    )}
                     {v.wants_home_visit && (
                       <span className="px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-xs font-medium flex items-center gap-1">
                         <Home className="w-3 h-3" /> Visita em casa
@@ -385,6 +394,7 @@ export default function AdminVisitantesPage() {
                 <thead>
                   <tr className="border-b border-border">
                     <th className="text-left p-3 font-medium text-muted-foreground">Nome</th>
+                    <th className="text-left p-3 font-medium text-muted-foreground">Igreja</th>
                     <th className="text-left p-3 font-medium text-muted-foreground">Aniversário</th>
                     <th className="text-left p-3 font-medium text-muted-foreground">Telefone</th>
                     <th className="text-left p-3 font-medium text-muted-foreground">Email</th>
@@ -399,6 +409,7 @@ export default function AdminVisitantesPage() {
                   {filtered.map((v) => (
                     <tr key={v.id} className="border-b border-border/50 hover:bg-muted/50">
                       <td className="p-3 font-medium text-foreground">{v.name}</td>
+                      <td className="p-3 text-muted-foreground">{churchLabel(v.church)}</td>
                       <td className="p-3 text-muted-foreground">
                         {v.birth_date ? format(new Date(v.birth_date + "T12:00:00"), "dd/MM/yyyy") : "—"}
                       </td>
@@ -578,6 +589,25 @@ export default function AdminVisitantesPage() {
             <DialogTitle className="font-display text-xl">Editar Visitante</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSaveEdit} className="space-y-4 mt-2">
+            <div className="space-y-2">
+              <Label>Igreja</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {CHURCHES.map((c) => (
+                  <button
+                    key={c.key}
+                    type="button"
+                    onClick={() => setEditForm({ ...editForm, church: editForm.church === c.key ? "" : c.key })}
+                    className={`p-2 rounded-lg border text-sm transition-colors ${
+                      editForm.church === c.key
+                        ? "border-primary bg-primary/5 text-primary font-medium"
+                        : "border-border text-muted-foreground hover:bg-muted/50"
+                    }`}
+                  >
+                    {c.label}
+                  </button>
+                ))}
+              </div>
+            </div>
             <div className="space-y-2">
               <Label>Nome *</Label>
               <Input

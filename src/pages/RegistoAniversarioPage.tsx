@@ -7,9 +7,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useMinistries } from "@/hooks/useMinistries";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
+import { CHURCHES } from "@/constants/churches";
 import { toast } from "sonner";
 
 const initialForm = {
+  church: "" as string,
   name: "",
   gender: "" as "male" | "female" | "",
   birthday_date: "",
@@ -68,6 +70,10 @@ export default function RegistoAniversarioPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!formData.church) {
+      toast.error("Por favor, selecione a igreja.");
+      return;
+    }
     if (!formData.gender) {
       toast.error("Por favor, selecione o género.");
       return;
@@ -86,6 +92,7 @@ export default function RegistoAniversarioPage() {
       const payload: any = {
         birthday_type: "personal",
         birthday_date: null,
+        church: formData.church || null,
         photo_url: formData.photo_url || null,
         phone: formData.phone || null,
         email: formData.email || null,
@@ -188,6 +195,26 @@ export default function RegistoAniversarioPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
+          {/* ── Igreja ── */}
+          <div className="space-y-2">
+            <Label>Qual a sua igreja? *</Label>
+            <div className="grid grid-cols-2 gap-3">
+              {CHURCHES.map((c) => (
+                <button
+                  key={c.key}
+                  type="button"
+                  onClick={() => setFormData({ ...formData, church: c.key })}
+                  className={`p-4 rounded-xl border-2 text-sm font-medium transition-all ${formData.church === c.key
+                    ? "border-primary bg-primary/5 text-primary"
+                    : "border-border text-muted-foreground hover:border-muted-foreground/50"
+                    }`}
+                >
+                  {c.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* ── Género ── */}
           <div className="space-y-2">
             <Label>Género *</Label>

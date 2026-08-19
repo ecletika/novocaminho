@@ -91,6 +91,7 @@ export type Database = {
           address: string | null
           birthday_date: string
           birthday_type: string
+          church: string | null
           created_at: string
           email: string | null
           id: string
@@ -110,6 +111,7 @@ export type Database = {
           address?: string | null
           birthday_date: string
           birthday_type: string
+          church?: string | null
           created_at?: string
           email?: string | null
           id?: string
@@ -129,6 +131,7 @@ export type Database = {
           address?: string | null
           birthday_date?: string
           birthday_type?: string
+          church?: string | null
           created_at?: string
           email?: string | null
           id?: string
@@ -151,6 +154,7 @@ export type Database = {
           accompanied_by: string[]
           address: string | null
           birth_date: string | null
+          church: string | null
           created_at: string
           email: string | null
           id: string
@@ -166,6 +170,7 @@ export type Database = {
           accompanied_by?: string[]
           address?: string | null
           birth_date?: string | null
+          church?: string | null
           created_at?: string
           email?: string | null
           id?: string
@@ -181,6 +186,7 @@ export type Database = {
           accompanied_by?: string[]
           address?: string | null
           birth_date?: string | null
+          church?: string | null
           created_at?: string
           email?: string | null
           id?: string

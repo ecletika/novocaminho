@@ -17,6 +17,7 @@ export interface Birthday {
   woman_phone?: string | null;
   man_phone?: string | null;
   wedding_date?: string | null;
+  church?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -40,6 +41,7 @@ export interface BirthdayInsert {
   woman_phone?: string | null;
   man_phone?: string | null;
   wedding_date?: string | null;
+  church?: string | null;
   ministry_selections?: { ministry_id: string; is_leader: boolean; leader_id?: string | null }[];
 }
 
@@ -237,11 +239,11 @@ export function useCreateBirthday() {
         .select()
         .single();
 
-      if (error && ((error as any).code === "PGRST204" || /wedding_date/i.test(error.message || ""))) {
-        const { wedding_date, ...withoutWedding } = birthdayData as any;
+      if (error && ((error as any).code === "PGRST204" || /wedding_date|church/i.test(error.message || ""))) {
+        const { wedding_date, church, ...safe } = birthdayData as any;
         ({ data: birthday, error } = await supabase
           .from("birthdays")
-          .insert(withoutWedding)
+          .insert(safe)
           .select()
           .single());
       }
@@ -287,11 +289,11 @@ export function useUpdateBirthday() {
         .select()
         .single();
 
-      if (error && ((error as any).code === "PGRST204" || /wedding_date/i.test(error.message || ""))) {
-        const { wedding_date, ...withoutWedding } = birthdayData as any;
+      if (error && ((error as any).code === "PGRST204" || /wedding_date|church/i.test(error.message || ""))) {
+        const { wedding_date, church, ...safe } = birthdayData as any;
         ({ data: birthday, error } = await supabase
           .from("birthdays")
-          .update(withoutWedding)
+          .update(safe)
           .eq("id", id)
           .select()
           .single());
