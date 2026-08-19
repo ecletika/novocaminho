@@ -293,9 +293,19 @@ export default function AniversariosPage() {
   const registrationUrl = `${window.location.origin}/registo-aniversario`;
   const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=10&data=${encodeURIComponent(registrationUrl)}`;
 
+  // Link de subscrição iCal ao vivo (Cloudflare Pages Function em /aniversarios.ics)
+  const icalUrl = `${window.location.origin}/aniversarios.ics`;
+  const icalWebcal = icalUrl.replace(/^https?:/i, "webcal:");
+  const icalQrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=10&data=${encodeURIComponent(icalWebcal)}`;
+
   const copyRegistrationLink = () => {
     navigator.clipboard.writeText(registrationUrl);
     toast.success("Link copiado para a área de transferência!");
+  };
+
+  const copyIcalLink = () => {
+    navigator.clipboard.writeText(icalWebcal);
+    toast.success("Link de subscrição copiado!");
   };
 
   // Gera e descarrega um ficheiro .ics com todos os aniversários e bodas,
@@ -638,6 +648,43 @@ export default function AniversariosPage() {
                 <Printer className="w-4 h-4 mr-2" /> Imprimir QR Code
               </Button>
             </div>
+          </div>
+
+          {/* Subscrição iCal ao vivo */}
+          <div className="bg-card rounded-xl shadow-soft p-6 max-w-xl mx-auto text-center space-y-4 mt-6">
+            <div>
+              <h2 className="font-display text-xl font-semibold text-foreground">
+                Calendário no telemóvel (subscrição ao vivo)
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Subscreva uma vez e os aniversários de todos aparecem no calendário do telemóvel —
+                atualiza-se sozinho quando há registos novos.
+              </p>
+            </div>
+            <div className="flex justify-center">
+              <img
+                src={icalQrSrc}
+                alt="QR do calendário de aniversários"
+                width={220}
+                height={220}
+                className="rounded-xl border border-border p-2 bg-white"
+              />
+            </div>
+            <code className="text-xs bg-muted px-3 py-2 rounded-lg break-all inline-block">{icalUrl}</code>
+            <div className="flex gap-3 justify-center flex-wrap">
+              <Button variant="outline" onClick={copyIcalLink}>
+                <Copy className="w-4 h-4 mr-2" /> Copiar link de subscrição
+              </Button>
+              <Button asChild>
+                <a href={icalWebcal}>
+                  <CalendarDays className="w-4 h-4 mr-2" /> Subscrever agora
+                </a>
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              📱 iPhone: toque em "Subscrever agora". Android: Google Agenda (computador) →
+              "Outros calendários" → "A partir do URL" → cole o link acima.
+            </p>
           </div>
         </TabsContent>
       </Tabs>
